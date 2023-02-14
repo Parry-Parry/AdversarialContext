@@ -37,3 +37,7 @@ def main(args):
     topk = scorer.transform(queries)
     out = topk[['qid', 'docno', 'score']]
     out.to_csv(os.path.join(args.sink, 'COLBERT.tsv'), sep='\t', index=False, header=False)
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+    main(args)

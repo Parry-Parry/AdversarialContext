@@ -38,6 +38,9 @@ def main(args):
     out = topk[['qid', 'docno', 'score']]
     out.to_csv(os.path.join(args.sink, 'BM25.tsv'), sep='\t', index=False, header=False)
 
+if __name__ == '__main__':
+    args = parser.parse_args()
+    main(args)
 
 
 

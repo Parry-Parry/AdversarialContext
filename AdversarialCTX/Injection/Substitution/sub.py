@@ -97,3 +97,7 @@ def main(args):
         start.to_csv(os.path.join(args.sink, f'sub.{rel}.start.tsv'), sep='\t', index=False, header=False)
         mid.to_csv(os.path.join(args.sink, f'sub.{rel}.mid.tsv'), sep='\t', index=False, header=False)
         end.to_csv(os.path.join(args.sink, f'sub.{rel}.end.tsv'), sep='\t', index=False, header=False)
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+    main(args)
