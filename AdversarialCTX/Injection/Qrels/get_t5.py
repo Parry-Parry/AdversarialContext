@@ -26,7 +26,7 @@ def build_data(path):
 
 def main(args):
     dataset = pt.get_dataset("irds:msmarco-passage")
-    bm25 = pt.BatchRetrieve(pt.get_dataset("msmarco_passage").get_index(variant='train'), wmodel="BM25")
+    bm25 = pt.BatchRetrieve.from_dataset('msmarco_passage', 'terrier_stemmed', wmodel='BM25')
 
     monoT5 = MonoT5ReRanker()
     scorer = bm25 >> pt.text.get_text(dataset, "text") >> monoT5 % args.top
