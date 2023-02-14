@@ -1,10 +1,10 @@
+import pyterrier as pt
+pt.init()
 import argparse
 import os
 from pyterrier_colbert.ranking import ColBERTFactory
 import ir_datasets
 import pandas as pd
-import pyterrier as pt
-pt.init()
 
 _logger = ir_datasets.log.easy()
 

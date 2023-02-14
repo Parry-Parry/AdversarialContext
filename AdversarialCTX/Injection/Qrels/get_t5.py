@@ -1,9 +1,9 @@
+import pyterrier as pt
+pt.init()
 import argparse
 import os
 import ir_datasets
 import pandas as pd
-import pyterrier as pt
-pt.init()
 from pyterrier_t5 import MonoT5ReRanker
 
 _logger = ir_datasets.log.easy()
