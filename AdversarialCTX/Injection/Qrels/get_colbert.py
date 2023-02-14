@@ -9,10 +9,6 @@ import pandas as pd
 
 _logger = ir_datasets.log.easy()
 
-def clean_text(text):
-    text = re.sub(r'[^A-Za-z0-9 ]+', '', text)
-    return re.sub(r'/[^\x00-\x7F]/g', '', text).strip()
-
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-qrels', type=str)
@@ -35,7 +31,6 @@ def build_data(path):
 def main(args):
     data = build_data(args.qrels)
     queries = data[['qid', 'query']].copy().drop_duplicates()
-    queries['query'] = queries['query'].apply(clean_text)
 
     pytcolbert = ColBERTFactory(args.chkpt, args.idx_path, args.idx)
     scorer = pytcolbert.end_to_end() % args.top
