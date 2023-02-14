@@ -33,6 +33,7 @@ def main(args):
     queries = data[['qid', 'query']].copy().drop_duplicates()
 
     pytcolbert = ColBERTFactory(args.chkpt, args.idx_path, args.idx)
+    pytcolbert.faiss_index_on_gpu = False 
     scorer = pytcolbert.end_to_end() % args.top
 
     topk = scorer.transform(queries)
