@@ -21,7 +21,7 @@ def build_data(path):
   dataset = ir_datasets.load(f'msmarco-passage/{path}')
   docs = dataset.docs_store()
   queries = {q.query_id: q.text for q in dataset.queries_iter()}
-  for qrel in _logger.pbar(ir_datasets.load('msmarco-passage/dev').scoreddocs_iter(), desc='dev data'):
+  for qrel in _logger.pbar(ir_datasets.load(f'msmarco-passage/{path}').scoreddocs_iter(), desc='dev data'):
     if qrel.query_id in queries:
       result.append([qrel.query_id, queries[qrel.query_id], qrel.doc_id, docs.get(qrel.doc_id).text])
   return pd.DataFrame(result, columns=['qid', 'query', 'docno', 'text'])
