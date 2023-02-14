@@ -64,7 +64,7 @@ class Syringe:
     def transform(self, df, col='adversary'):
         self._reset_text()
         df = df.copy()
-        df[col] = df.apply(lambda x : self._inject(x.docno, x.qid))
+        df[col] = df.apply(lambda x : self._inject(x.docno, x.qid), axis='columns')
         return df
     
 
