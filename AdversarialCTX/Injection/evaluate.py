@@ -31,9 +31,7 @@ def main(args):
     def build_from_df(df):
         new = []
         for row in texts.itertuples():
-            new.append(
-                {'qid':row.qid, 'query':queries[row.qid], 'docno':row.docno, 'text':row.adversary}
-            )
+            new.append({'qid':row.qid, 'query':queries[row.qid], 'docno':row.docno, 'text':row.adversary})
         return pd.DataFrame.from_records(new)
 
     cols = ['qid', 'docno', 'score', 'adversary']
