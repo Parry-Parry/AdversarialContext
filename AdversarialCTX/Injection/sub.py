@@ -16,9 +16,9 @@ def get_random_sentence(text):
 
 class Syringe:
     def __init__(self, qrels) -> None:
-        self.ds = ir_datasets.load("irds:msmarco-passage")
+        self.ds = ir_datasets.load("msmarco-passage")
         self.docs = pd.DataFrame(self.ds.docs_iter()).set_index('doc_id').text.to_dict()
-        _qrels = pd.DataFrame(ir_datasets.load(f"irds:msmarco-passage/{qrels}").qrels_iter()).rename({'query_id':'qid', 'relevance':'rel'})
+        _qrels = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{qrels}").qrels_iter()).rename({'query_id':'qid', 'relevance':'rel'})
         self.qrels = {
             0 : _qrels[_qrels.rel == 0],
             1 : _qrels[_qrels.rel == 1],
