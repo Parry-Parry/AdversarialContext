@@ -1,56 +1,60 @@
+import pyterrier as pt
+pt.init()
 import argparse
-from collections import defaultdict
-import numpy as np
 import os
 import pandas as pd
 import ir_datasets
+import re
 
-
-_logger = ir_datasets.log.easy()
-    
-def build_data(path):
-  result = []
-  dataset = ir_datasets.load(f'msmarco-passage/{path}')
-  docs = dataset.docs_store()
-  queries = {q.query_id: q.text for q in dataset.queries_iter()}
-  for qrel in _logger.pbar(ir_datasets.load('msmarco-passage/dev').scoreddocs, desc='dev data'):
-    if qrel.query_id in queries:
-      result.append([qrel.query_id, queries[qrel.query_id], qrel.doc_id, docs.get(qrel.doc_id).text])
-  return pd.DataFrame(result, columns=['qid', 'query', 'docno', 'text'])
-
+def clean_text(text):
+    text = re.sub(r'[^A-Za-z0-9 ]+', '', text)
+    return re.sub(r'/[^\x00-\x7F]/g', '', text).strip()
 
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-source', type=str)
-parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
 
 def main(args):
-
     ds = ir_datasets.load("msmarco-passage")
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
 
+    ds = pt.get_dataset('msmarco-passage')
+    indx = pt.IndexFactory.of(ds.get_index(variant='terrier_stemmed'))
+    scorer = pt.batchretrieve.TextScorer(body_attr='text', wmodel='BM25', background_index=indx, properties={"termpipelines" : "Stopwords,PorterStemmer"})
+
     def build_from_df(df):
         new = []
-        for row in texts.itertuples():
+        for row in df.itertuples():
             new.append({'qid':row.qid, 'query':queries[row.qid], 'docno':row.docno, 'text':row.adversary})
         return pd.DataFrame.from_records(new)
 
     cols = ['qid', 'docno', 'score', 'adversary']
     types = {'qid' : str, 'docno' : str, 'score' : float, 'adversary' : str}
 
-    texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
+    advers = [f for f in os.listdir(args.source) if os.path.isfile(os.path.join(args.source, f))]
+    frames = []
+    for text in advers:
+      texts = pd.read_csv(os.path.join(args.source, text), sep='\t', header=None, index_col=False, names=cols, dtype=types)
 
-    test = build_from_df(texts)
+      test = build_from_df(texts)
+      test['query'] = test['query'].apply(clean_text)
+      test['text'] = test['text'].apply(clean_text)
+      results = scorer.transform(test)
 
-    ds = pt.get_dataset('msmarco-passage')
-    indx = pt.IndexFactory.of(ds.get_index(variant='terrier_stemmed'))
+      def ABNIRML(qid, docno, score):
+        tmp = results[results['qid'==qid]].set_index('docno')['score']
+        adv_score = tmp.loc[docno]
+        diff = score - adv_score
+        if diff < 0: return -1 
+        elif diff > 0: return 1
+        return 0
 
-    scorer = pt.batchretrieve.TextScorer(body_attr='text', wmodel='BM25', background_index=indx, properties={"termpipelines" : "Stopwords,PorterStemmer"})
+      texts['adv_score'] = texts.apply(lambda x : ABNIRML(x.qid, x.docno, x.score))
+      texts['file'] = text
+      frames.append(texts)
 
-    results = scorer(test)
-
-    texts['adv_score'] = texts['score'] - results['score']
+    pd.concat(frames).to_csv(args.sink)
 
 
 

@@ -19,10 +19,13 @@ class Syringe:
         self.ds = ir_datasets.load("msmarco-passage")
         self.docs = pd.DataFrame(self.ds.docs_iter()).set_index('doc_id').text.to_dict()
         _qrels = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{qrels}").qrels_iter())
+        irrel = _qrels[_qrels['relevance'] < 2]
+        rel = _qrels[_qrels['relevance'] >= 2]
         self.qrels = {
-            0 : _qrels[_qrels['relevance'] == 0],
-            1 : _qrels[_qrels['relevance'] == 1],
-            2 : _qrels[_qrels['relevance'] == 2]
+            0 : irrel,
+            1 : irrel,
+            2 : rel,
+            3 : rel
         }
         self.texts = defaultdict(str)
         self.rel = None

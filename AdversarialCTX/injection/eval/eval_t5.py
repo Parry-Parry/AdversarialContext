@@ -1,24 +1,30 @@
+import pyterrier as pt
+pt.init()
 import argparse
 import os
 import pandas as pd
 import ir_datasets
-from pyterrier_colbert.ranking import ColBERTFactory
+from pyterrier_t5 import MonoT5ReRanker
+import re
+
+def clean_text(text):
+    text = re.sub(r'[^A-Za-z0-9 ]+', '', text)
+    return re.sub(r'/[^\x00-\x7F]/g', '', text).strip()
 
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-source', type=str)
 parser.add_argument('-sink', type=str)
-parser.add_argument('-chkpt', type=str)
-parser.add_argument('-idx_path', type=str)
-parser.add_argument('-idx', type=str)
 
 def main(args):
     ds = ir_datasets.load("msmarco-passage")
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
 
-    pytcolbert = ColBERTFactory(args.chkpt, args.idx_path, args.idx)
-    pytcolbert.faiss_index_on_gpu = False 
-    scorer = pytcolbert.end_to_end() 
+    dataset = pt.get_dataset("irds:msmarco-passage")
+    bm25 = pt.BatchRetrieve.from_dataset('msmarco_passage', 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text'])
+
+    monoT5 = MonoT5ReRanker()
+    scorer = bm25 >> pt.text.get_text(dataset, "text") >> monoT5 
 
     def build_from_df(df):
         new = []
@@ -32,11 +38,12 @@ def main(args):
     advers = [f for f in os.listdir(args.source) if os.path.isfile(os.path.join(args.source, f))]
 
     frames = []
-
     for text in advers:
       texts = pd.read_csv(os.path.join(args.source, text), sep='\t', header=None, index_col=False, names=cols, dtype=types)
 
       test = build_from_df(texts)
+      test['query'] = test['query'].apply(clean_text)
+      test['text'] = test['text'].apply(clean_text)
       results = scorer(test)
 
       def ABNIRML(qid, docno, score):
