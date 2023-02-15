@@ -86,7 +86,7 @@ def main(args):
 
     texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
 
-    for rel in [2, 1, 0]:
+    for rel in [2, 1]:
         syringe.set_rel(rel)
         ## START ##
         syringe.set_pos(0)
