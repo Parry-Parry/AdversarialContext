@@ -9,7 +9,7 @@ def count_sentences(text):
     return text.count('.')
 
 def get_random_sentence(text):
-    groups = text.split('.')
+    groups = [group for group in text.split('.') if len(group) > 1]
     num_sen = len(groups)
     if num_sen == 1: return text
     return f'{groups[np.random.randint(0, len(groups))]}.'
@@ -33,11 +33,7 @@ class Syringe:
         if _text != "": return _text
         qrels = self.qrels[rel]
         text = self.docs[qrels[qrels['query_id'] == qid].sample(1).doc_id.values[0]]
-        
-        sample = ""
-        while len(sample) < 2:
-            sample = get_random_sentence(text)
-        return sample
+        return get_random_sentence(text)
     
     def _inject(self, target, text, pos):
         if pos == 0: return f'{text} {target}'
