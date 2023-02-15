@@ -44,7 +44,7 @@ def main(args):
       results = scorer.transform(test)
 
       def ABNIRML(qid, docno, score):
-        tmp = results[results['qid'==qid]].set_index('docno')['score']
+        tmp = results[results['qid']==qid].set_index('docno')['score']
         adv_score = tmp.loc[docno]
         diff = score - adv_score
         if diff < 0: return -1 
