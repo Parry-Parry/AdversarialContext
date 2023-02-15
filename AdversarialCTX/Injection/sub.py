@@ -18,11 +18,11 @@ class Syringe:
     def __init__(self, qrels) -> None:
         self.ds = ir_datasets.load("msmarco-passage")
         self.docs = pd.DataFrame(self.ds.docs_iter()).set_index('doc_id').text.to_dict()
-        _qrels = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{qrels}").qrels_iter()).rename({'query_id':'qid', 'relevance':'rel'})
+        _qrels = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{qrels}").qrels_iter())
         self.qrels = {
-            0 : _qrels[_qrels.rel == 0],
-            1 : _qrels[_qrels.rel == 1],
-            2 : _qrels[_qrels.rel == 2]
+            0 : _qrels[_qrels['relevance'] == 0],
+            1 : _qrels[_qrels['relevance'] == 1],
+            2 : _qrels[_qrels['relevance'] == 2]
         }
         self.texts = defaultdict(str)
         self.rel = None
@@ -32,7 +32,7 @@ class Syringe:
         _text = self.texts[qid]
         if _text != "": return _text
         qrels = self.qrels[rel]
-        text = self.docs[qrels[qrels.qid == qid].sample(1).doc_id]
+        text = self.docs[qrels[qrels['query_id'] == qid].sample(1).doc_id]
         return get_random_sentence(text)
     
     def _inject(self, target, text, pos):
