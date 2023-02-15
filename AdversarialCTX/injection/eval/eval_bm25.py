@@ -43,6 +43,9 @@ def main(args):
       test['text'] = test['text'].apply(clean_text)
       results = scorer.transform(test)
 
+      print(results.head(5))
+      print(texts.head(5))
+
       def ABNIRML(qid, docno, score):
         tmp = results[results['qid']==qid].set_index('docno')['score']
         adv_score = tmp.loc[docno]
