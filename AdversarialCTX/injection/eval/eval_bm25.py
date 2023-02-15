@@ -54,8 +54,12 @@ def main(args):
         elif diff > 0: return 1
         return 0
 
-      texts['adv_score'] = texts.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
-      texts['file'] = text
+      def get_score(qid, docno):
+        tmp = results[results['qid']==qid].set_index('docno')['score']
+        return tmp.loc[docno]
+
+      texts['adv_signal'] = texts.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
+      texts['adv_score'] = texts.apply(lambda x : get_score(x['qid'], x['docno']), axis=1)
       frames.append(texts)
 
     out = pd.concat(frames)

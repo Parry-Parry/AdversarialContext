@@ -4,7 +4,7 @@ import argparse
 import os
 import pandas as pd
 import ir_datasets
-from pyterrier_colbert.ranking import ColBERTFactory
+from pyterrier_colbert.ranking import ColBERTModelOnlyFactory
 
 parser = argparse.ArgumentParser()
 
@@ -19,9 +19,8 @@ def main(args):
     ds = ir_datasets.load(f"msmarco-passage/{args.qrels}")
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
 
-    pytcolbert = ColBERTFactory(args.chkpt, args.idx_path, args.idx)
-    pytcolbert.faiss_index_on_gpu = False 
-    scorer = pytcolbert.end_to_end() 
+    pytcolbert = ColBERTModelOnlyFactory(args.chkpt, gpu=False)
+    scorer = pytcolbert.text_scorer() 
 
     def build_from_df(df):
         new = []
@@ -49,8 +48,13 @@ def main(args):
         if diff < 0: return -1 
         elif diff > 0: return 1
         return 0
+      
+      def get_score(qid, docno):
+        tmp = results[results['qid']==qid].set_index('docno')['score']
+        return tmp.loc[docno]
 
-      texts['adv_score'] = texts.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
+      texts['adv_signal'] = texts.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
+      texts['adv_score'] = texts.apply(lambda x : get_score(x['qid'], x['docno']), axis=1)
       texts['file'] = text
       frames.append(texts)
 
