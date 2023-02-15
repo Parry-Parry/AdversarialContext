@@ -9,7 +9,7 @@ def count_sentences(text):
     return text.count('.')
 
 def get_random_sentence(text):
-    groups = [group for group in text.split('.') if len(group) > 1]
+    groups = [group for group in text.split('.') if len(group) > 5]
     num_sen = len(groups)
     if num_sen == 1: return text
     return f'{groups[np.random.randint(0, len(groups))]}.'
