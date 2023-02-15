@@ -30,8 +30,8 @@ def main(args):
             new.append({'qid':row.qid, 'query':queries[row.qid], 'docno':row.docno, 'text':row.adversary})
         return pd.DataFrame.from_records(new)
 
-    cols = ['qid', 'docno', 'score', 'adversary']
-    types = {'qid' : str, 'docno' : str, 'score' : float, 'adversary' : str}
+    cols = ['qid', 'docno', 'score', 'adversary', 'rel', 'pos']
+    types = {'qid' : str, 'docno' : str, 'score' : float, 'adversary' : str, 'rel' : int, 'pos':str}
 
     advers = [f for f in os.listdir(args.source) if os.path.isfile(os.path.join(args.source, f))]
     frames = []

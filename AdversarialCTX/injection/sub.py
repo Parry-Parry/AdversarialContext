@@ -91,12 +91,18 @@ def main(args):
         ## START ##
         syringe.set_pos(0)
         start = syringe.transform(texts)
+        start['rel'] = rel 
+        start['pos'] = 'start'
         ## MIDDLE ##
         syringe.set_pos(1)
         mid = syringe.transform(texts)
+        mid['rel'] = rel 
+        mid['pos'] = 'mid'
         ## END ## 
         syringe.set_pos(-1)
         end = syringe.transform(texts)
+        end['rel'] = rel 
+        end['pos'] = 'end'
 
         start.to_csv(os.path.join(args.sink, f'sub.{rel}.start.tsv'), sep='\t', index=False, header=False)
         mid.to_csv(os.path.join(args.sink, f'sub.{rel}.mid.tsv'), sep='\t', index=False, header=False)
