@@ -7,13 +7,14 @@ from pyterrier_colbert.ranking import ColBERTFactory
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-source', type=str)
+parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
 parser.add_argument('-chkpt', type=str)
 parser.add_argument('-idx_path', type=str)
 parser.add_argument('-idx', type=str)
 
 def main(args):
-    ds = ir_datasets.load("msmarco-passage")
+    ds = ir_datasets.load(f"msmarco-passage/{args.qrels}")
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
 
     pytcolbert = ColBERTFactory(args.chkpt, args.idx_path, args.idx)
