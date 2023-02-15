@@ -1,3 +1,5 @@
+import pyterrier as pt
+pt.init()
 import argparse
 import os
 import pandas as pd
