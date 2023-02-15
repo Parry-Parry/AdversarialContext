@@ -2,9 +2,13 @@ import pyterrier as pt
 pt.init()
 import argparse
 import os
-from pyterrier_pisa import PisaIndex
 import ir_datasets
 import pandas as pd
+import re
+
+def clean_text(text):
+    text = re.sub(r'[^A-Za-z0-9 ]+', '', text)
+    return re.sub(r'/[^\x00-\x7F]/g', '', text).strip()
 
 _logger = ir_datasets.log.easy()
 
@@ -30,8 +34,8 @@ def main(args):
     scorer = pt.BatchRetrieve.from_dataset('msmarco_passage', 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text']) % args.top
 
     data = build_data(args.qrels)
-
     queries = data[['qid', 'query']].copy().drop_duplicates()
+    queries['query'] = queries['query'].apply(clean_text)
 
     topk = scorer.transform(queries)
     out = topk[['qid', 'docno', 'score']]
