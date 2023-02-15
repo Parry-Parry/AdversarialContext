@@ -39,8 +39,8 @@ class Syringe:
         if pos == 0: return f'{text} {target}'
         if pos == -1: return f'{target} {text}'
         groups = target.split('.')
-        start = groups[:pos].join('.')
-        end = groups[pos:].join('.')
+        start = '.'.join(groups[:pos])
+        end = '.'.join(groups[pos:])
         return f'{start} {text} {end}'
     
     def _reset_text(self):
