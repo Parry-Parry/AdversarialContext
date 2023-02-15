@@ -58,7 +58,12 @@ def main(args):
       texts['file'] = text
       frames.append(texts)
 
-    pd.concat(frames).to_csv(args.sink)
+    out = pd.concat(frames)
+    out.to_csv(args.sink)
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+    main(args)
 
 
 
