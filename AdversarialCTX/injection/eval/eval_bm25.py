@@ -20,7 +20,7 @@ def main(args):
     ds = ir_datasets.load(f"msmarco-passage/{args.qrels}")
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
 
-    ds = pt.get_dataset('msmarco-passage')
+    ds = pt.get_dataset('msmarco_passage')
     indx = pt.IndexFactory.of(ds.get_index(variant='terrier_stemmed'))
     scorer = pt.batchretrieve.TextScorer(body_attr='text', wmodel='BM25', background_index=indx, properties={"termpipelines" : "Stopwords,PorterStemmer"})
 
