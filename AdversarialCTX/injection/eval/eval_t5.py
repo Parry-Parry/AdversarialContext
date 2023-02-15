@@ -55,7 +55,7 @@ def main(args):
         elif diff > 0: return 1
         return 0
 
-      texts['adv_score'] = texts.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']))
+      texts['adv_score'] = texts.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
       texts['file'] = text
       frames.append(texts)
 
