@@ -4,6 +4,7 @@ import numpy as np
 import os
 import pandas as pd
 import ir_datasets
+from pyterrier_colbert.ranking import ColBERTFactory
 
 _logger = ir_datasets.log.easy()
     
@@ -23,9 +24,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-source', type=str)
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
+parser.add_argument('-chkpt', type=str)
+parser.add_argument('-idx_path', type=str)
+parser.add_argument('-idx', type=str)
 
 def main(args):
-    ds = ir_datasets.load("irds:msmarco-passage")
+    
+    ds = ir_datasets.load("msmarco-passage")
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
 
     def build_from_df(df):
@@ -39,4 +44,17 @@ def main(args):
 
     texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
 
-    new_texts = build_from_df(texts)
+    test = build_from_df(texts)
+
+    pytcolbert = ColBERTFactory(args.chkpt, args.idx_path, args.idx)
+    pytcolbert.faiss_index_on_gpu = False 
+    scorer = pytcolbert.end_to_end() 
+
+    results = scorer(test)
+
+    texts['adv_score'] = texts['score'] - results['score']
+
+    texts.to_csv(os.path.join(args.sink, name))
+
+
+

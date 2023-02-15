@@ -27,8 +27,7 @@ def build_data(path):
   return pd.DataFrame(result, columns=['qid', 'query', 'docno', 'text'])
 
 def main(args):
-    pisa_index = PisaIndex.from_dataset('msmarco_passage', 'pisa_porter2')
-    scorer = pisa_index.bm25(num_results=args.top, threads=args.threads)
+    scorer = pt.BatchRetrieve.from_dataset('msmarco_passage', 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text']) % args.top
 
     data = build_data(args.qrels)
 
