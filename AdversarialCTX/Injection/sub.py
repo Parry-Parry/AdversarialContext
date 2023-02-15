@@ -33,7 +33,11 @@ class Syringe:
         if _text != "": return _text
         qrels = self.qrels[rel]
         text = self.docs[qrels[qrels['query_id'] == qid].sample(1).doc_id.values[0]]
-        return get_random_sentence(text)
+        
+        sample = ""
+        while len(sample) < 2:
+            sample = get_random_sentence(text)
+        return sample
     
     def _inject(self, target, text, pos):
         if pos == 0: return f'{text} {target}'
