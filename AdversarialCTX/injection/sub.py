@@ -59,7 +59,6 @@ class Syringe:
         text = self.docs[id]
         assert self.rel is not None
         payload = self._get_text(self.rel, qid)
-        print('payload:', payload)
         if self.pos not in [0, -1]: pos = count_sentences(text) // 2
         else: pos = self.pos
 

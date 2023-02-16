@@ -5,6 +5,7 @@ import os
 import ir_datasets
 import pandas as pd
 import re
+from pyterrier_dr import TasB
 
 _logger = ir_datasets.log.easy()
 
@@ -32,8 +33,8 @@ def main(args):
     dataset = pt.get_dataset("irds:msmarco-passage")
     bm25 = pt.BatchRetrieve.from_dataset('msmarco_passage', 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text'])
 
-    monoT5 = MonoT5ReRanker()
-    scorer = bm25 >> pt.text.get_text(dataset, "text") >> monoT5 % args.top
+    tasb = TasB()
+    scorer = bm25 >> pt.text.get_text(dataset, "text") >> tasb % args.top
 
     data = build_data(args.qrels)
 
@@ -42,7 +43,7 @@ def main(args):
 
     topk = scorer.transform(queries)
     out = topk[['qid', 'docno', 'score']]
-    out.to_csv(os.path.join(args.sink, 'T5.tsv'), sep='\t', index=False, header=False)
+    out.to_csv(os.path.join(args.sink, 'TASB.tsv'), sep='\t', index=False, header=False)
 
 if __name__ == '__main__':
     args = parser.parse_args()
