@@ -15,11 +15,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-dataset', type=str)
 parser.add_argument('-scorer', type=str)
 
+parser.add_argument('--model_name', type=str)
 parser.add_argument('--index_name', type=str, default='msmarco-passage')
 
 def main(args):
     index = pyterrier_dr.NumpyIndex(f'{args.index_name}.{args.scorer}.np')
     
+
+    if args.scorer == 'tasb': assert args.model_name is not None
     try:
         model = scorers[args.scorer]
     except KeyError:

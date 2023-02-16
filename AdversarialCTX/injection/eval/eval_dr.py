@@ -20,12 +20,16 @@ parser.add_argument('-scorer', type=str)
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
 
+parser.add_argument('--model_name', type=str)
+
 def main(args):
     ds = ir_datasets.load(f"msmarco-passage/{args.qrels}")
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
 
+    if args.scorer == 'tasb': assert args.model_name is not None
     try:
-        model = scorers[args.scorer]
+        if args.model_name:  model = scorers[args.scorer](args.model_name)
+        else: model = scorers[args.scorer]()
     except KeyError:
         logging.error(f'Model: {args.scorer} not found')
         exit
