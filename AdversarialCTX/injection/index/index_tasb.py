@@ -9,6 +9,7 @@ import logging
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-dataset', type=str)
+parser.add_argument('-index_path', type=str)
 
 parser.add_argument('--index_name', type=str, default='msmarco-passage')
 
