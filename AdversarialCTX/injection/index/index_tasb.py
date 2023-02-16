@@ -21,7 +21,6 @@ def main(args):
     pipeline = model >> index
     pipeline.index(pt.get_dataset(f'irds:{args.dataset}').get_corpus_iter())
 
-
 if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
