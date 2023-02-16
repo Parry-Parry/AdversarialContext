@@ -15,7 +15,7 @@ def main(args):
     index = pyterrier_dr.NumpyIndex(f'{args.index_name}.tasb.np')
     
 
-    model = TasB()
+    model = TasB('dot')
 
     logging.info(f'Indexing {args.dataset} with tasb...')
     pipeline = model >> index
