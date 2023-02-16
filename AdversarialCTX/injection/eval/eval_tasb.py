@@ -4,6 +4,7 @@ import argparse
 import os
 import pandas as pd
 import ir_datasets
+import pyterrier_dr
 from pyterrier_dr import TasB
 import logging
 
@@ -17,7 +18,8 @@ def main(args):
     ds = ir_datasets.load(f"msmarco-passage/{args.qrels}")
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
 
-    model = TasB()
+    index = pyterrier_dr.NumpyIndex(os.path.join(args.index_path, f'{args.index_name}.tasb.np'))
+    model = TasB('sebastian-hofstaetter/distilbert-dot-tas_b-b256-msmarco')
     scorer = model
 
     def build_from_df(df):

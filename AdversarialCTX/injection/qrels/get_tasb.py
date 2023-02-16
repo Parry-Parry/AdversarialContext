@@ -20,6 +20,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-top', type=int)
 parser.add_argument('-index_name', type=int)
+parser.add_argument('-index_path', type=int)
 parser.add_argument('-sink', type=str)
 
 def build_data(path):
@@ -33,9 +34,8 @@ def build_data(path):
   return pd.DataFrame(result, columns=['qid', 'query', 'docno', 'text'])
 
 def main(args):
-    index = pyterrier_dr.NumpyIndex(f'{args.index_name}.tasb.np')
-
-    model = TasB()
+    index = pyterrier_dr.NumpyIndex(os.path.join(args.index_path, f'{args.index_name}.tasb.np'))
+    model = TasB('sebastian-hofstaetter/distilbert-dot-tas_b-b256-msmarco')
     scorer = model >> index % args.top
 
     data = build_data(args.qrels)
