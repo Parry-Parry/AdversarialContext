@@ -1,3 +1,4 @@
+import os
 import pyterrier as pt
 pt.init()
 import argparse
@@ -12,7 +13,7 @@ parser.add_argument('-dataset', type=str)
 parser.add_argument('--index_name', type=str, default='msmarco-passage')
 
 def main(args):
-    index = pyterrier_dr.NumpyIndex(f'{args.index_name}.tasb.np')
+    index = pyterrier_dr.NumpyIndex(os.path.join(args.index_path, f'{args.index_name}.tasb.np'))
     
 
     model = TasB('sebastian-hofstaetter/distilbert-dot-tas_b-b256-msmarco')
