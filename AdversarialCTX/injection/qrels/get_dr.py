@@ -39,7 +39,7 @@ def build_data(path):
   return pd.DataFrame(result, columns=['qid', 'query', 'docno', 'text'])
 
 def main(args):
-    index = pyterrier_dr.NumpyIndex(f'{args.index_name}.np')
+    index = pyterrier_dr.NumpyIndex(f'{args.index_name}.{args.scorer}.np')
 
     try:
         model = scorers[args.scorer]
@@ -55,7 +55,7 @@ def main(args):
 
     topk = scorer.transform(queries)
     out = topk[['qid', 'docno', 'score']]
-    out.to_csv(os.path.join(args.sink, 'TASB.tsv'), sep='\t', index=False, header=False)
+    out.to_csv(os.path.join(args.sink, f'{args.scorer}.tsv'), sep='\t', index=False, header=False)
 
 if __name__ == '__main__':
     args = parser.parse_args()
