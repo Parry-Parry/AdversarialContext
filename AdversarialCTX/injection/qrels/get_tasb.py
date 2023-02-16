@@ -19,8 +19,8 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-top', type=int)
-parser.add_argument('-index_name', type=int)
-parser.add_argument('-index_path', type=int)
+parser.add_argument('-index_name', type=str)
+parser.add_argument('-index_path', type=str)
 parser.add_argument('-sink', type=str)
 
 def build_data(path):
