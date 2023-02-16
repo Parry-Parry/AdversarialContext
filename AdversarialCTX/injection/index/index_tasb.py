@@ -15,7 +15,7 @@ def main(args):
     index = pyterrier_dr.NumpyIndex(f'{args.index_name}.tasb.np')
     
 
-    model = TasB('dot')
+    model = TasB('sebastian-hofstaetter/distilbert-dot-tas_b-b256-msmarco')
 
     logging.info(f'Indexing {args.dataset} with tasb...')
     pipeline = model >> index
