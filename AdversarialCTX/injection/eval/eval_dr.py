@@ -4,16 +4,19 @@ import argparse
 import os
 import pandas as pd
 import ir_datasets
-from pyterrier_dr import TasB
-import re
+from pyterrier_t5 import ElectraScorer
+from pyterrier_dr import ElectraScorer, TasB
+import logging
 
-def clean_text(text):
-    text = re.sub(r'[^A-Za-z0-9 ]+', '', text)
-    return re.sub(r'/[^\x00-\x7F]/g', '', text).strip()
+scorers = {
+    'electra' : ElectraScorer,
+    'tasb' : TasB
+}
 
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-source', type=str)
+parser.add_argument('-scorer', type=str)
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
 
@@ -21,11 +24,13 @@ def main(args):
     ds = ir_datasets.load(f"msmarco-passage/{args.qrels}")
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
 
-    dataset = pt.get_dataset("irds:msmarco-passage")
-    bm25 = pt.BatchRetrieve.from_dataset('msmarco_passage', 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text'])
-
-    tasb = TasB()
-    scorer = tasb 
+    try:
+        model = scorers[args.scorer]
+    except KeyError:
+        logging.error(f'Model: {args.scorer} not found')
+        exit
+    
+    scorer = model
 
     def build_from_df(df):
         new = []
@@ -41,10 +46,7 @@ def main(args):
     frames = []
     for text in advers:
       texts = pd.read_csv(os.path.join(args.source, text), sep='\t', header=None, index_col=False, names=cols, dtype=types)
-
       test = build_from_df(texts)
-      test['query'] = test['query'].apply(clean_text)
-      test['text'] = test['text'].apply(clean_text)
       results = scorer(test)
 
       def ABNIRML(qid, docno, score):
