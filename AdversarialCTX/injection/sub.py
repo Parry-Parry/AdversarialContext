@@ -22,20 +22,19 @@ class Syringe:
         irrel = _qrels[_qrels['relevance'] < 2]
         rel = _qrels[_qrels['relevance'] >= 2]
         self.qrels = {
-            0 : irrel,
+            0 : rel,
             1 : irrel,
             2 : rel,
-            3 : rel
         }
         self.texts = defaultdict(str)
         self.rel = None
         self.pos = None
     
     def _get_text(self, rel, qid):
-        _text = self.texts[qid]
-        if _text != "": return _text
         qrels = self.qrels[rel]
-        text = self.docs[qrels[qrels['query_id'] == qid].sample(1).doc_id.values[0]]
+        if rel == 0: space = qrels[qrels['query_id'] != qid]
+        else: space = qrels[qrels['query_id'] == qid]
+        text = self.docs[space.sample(1).doc_id.values[0]]
         return get_random_sentence(text)
     
     def _inject(self, target, text, pos):
@@ -58,7 +57,11 @@ class Syringe:
     def inject(self, id, qid):
         text = self.docs[id]
         assert self.rel is not None
-        payload = self._get_text(self.rel, qid)
+        _text = self.texts[qid]
+        if _text != "": payload = _text
+        else: 
+            payload = self._get_text(self.rel, qid)
+            self.texts[qid] = payload
         if self.pos not in [0, -1]: pos = count_sentences(text) // 2
         else: pos = self.pos
 
@@ -85,7 +88,7 @@ def main(args):
 
     texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
 
-    for rel in [2, 1]:
+    for rel in [2, 1, 0]:
         syringe.set_rel(rel)
         ## START ##
         syringe.set_pos(0)

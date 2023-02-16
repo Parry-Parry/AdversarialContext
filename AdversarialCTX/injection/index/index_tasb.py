@@ -15,8 +15,6 @@ parser.add_argument('--index_name', type=str, default='msmarco-passage')
 
 def main(args):
     index = pyterrier_dr.NumpyIndex(os.path.join(args.index_path, f'{args.index_name}.tasb.np'))
-    
-
     model = TasB('sebastian-hofstaetter/distilbert-dot-tas_b-b256-msmarco')
 
     logging.info(f'Indexing {args.dataset} with tasb...')
