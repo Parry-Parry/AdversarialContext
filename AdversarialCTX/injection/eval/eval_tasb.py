@@ -25,7 +25,7 @@ def main(args):
     bm25 = pt.BatchRetrieve.from_dataset('msmarco_passage', 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text'])
 
     tasb = TasB()
-    scorer = bm25 >> pt.text.get_text(dataset, "text") >> tasb 
+    scorer = tasb 
 
     def build_from_df(df):
         new = []

@@ -25,7 +25,7 @@ def main(args):
     bm25 = pt.BatchRetrieve.from_dataset('msmarco_passage', 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text'])
 
     electra = ElectraScorer()
-    scorer = bm25 >> pt.text.get_text(dataset, "text") >> electra 
+    scorer = electra 
 
     def build_from_df(df):
         new = []

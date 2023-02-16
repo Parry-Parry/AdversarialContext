@@ -34,7 +34,7 @@ def main(args):
     bm25 = pt.BatchRetrieve.from_dataset('msmarco_passage', 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text'])
 
     tasb = TasB()
-    scorer = bm25 >> pt.text.get_text(dataset, "text") >> tasb % args.top
+    scorer = tasb % args.top
 
     data = build_data(args.qrels)
 

@@ -34,7 +34,7 @@ def main(args):
     bm25 = pt.BatchRetrieve.from_dataset('msmarco_passage', 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text'])
 
     electra = ElectraScorer()
-    scorer = bm25 >> pt.text.get_text(dataset, "text") >> electra % args.top
+    scorer = electra % args.top
 
     data = build_data(args.qrels)
 
