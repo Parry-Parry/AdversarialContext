@@ -6,13 +6,8 @@ import ir_datasets
 import pandas as pd
 import re
 import pyterrier_dr
-from pyterrier_dr import ElectraScorer, TasB
+from pyterrier_dr import ElectraScorer
 import logging
-
-scorers = {
-    'electra' : ElectraScorer,
-    'tasb' : TasB
-}
 
 _logger = ir_datasets.log.easy()
 
@@ -24,11 +19,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-top', type=int)
-parser.add_argument('-scorer', type=str)
-parser.add_argument('-index_name', type=int)
 parser.add_argument('-sink', type=str)
-
-parser.add_argument('--model_name', type=str)
 
 def build_data(path):
   result = []
@@ -41,16 +32,11 @@ def build_data(path):
   return pd.DataFrame(result, columns=['qid', 'query', 'docno', 'text'])
 
 def main(args):
-    index = pyterrier_dr.NumpyIndex(f'{args.index_name}.{args.scorer}.np')
+    dataset = pt.get_dataset("irds:msmarco-passage")
+    bm25 = pt.BatchRetrieve.from_dataset('msmarco_passage', 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text'])
 
-    if args.scorer == 'tasb': assert args.model_name is not None
-    try:
-        if args.model_name:  model = scorers[args.scorer](args.model_name)
-        else: model = scorers[args.scorer]()
-    except KeyError:
-        logging.error(f'Model: {args.scorer} not found')
-        exit
-    scorer = model >> index % args.top
+    model = ElectraScorer()
+    scorer = bm25 >> pt.text.get_text(dataset, "text") >> model % args.top
 
     data = build_data(args.qrels)
 
@@ -59,7 +45,7 @@ def main(args):
 
     topk = scorer.transform(queries)
     out = topk[['qid', 'docno', 'score']]
-    out.to_csv(os.path.join(args.sink, f'{args.scorer}.tsv'), sep='\t', index=False, header=False)
+    out.to_csv(os.path.join(args.sink, f'electra.tsv'), sep='\t', index=False, header=False)
 
 if __name__ == '__main__':
     args = parser.parse_args()
