@@ -45,7 +45,7 @@ class Syringe:
         end = '.'.join(groups[pos:])
         return start +  f' {text}. ' + end
     
-    def _reset_text(self):
+    def reset_text(self):
         self.texts = defaultdict(str)
 
     def set_rel(self, rel):
@@ -68,7 +68,6 @@ class Syringe:
         return self._inject(text, payload, pos)
     
     def transform(self, df, col='adversary'):
-        self._reset_text()
         df = df.copy()
         df[col] = df.apply(lambda x : self.inject(x.docno, x.qid), axis='columns')
         return df
@@ -89,6 +88,7 @@ def main(args):
     texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
 
     for rel in [2, 1, 0]:
+        syringe.reset_text()
         syringe.set_rel(rel)
         ## START ##
         syringe.set_pos(0)

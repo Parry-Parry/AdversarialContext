@@ -17,8 +17,7 @@ parser.add_argument('-sink', type=str)
 def main(args):
     ds = ir_datasets.load(f"msmarco-passage/{args.qrels}")
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
-
-    index = pyterrier_dr.NumpyIndex(os.path.join(args.index_path, f'{args.index_name}.tasb.np'))
+    
     model = TasB('sebastian-hofstaetter/distilbert-dot-tas_b-b256-msmarco')
     scorer = model
 
