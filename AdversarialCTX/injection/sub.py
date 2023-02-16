@@ -9,10 +9,10 @@ def count_sentences(text):
     return text.count('.')
 
 def get_random_sentence(text):
-    groups = [group for group in text.split('.') if len(group) > 5]
+    groups = [group for group in text.split('.') if len(group.split(' ')) > 4]
     num_sen = len(groups)
     if num_sen == 1: return text
-    return f'{groups[np.random.randint(0, len(groups))]}.'
+    return groups[np.random.randint(0, len(groups))]
 
 class Syringe:
     def __init__(self, qrels) -> None:
@@ -38,12 +38,12 @@ class Syringe:
         return get_random_sentence(text)
     
     def _inject(self, target, text, pos):
-        if pos == 0: return f'{text} {target}'
-        if pos == -1: return f'{target} {text}'
+        if pos == 0: return f'{text}. ' + target
+        if pos == -1: return target + f' {text}'
         groups = target.split('.')
         start = '.'.join(groups[:pos])
         end = '.'.join(groups[pos:])
-        return f'{start} {text} {end}'
+        return start +  f' {text}. ' + end
     
     def _reset_text(self):
         self.texts = defaultdict(str)
