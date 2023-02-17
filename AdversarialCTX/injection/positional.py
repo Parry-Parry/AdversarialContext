@@ -95,16 +95,19 @@ def main(args):
         start = syringe.transform(texts)
         start['rel'] = rel 
         start['pos'] = 'start'
+        start['salience'] = 'N/A'
         ## MIDDLE ##
         syringe.set_pos(1)
         mid = syringe.transform(texts)
         mid['rel'] = rel 
         mid['pos'] = 'mid'
+        start['salience'] = 'N/A'
         ## END ## 
         syringe.set_pos(-1)
         end = syringe.transform(texts)
         end['rel'] = rel 
         end['pos'] = 'end'
+        start['salience'] = 'N/A'
 
         start.to_csv(os.path.join(args.sink, f'sub.{rel}.start.tsv'), sep='\t', index=False, header=False)
         mid.to_csv(os.path.join(args.sink, f'sub.{rel}.mid.tsv'), sep='\t', index=False, header=False)

@@ -4,6 +4,8 @@ import numpy as np
 import os
 import pandas as pd
 import ir_datasets
+from lexrank import LexRank
+from lexrank.mappings.stopwords import STOPWORDS
 
 def count_sentences(text):
     return text.count('.')
@@ -29,6 +31,15 @@ class Syringe:
         self.texts = defaultdict(str)
         self.rel = None
         self.pos = None
+        self.salient = None
+        self.lxr = None
+
+    def _get_position(self, text):
+        assert self.lxr is not None, 'Train Lexer!'
+        scores = self.lxr(text.split('.'))
+        order = np.argmax(scores)
+        if self.salient == True: return order[0]
+        else: return order[-1]
     
     def _get_text(self, rel, qid):
         qrels = self.qrels[rel]
@@ -37,12 +48,11 @@ class Syringe:
         text = self.docs[space.sample(1).doc_id.values[0]]
         return get_random_sentence(text)
     
-    def _inject(self, target, text, pos):
-        if pos == 0: return f'{text}. ' + target
-        if pos == -1: return target + f' {text}'
+    def _inject(self, target, text, idx):
+        adjusted = idx + self.pos
         groups = target.split('.')
-        start = '.'.join(groups[:pos])
-        end = '.'.join(groups[pos:])
+        start = '.'.join(groups[:adjusted])
+        end = '.'.join(groups[adjusted:])
         return start +  f' {text}. ' + end
     
     def reset_text(self):
@@ -54,7 +64,11 @@ class Syringe:
     def set_pos(self, pos):
         self.pos = pos
     
+    def set_salient(self, salient):
+        self.salient = salient
+    
     def inject(self, id, qid):
+        idx = None
         text = self.docs[id]
         assert self.rel is not None
         _text = self.texts[qid]
@@ -62,10 +76,11 @@ class Syringe:
         else: 
             payload = self._get_text(self.rel, qid)
             self.texts[qid] = payload
-        if self.pos not in [0, -1]: pos = count_sentences(text) // 2
-        else: pos = self.pos
 
-        return self._inject(text, payload, pos)
+        return self._inject(text, payload, idx)
+    
+    def initialise_lxr(self, docs):
+        self.lxr = LexRank(docs, stopwords=STOPWORDS['en'])
     
     def transform(self, df, col='adversary'):
         df = df.copy()
@@ -76,11 +91,14 @@ class Syringe:
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-source', type=str)
+parser.add_argument('-dataset', type=str)
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
 
 def main(args):
+    docs = [doc.text for doc in ir_datasets.load(args.dataset).docs_iter()]
     syringe = Syringe(args.qrels)
+    syringe.initialise_lxr(docs)
 
     cols = ['qid', 'docno', 'score']
     types = {'qid' : str, 'docno' : str, 'score' : float}
@@ -90,25 +108,21 @@ def main(args):
     for rel in [2, 1, 0]:
         syringe.reset_text()
         syringe.set_rel(rel)
-        ## START ##
-        syringe.set_pos(0)
-        start = syringe.transform(texts)
-        start['rel'] = rel 
-        start['pos'] = 'start'
-        ## MIDDLE ##
-        syringe.set_pos(1)
-        mid = syringe.transform(texts)
-        mid['rel'] = rel 
-        mid['pos'] = 'mid'
-        ## END ## 
-        syringe.set_pos(-1)
-        end = syringe.transform(texts)
-        end['rel'] = rel 
-        end['pos'] = 'end'
-
-        start.to_csv(os.path.join(args.sink, f'sub.{rel}.start.tsv'), sep='\t', index=False, header=False)
-        mid.to_csv(os.path.join(args.sink, f'sub.{rel}.mid.tsv'), sep='\t', index=False, header=False)
-        end.to_csv(os.path.join(args.sink, f'sub.{rel}.end.tsv'), sep='\t', index=False, header=False)
+        for salience in [True, False]:
+            syringe.set_salient(salience)
+            ### BEFORE ### 
+            syringe.set_pos(-1)
+            end['rel'] = rel 
+            end['pos'] = 'before'
+            start['salience'] = 'N/A'
+            ### AFTER ###
+            syringe.set_pos(-1)
+            end['rel'] = rel 
+            end['pos'] = 'after'
+            start['salience'] = 'Salient' if salience else 'Non-Salient'
+            start.to_csv(os.path.join(args.sink, f'sub.{rel}.start.tsv'), sep='\t', index=False, header=False)
+            mid.to_csv(os.path.join(args.sink, f'sub.{rel}.mid.tsv'), sep='\t', index=False, header=False)
+            end.to_csv(os.path.join(args.sink, f'sub.{rel}.end.tsv'), sep='\t', index=False, header=False)
 
 if __name__ == '__main__':
     args = parser.parse_args()
