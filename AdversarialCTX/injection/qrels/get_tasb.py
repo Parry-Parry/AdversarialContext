@@ -11,9 +11,6 @@ import logging
 
 _logger = ir_datasets.log.easy()
 
-def clean_text(text):
-    text = re.sub(r'[^A-Za-z0-9 ]+', '', text)
-    return re.sub(r'/[^\x00-\x7F]/g', '', text).strip()
 
 parser = argparse.ArgumentParser()
 
@@ -41,7 +38,6 @@ def main(args):
     data = build_data(args.qrels)
 
     queries = data[['qid', 'query']].copy().drop_duplicates()
-    queries['query'] = queries['query'].apply(clean_text)
 
     topk = scorer.transform(queries)
     out = topk[['qid', 'docno', 'score']]
