@@ -6,12 +6,51 @@ import pandas as pd
 import ir_datasets
 from lexrank import LexRank
 from lexrank.mappings.stopwords import STOPWORDS
+import re 
+
+### Sentence Regex from: https://stackoverflow.com/a/31505798
+
+alphabets= "([A-Za-z])"
+prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
+suffixes = "(Inc|Ltd|Jr|Sr|Co)"
+starters = "(Mr|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|He\s|She\s|It\s|They\s|Their\s|Our\s|We\s|But\s|However\s|That\s|This\s|Wherever)"
+acronyms = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
+websites = "[.](com|net|org|io|gov|edu|me)"
+digits = "([0-9])"
+
+def split_into_sentences(text):
+    text = " " + text + "  "
+    text = text.replace("\n"," ")
+    text = re.sub(prefixes,"\\1<prd>",text)
+    text = re.sub(websites,"<prd>\\1",text)
+    text = re.sub(digits + "[.]" + digits,"\\1<prd>\\2",text)
+    if "..." in text: text = text.replace("...","<prd><prd><prd>")
+    if "Ph.D" in text: text = text.replace("Ph.D.","Ph<prd>D<prd>")
+    text = re.sub("\s" + alphabets + "[.] "," \\1<prd> ",text)
+    text = re.sub(acronyms+" "+starters,"\\1<stop> \\2",text)
+    text = re.sub(alphabets + "[.]" + alphabets + "[.]" + alphabets + "[.]","\\1<prd>\\2<prd>\\3<prd>",text)
+    text = re.sub(alphabets + "[.]" + alphabets + "[.]","\\1<prd>\\2<prd>",text)
+    text = re.sub(" "+suffixes+"[.] "+starters," \\1<stop> \\2",text)
+    text = re.sub(" "+suffixes+"[.]"," \\1<prd>",text)
+    text = re.sub(" " + alphabets + "[.]"," \\1<prd>",text)
+    if "”" in text: text = text.replace(".”","”.")
+    if "\"" in text: text = text.replace(".\"","\".")
+    if "!" in text: text = text.replace("!\"","\"!")
+    if "?" in text: text = text.replace("?\"","\"?")
+    text = text.replace(".",".<stop>")
+    text = text.replace("?","?<stop>")
+    text = text.replace("!","!<stop>")
+    text = text.replace("<prd>",".")
+    sentences = text.split("<stop>")
+    sentences = sentences[:-1]
+    sentences = [s.strip() for s in sentences]
+    return sentences
 
 def count_sentences(text):
-    return text.count('.')
+    return len(split_into_sentences(text))
 
 def get_random_sentence(text):
-    groups = [group for group in text.split('.') if len(group.split(' ')) > 4]
+    groups = [group for group in split_into_sentences(text)]
     num_sen = len(groups)
     if num_sen == 1: return text
     return groups[np.random.randint(0, len(groups))]
@@ -36,10 +75,10 @@ class Syringe:
 
     def _get_position(self, text):
         assert self.lxr is not None, 'Train Lexer!'
-        scores = self.lxr(text.split('.'))
-        order = np.argmax(scores)
-        if self.salient == True: return order[0]
-        else: return order[-1]
+        scores = self.lxr.rank_sentences(split_into_sentences(text), fast_power_method=True)
+        order = np.argsort(scores)
+        if self.salient == True: return order[-1]
+        else: return order[0]
     
     def _get_text(self, rel, qid):
         qrels = self.qrels[rel]
@@ -50,7 +89,7 @@ class Syringe:
     
     def _inject(self, target, text, idx):
         adjusted = idx + self.pos
-        groups = target.split('.')
+        groups = split_into_sentences(target)
         start = '.'.join(groups[:adjusted])
         end = '.'.join(groups[adjusted:])
         return start +  f' {text}. ' + end
@@ -110,19 +149,21 @@ def main(args):
         syringe.set_rel(rel)
         for salience in [True, False]:
             syringe.set_salient(salience)
+            salience_text = 'salient' if salience else 'nonsalient'
             ### BEFORE ### 
-            syringe.set_pos(-1)
-            end['rel'] = rel 
-            end['pos'] = 'before'
-            start['salience'] = 'N/A'
+            syringe.set_pos(0)
+            before = syringe.transform(texts)
+            before['rel'] = rel 
+            before['pos'] = 'before'
+            before['salience'] = salience_text
             ### AFTER ###
-            syringe.set_pos(-1)
-            end['rel'] = rel 
-            end['pos'] = 'after'
-            start['salience'] = 'Salient' if salience else 'Non-Salient'
-            start.to_csv(os.path.join(args.sink, f'sub.{rel}.start.tsv'), sep='\t', index=False, header=False)
-            mid.to_csv(os.path.join(args.sink, f'sub.{rel}.mid.tsv'), sep='\t', index=False, header=False)
-            end.to_csv(os.path.join(args.sink, f'sub.{rel}.end.tsv'), sep='\t', index=False, header=False)
+            syringe.set_pos(1)
+            after = syringe.transform(texts)
+            after['rel'] = rel 
+            after['pos'] = 'after'
+            after['salience'] = salience_text
+            before.to_csv(os.path.join(args.sink, f'sub.{rel}.{salience_text}.before.tsv'), sep='\t', index=False, header=False)
+            after.to_csv(os.path.join(args.sink, f'sub.{rel}.{salience_text}.after.tsv'), sep='\t', index=False, header=False)
 
 if __name__ == '__main__':
     args = parser.parse_args()
