@@ -1,5 +1,6 @@
 import argparse
 from collections import defaultdict
+import logging
 import numpy as np
 import os
 import pandas as pd
@@ -119,7 +120,9 @@ class Syringe:
         return self._inject(text, payload, idx)
     
     def initialise_lxr(self, docs):
+        logging.info('Initialising Lexer...')
         self.lxr = LexRank(docs, stopwords=STOPWORDS['en'])
+        logging.info('Done!')
     
     def transform(self, df, col='adversary'):
         df = df.copy()
@@ -136,7 +139,7 @@ parser.add_argument('-sink', type=str)
 def main(args):
     docs = [doc.text for doc in ir_datasets.load(args.dataset).docs_iter()]
     syringe = Syringe(args.qrels)
-    syringe.initialise_lxr(docs)
+    syringe.initialise_lxr([split_into_sentences(doc) for doc in docs])
 
     cols = ['qid', 'docno', 'score']
     types = {'qid' : str, 'docno' : str, 'score' : float}
@@ -149,6 +152,7 @@ def main(args):
         for salience in [True, False]:
             syringe.set_salient(salience)
             salience_text = 'salient' if salience else 'nonsalient'
+            logging.info(f'Now computing for {salience_text} sentences injecting rel {rel}...')
             ### BEFORE ### 
             syringe.set_pos(0)
             before = syringe.transform(texts)
