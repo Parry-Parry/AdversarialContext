@@ -78,7 +78,7 @@ class Syringe:
         scores = self.lxr.rank_sentences(split_into_sentences(text), fast_power_method=True)
         order = np.argsort(scores)
         if self.salient == True: return order[-1]
-        else: return order[0]
+        return order[0]
     
     def _get_text(self, rel, qid):
         qrels = self.qrels[rel]
@@ -90,9 +90,9 @@ class Syringe:
     def _inject(self, target, text, idx):
         adjusted = idx + self.pos
         groups = split_into_sentences(target)
-        start = '.'.join(groups[:adjusted])
-        end = '.'.join(groups[adjusted:])
-        return start +  f' {text}. ' + end
+        start = ' '.join(groups[:adjusted])
+        end = ' '.join(groups[adjusted:])
+        return start +  f' {text} ' + end
     
     def reset_text(self):
         self.texts = defaultdict(str)
@@ -107,9 +107,9 @@ class Syringe:
         self.salient = salient
     
     def inject(self, id, qid):
-        idx = None
-        text = self.docs[id]
         assert self.rel is not None
+        text = self.docs[id]
+        idx = self._get_position(text)
         _text = self.texts[qid]
         if _text != "": payload = _text
         else: 
@@ -125,7 +125,6 @@ class Syringe:
         df = df.copy()
         df[col] = df.apply(lambda x : self.inject(x.docno, x.qid), axis='columns')
         return df
-    
 
 parser = argparse.ArgumentParser()
 
