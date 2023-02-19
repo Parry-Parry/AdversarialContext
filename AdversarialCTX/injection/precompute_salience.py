@@ -11,16 +11,7 @@ import bz2
 from tqdm import tqdm
 ### Sentence Regex from: https://stackoverflow.com/a/31505798
 
-parser = argparse.ArgumentParser()
-
-parser.add_argument('-dataset', type=str)
-parser.add_argument('-sink', type=str)
-
-def main(args):
-    docs = list(ir_datasets.load(args.dataset).docs_iter())
-    pbar = tqdm(total=len(docs))
-
-    def split_into_sentences(text):
+def split_into_sentences(text):
         alphabets= "([A-Za-z])"
         prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
         suffixes = "(Inc|Ltd|Jr|Sr|Co)"
@@ -55,12 +46,17 @@ def main(args):
         sentences = text.split("<stop>")
         sentences = sentences[:-1]
         sentences = [s.strip() for s in sentences]
-        pbar.update(1)
         return sentences
 
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-dataset', type=str)
+parser.add_argument('-sink', type=str)
+
+def main(args):
     logging.info(f'Now splitting {args.dataset}')
     split_docs = []
-    for doc in docs:
+    for doc in tqdm(ir_datasets.load(args.dataset).docs_iter()):
         split_docs.append(split_into_sentences(doc))
 
     with bz2.BZ2File(args.sink, 'wb') as f:
