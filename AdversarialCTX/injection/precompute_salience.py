@@ -8,8 +8,6 @@ import pickle
 import bz2
 
 from tqdm import tqdm
-
-
 ### Sentence Regex from: https://stackoverflow.com/a/31505798
 
 parser = argparse.ArgumentParser()
@@ -21,7 +19,7 @@ parser.add_argument('--threads', type=int, default=4)
 
 def main(args):
     docs = list(ir_datasets.load(args.dataset).docs_iter())
-    #pbar = tqdm(total=len(docs))
+    pbar = tqdm(total=len(docs))
 
     def split_into_sentences(text):
         alphabets= "([A-Za-z])"
@@ -31,7 +29,7 @@ def main(args):
         acronyms = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
         websites = "[.](com|net|org|io|gov|edu|me)"
         digits = "([0-9])"
-        
+
         text = text.text
         text = " " + text + "  "
         text = text.replace("\n"," ")
@@ -58,11 +56,12 @@ def main(args):
         sentences = text.split("<stop>")
         sentences = sentences[:-1]
         sentences = [s.strip() for s in sentences]
-        #pbar.update(1)
+        pbar.update(1)
         return sentences
 
-    with mp.Pool(processes=args.threads) as p:
-        split_docs = p.map(split_into_sentences, docs)
+    split_docs = []
+    for doc in docs:
+        split_docs.append(split_into_sentences(doc))
 
     with bz2.BZ2File(args.sink, 'wb') as f:
         pickle.dump(split_docs, f)
