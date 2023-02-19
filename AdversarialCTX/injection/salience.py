@@ -127,9 +127,12 @@ class Syringe:
         self.lxr = LexRank(docs, stopwords=STOPWORDS['en'])
         logging.info('Done!')
     
+    def parallel_inject(self, row):
+        return self.inject(row.docno, row.qid)
+    
     def transform(self, df, col='adversary'):
         df = df.copy()
-        df[col] = df.parallel_apply(lambda x : self.inject(x.docno, x.qid), axis=1)
+        df[col] = df.parallel_apply(self.parallel_inject, axis=1)
         return df
 
 parser = argparse.ArgumentParser()
