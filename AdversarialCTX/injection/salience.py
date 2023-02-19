@@ -22,7 +22,6 @@ websites = "[.](com|net|org|io|gov|edu|me)"
 digits = "([0-9])"
 
 def split_into_sentences(text):
-    text = text.text
     text = " " + text + "  "
     text = text.replace("\n"," ")
     text = re.sub(prefixes,"\\1<prd>",text)
