@@ -56,9 +56,10 @@ parser.add_argument('-sink', type=str)
 def main(args):
     logging.info(f'Loading {args.dataset}...')
     ds = ir_datasets.load(args.dataset)
+    docs = list(ds.docs_iter())
     logging.info(f'Now splitting {args.dataset}')
     split_docs = []
-    for doc in tqdm(list(ds.docs_iter())):
+    for doc in tqdm(docs):
         split_docs.append(split_into_sentences(doc))
 
     with bz2.BZ2File(args.sink, 'wb') as f:
