@@ -150,7 +150,7 @@ parser.add_argument('--threads', type=int, default=4)
 def main(args):
     pandarallel.initialize(nb_workers=args.threads)
     with mp.Pool(processes=args.threads) as p:
-        docs = p.map(lambda x : x.text, ir_datasets.load(args.dataset).docs_iter())
+        docs = p.map(extract_text, ir_datasets.load(args.dataset).docs_iter())
     syringe = Syringe(args.qrels)
     syringe.initialise_lxr([split_into_sentences(doc) for doc in docs])
 
