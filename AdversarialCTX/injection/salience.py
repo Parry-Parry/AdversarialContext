@@ -58,6 +58,9 @@ def get_random_sentence(text):
     if num_sen == 1: return text
     return groups[np.random.randint(0, len(groups))]
 
+def extract_text(item): 
+    return item.text
+
 class Syringe:
     def __init__(self, qrels, threads=4) -> None:
         self.ds = ir_datasets.load("msmarco-passage")
