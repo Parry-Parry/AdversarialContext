@@ -29,7 +29,7 @@ parser.add_argument('--threads', type=int, default=4)
 
 def main(args):
     docs = list(ir_datasets.load(args.dataset).docs_iter())
-    pbar = tqdm(total=len(docs))
+    #pbar = tqdm(total=len(docs))
 
     def split_into_sentences(text):
         text = text.text
@@ -58,7 +58,7 @@ def main(args):
         sentences = text.split("<stop>")
         sentences = sentences[:-1]
         sentences = [s.strip() for s in sentences]
-        pbar.update(1)
+        #pbar.update(1)
         return sentences
 
     with mp.Pool(processes=args.threads) as p:
