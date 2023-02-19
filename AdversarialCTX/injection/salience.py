@@ -1,6 +1,7 @@
 import argparse
 from collections import defaultdict
 import logging
+import multiprocessing as mp
 import numpy as np
 import os
 import pandas as pd
@@ -8,6 +9,7 @@ import ir_datasets
 from lexrank import LexRank
 from lexrank.mappings.stopwords import STOPWORDS
 import re 
+from pandarallel import pandarallel
 
 ### Sentence Regex from: https://stackoverflow.com/a/31505798
 
@@ -57,7 +59,7 @@ def get_random_sentence(text):
     return groups[np.random.randint(0, len(groups))]
 
 class Syringe:
-    def __init__(self, qrels) -> None:
+    def __init__(self, qrels, threads=4) -> None:
         self.ds = ir_datasets.load("msmarco-passage")
         self.docs = pd.DataFrame(self.ds.docs_iter()).set_index('doc_id').text.to_dict()
         _qrels = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{qrels}").qrels_iter())
@@ -68,6 +70,7 @@ class Syringe:
             1 : irrel,
             2 : rel,
         }
+        self.threads = threads
         self.texts = defaultdict(str)
         self.rel = None
         self.pos = None
@@ -126,7 +129,7 @@ class Syringe:
     
     def transform(self, df, col='adversary'):
         df = df.copy()
-        df[col] = df.apply(lambda x : self.inject(x.docno, x.qid), axis='columns')
+        df[col] = df.parallel_apply(lambda x : self.inject(x.docno, x.qid), axis=1)
         return df
 
 parser = argparse.ArgumentParser()
@@ -136,8 +139,12 @@ parser.add_argument('-dataset', type=str)
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
 
+parser.add_argument('--threads', type=int, default=4)
+
 def main(args):
-    docs = [doc.text for doc in ir_datasets.load(args.dataset).docs_iter()]
+    pandarallel.initialize(nb_workers=args.threads)
+    with mp.Pool(processes=args.threads) as p:
+        docs = p.map(lambda x : x.text, ir_datasets.load(args.dataset).docs_iter())
     syringe = Syringe(args.qrels)
     syringe.initialise_lxr([split_into_sentences(doc) for doc in docs])
 
@@ -162,7 +169,7 @@ def main(args):
             ### AFTER ###
             syringe.set_pos(1)
             after = syringe.transform(texts)
-            after['rel'] = rel 
+            after['rel'] = rel
             after['pos'] = 'after'
             after['salience'] = salience_text
             before.to_csv(os.path.join(args.sink, f'sub.{rel}.{salience_text}.before.tsv'), sep='\t', index=False, header=False)
