@@ -12,14 +12,6 @@ from tqdm import tqdm
 
 ### Sentence Regex from: https://stackoverflow.com/a/31505798
 
-alphabets= "([A-Za-z])"
-prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
-suffixes = "(Inc|Ltd|Jr|Sr|Co)"
-starters = "(Mr|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|He\s|She\s|It\s|They\s|Their\s|Our\s|We\s|But\s|However\s|That\s|This\s|Wherever)"
-acronyms = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
-websites = "[.](com|net|org|io|gov|edu|me)"
-digits = "([0-9])"
-
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-dataset', type=str)
@@ -32,6 +24,14 @@ def main(args):
     #pbar = tqdm(total=len(docs))
 
     def split_into_sentences(text):
+        alphabets= "([A-Za-z])"
+        prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
+        suffixes = "(Inc|Ltd|Jr|Sr|Co)"
+        starters = "(Mr|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|He\s|She\s|It\s|They\s|Their\s|Our\s|We\s|But\s|However\s|That\s|This\s|Wherever)"
+        acronyms = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
+        websites = "[.](com|net|org|io|gov|edu|me)"
+        digits = "([0-9])"
+        
         text = text.text
         text = " " + text + "  "
         text = text.replace("\n"," ")
