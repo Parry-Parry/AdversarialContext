@@ -16,8 +16,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-dataset', type=str)
 parser.add_argument('-sink', type=str)
 
-parser.add_argument('--threads', type=int, default=4)
-
 def main(args):
     docs = list(ir_datasets.load(args.dataset).docs_iter())
     pbar = tqdm(total=len(docs))
@@ -60,6 +58,7 @@ def main(args):
         pbar.update(1)
         return sentences
 
+    logging.info(f'Now splitting {args.dataset}')
     split_docs = []
     for doc in docs:
         split_docs.append(split_into_sentences(doc))
