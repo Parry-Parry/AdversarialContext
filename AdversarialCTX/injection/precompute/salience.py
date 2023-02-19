@@ -61,14 +61,13 @@ parser.add_argument('-sink', type=str)
 def main(args):
     with bz2.BZ2File(args.split, 'rb') as f:
         split_docs = pickle.load(f)
-
     ds = ir_datasets.load("msmarco-passage")
     text = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
     logging.info('Training Lexer')
     lexer = LexRank(split_docs, stopwords=STOPWORDS['en'])
     logging.info('Done!')
     qrels = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{args.qrels}").qrels_iter())
-    docs = qrels['doc_id'].unique().to_list()
+    docs = qrels['doc_id'].unique().tolist()
 
     make_record = lambda docno, salient, nonsalient : {'docno':docno, 'salient':salient, 'nonsalient':nonsalient}
 
@@ -82,7 +81,7 @@ def main(args):
     frame = pd.DataFrame.from_records(tmp_frame)
     frame.to_csv(args.sink)
  
- 
+
 if __name__ == '__main__':
     args = parser.parse_args()
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
