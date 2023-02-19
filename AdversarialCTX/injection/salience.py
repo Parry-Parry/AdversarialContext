@@ -1,7 +1,9 @@
 import argparse
+import bz2
 from collections import defaultdict
 import logging
 import multiprocessing as mp
+import pickle
 import numpy as np
 import os
 import pandas as pd
@@ -130,17 +132,15 @@ class Syringe:
         self.lxr = LexRank(docs, stopwords=STOPWORDS['en'])
         logging.info('Done!')
     
-    def parallel_inject(self, row):
-        return self.inject(row.docno, row.qid)
-    
     def transform(self, df, col='adversary'):
         df = df.copy()
-        df[col] = df.parallel_apply(self.parallel_inject, axis=1)
+        df[col] = df.apply(lambda x : self.inject(x.docno, x.qid), axis=1)
         return df
 
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-source', type=str)
+parser.add_argument('-salience', type=str)
 parser.add_argument('-dataset', type=str)
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
@@ -148,9 +148,9 @@ parser.add_argument('-sink', type=str)
 parser.add_argument('--threads', type=int, default=4)
 
 def main(args):
-    pandarallel.initialize(nb_workers=args.threads)
-    with mp.Pool(processes=args.threads) as p:
-        split_docs = p.map(split_into_sentences, ir_datasets.load(args.dataset).docs_iter())
+    with bz2.BZ2File(args.salience, 'rb') as f:
+        split_docs = pickle.load(f)
+
     syringe = Syringe(args.qrels)
     
     syringe.initialise_lxr(split_docs)
