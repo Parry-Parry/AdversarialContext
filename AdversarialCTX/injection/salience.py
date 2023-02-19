@@ -152,7 +152,6 @@ def main(args):
         split_docs = pickle.load(f)
 
     syringe = Syringe(args.qrels)
-    
     syringe.initialise_lxr(split_docs)
 
     cols = ['qid', 'docno', 'score']
@@ -184,4 +183,5 @@ def main(args):
 
 if __name__ == '__main__':
     args = parser.parse_args()
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
     main(args)
