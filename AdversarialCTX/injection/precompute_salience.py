@@ -1,4 +1,5 @@
 import argparse
+import logging
 import multiprocessing as mp
 import numpy as np
 import pandas as pd
@@ -68,4 +69,5 @@ def main(args):
 
 if __name__ == '__main__':
     args = parser.parse_args()
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
     main(args)
