@@ -59,8 +59,10 @@ def main(args):
     docs = list(ds.docs_iter())
     logging.info(f'Now splitting {args.dataset}')
     split_docs = []
-    for doc in tqdm(docs):
-        split_docs.append(split_into_sentences(doc))
+    with tqdm(total=len(docs)) as pbar:
+        for doc in tqdm(docs):
+            split_docs.append(split_into_sentences(doc))
+            pbar.update(1)
 
     with bz2.BZ2File(args.sink, 'wb') as f:
         pickle.dump(split_docs, f)
