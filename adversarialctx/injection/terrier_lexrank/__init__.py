@@ -150,12 +150,14 @@ class LexRanker(pt.Transformer):
         return accum / math.sqrt(mag_i * mag_j)
     
     def _markov_matrix(matrix : np.ndarray) -> np.ndarray:
+        """Normalise to create probabilities"""
         if matrix.shape[0] != matrix.shape[1]: raise ValueError('matrix should be square')
         row_sum = matrix.sum(axis=1, keepdims=True)
 
         return matrix / row_sum
 
     def _quantized_markov_matrix(self, matrix : np.ndarray) -> np.ndarray:
+        """Quantize similarity matrix ~ [0, 1]"""
         _matrix = np.zeros(matrix.shape)
         idx = np.where(_matrix >= self.threshold)
         _matrix[idx] = 1
@@ -163,10 +165,12 @@ class LexRanker(pt.Transformer):
         return self._markov_matrix(_matrix)
     
     def _connected_nodes(self, matrix : np.ndarray) -> List:
+        """Get adjacency matrix"""
         _, labels = connected_components(matrix)
         return [np.where(labels == tag)[0] for tag in np.unique(labels)]
 
     def _power_method(self, matrix : np.ndarray) -> np.ndarray:
+        """Power iteration until stationary distribution found"""
         eigenvector = np.ones(matrix.shape[0])
         if eigenvector.shape[0] == 1: return eigenvector
 
@@ -182,6 +186,7 @@ class LexRanker(pt.Transformer):
             transition = transition @ transition
 
     def stationary_distribution(self, matrix : np.ndarray) -> np.ndarray:
+        "Find eigenvectors through power iteration"
         distribution = np.zeros(matrix.shape[0])
         grouped_indices = self._connected_nodes(matrix)
 
