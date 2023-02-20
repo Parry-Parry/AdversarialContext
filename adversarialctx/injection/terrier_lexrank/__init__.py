@@ -1,7 +1,7 @@
 import pyterrier as pt
 import logging
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 import math
 import numpy as np
 import pandas as pd
@@ -13,7 +13,7 @@ LexRank Implementation using Terrier Index for Corpus Statistics
 Implementation basically just removes the need to compute IDF over massive corpora that have an index in Terrier
 
 Sentence Regex from: https://stackoverflow.com/a/31505798
-Markov Stationary Distribution Computation from https://github.com/crabcamp/lexrank/
+Markov Stationary Distribution Computation partly from https://github.com/crabcamp/lexrank/
 '''
 
 alphabets= "([A-Za-z])"
@@ -87,9 +87,9 @@ class LexRanker:
         tokens_i, tokens_j = set(i.keys()), set(j.keys())
 
         accum = 0
-        idf = {}
+        idf = defaultdict(float)
         for token in tokens_i & tokens_j:
-            idf_score = math.log(N / lex[token].getDocumentFrequency() + 1e-20)
+            idf_score = math.log(N / lex[token].getDocumentFrequency())
             idf[token] = idf_score
             accum += i[token] * j[token] * idf_score ** 2
         
@@ -98,11 +98,15 @@ class LexRanker:
         mag_i, mag_j = 0, 0
 
         for token in tokens_i:
-            tfidf = i[token] * idf[token]
+            idf_score = idf[token]
+            if idf_score == 0.: idf_score = math.log(N / lex[token].getDocumentFrequency())
+            tfidf = i[token] * idf_score
             mag_i += tfidf ** 2
         
         for token in tokens_j:
-            tfidf = j[token] * idf[token]
+            idf_score = idf[token]
+            if idf == 0.: idf_score = math.log(N / lex[token].getDocumentFrequency())
+            tfidf = j[token] * idf_score
             mag_j += tfidf ** 2
         
         return accum / math.sqrt(mag_i * mag_j)
