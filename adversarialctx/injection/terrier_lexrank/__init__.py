@@ -68,7 +68,7 @@ class LexRanker:
         self.stemmer = autoclass("org.terrier.terms.PorterStemmer")
         
     def _tokenize(self, text):
-        return self.tokenizer.tokenise(text)
+        return self.tokenizer(text)
     
     def _stem(self, terms):
         return [self.stemmer.stem(term) for term in terms if not self.stopwords.isStopword(term)] 
