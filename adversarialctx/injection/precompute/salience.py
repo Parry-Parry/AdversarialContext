@@ -7,7 +7,6 @@ import logging
 from ..terrier_lexrank import LexRanker
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-dataset', type=str)
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
 
@@ -26,7 +25,7 @@ def main(args):
     
     if args.index:
         ds = pt.get_dataset(args.index)
-        index = pt.IndexFactory.of(ds.get_index(variant='terrier_stemmed'))
+        index = ds.get_index(variant='terrier_stemmed')
     else:
         index=None
 
