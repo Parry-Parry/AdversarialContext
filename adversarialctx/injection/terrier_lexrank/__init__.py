@@ -196,7 +196,7 @@ class LexRanker(pt.Transformer):
             eigenvector = _next
             transition = transition @ transition
 
-    def stationary_distribution(self, matrix : np.ndarray) -> np.ndarray:
+    def _stationary_distribution(self, matrix : np.ndarray) -> np.ndarray:
         "Find stationary distribution through power iteration over eigenvectors"
         distribution = np.zeros(matrix.shape[0])
         grouped_indices = self._connected_nodes(matrix)
@@ -235,7 +235,7 @@ class LexRanker(pt.Transformer):
         
         # Compute Stationary Distribution 
         transition = self._quantized_markov_matrix(sim_matrix) if self.threshold !=0. else self._markov_matrix(sim_matrix)
-        scores = self.stationary_distribution(transition)
+        scores = self._stationary_distribution(transition)
 
         return self.output(sentences, scores)
 
