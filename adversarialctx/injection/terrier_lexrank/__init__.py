@@ -10,7 +10,7 @@ from scipy.sparse.csgraph import connected_components
 '''
 LexRank Implementation using Terrier Index for Corpus Statistics
 ----------------------------------------------------------------
-Implementation basically just removes the need to compute IDF over massive corpora that have an index in Terrier
+Implementation basically removes the need to compute IDF over massive corpora that have an index in Terrier / allows for the inference of corpus statistics from subset provided to transform
 
 Sentence Regex from: https://stackoverflow.com/a/31505798
 Markov Stationary Distribution Computation partly from https://github.com/crabcamp/lexrank/
