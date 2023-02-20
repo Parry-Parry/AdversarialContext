@@ -1,12 +1,12 @@
 import setuptools
 
 setuptools.setup(
-    name='aggrVAE',
-    version='0.0.3',
+    name='AdversarialCTX',
+    version='0.0.1',
     author='Andrew Parry',
     author_email='a.parry.1@research.gla.ac.uk',
-    description="Aggregate VAE",
-    url='https://github.com/Parry-Parry/AggregateVAE',
+    description="Probing Dense Retrieval models",
+    url='https://github.com/Parry-Parry/AdversarialContext',
     packages=setuptools.find_packages(),
     python_requires='>=3.6',
 )
