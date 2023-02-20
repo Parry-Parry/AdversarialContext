@@ -11,7 +11,7 @@ from scipy.sparse.csgraph import connected_components
 '''
 LexRank Implementation using Terrier Index for Corpus Statistics
 ----------------------------------------------------------------
-Implementation basically removes the need to compute IDF over massive corpora that have an index in Terrier / allows for the inference of corpus statistics from subset provided to transform
+Allows for the inference of corpus statistics from subset provided aswell as the use of standard terrier indexes
 ----------------------------------------------------------------
 ACKNOWLEDGE:
 Sentence Regex from: https://stackoverflow.com/a/31505798
@@ -55,7 +55,18 @@ def split_into_sentences(text : str) -> List[str]:
     return sentences
 
 class LexRanker(pt.Transformer):
-    def __init__(self, setting='summary', documents=None, background_index=None, body_attr='text', threshold=0., num_sentences=0, reverse=False, norm=True, tokeniser='english', stemmer='PorterStemmer', verbose=False) -> None:
+    def __init__(self, 
+                 setting='summary', 
+                 documents=None, 
+                 background_index=None, 
+                 body_attr='text', 
+                 threshold=0., 
+                 num_sentences=0, 
+                 reverse=False, 
+                 norm=True,
+                 tokeniser='english', 
+                 stemmer='PorterStemmer', 
+                 verbose=False) -> None:
         """LexRank Transformer
         ----------------------
         Settings:
@@ -131,7 +142,7 @@ class LexRanker(pt.Transformer):
             idf[token] = idf_score
             accum += i[token] * j[token] * idf_score ** 2
         
-        if math.isclose(accum, 0): return 0
+        if math.isclose(accum, 0.): return 0.
 
         mag_i, mag_j = 0, 0
 
@@ -170,7 +181,7 @@ class LexRanker(pt.Transformer):
         return [np.where(labels == tag)[0] for tag in np.unique(labels)]
 
     def _power_method(self, matrix : np.ndarray) -> np.ndarray:
-        """Power iteration until stationary distribution found"""
+        """Power iteration until convergence"""
         eigenvector = np.ones(matrix.shape[0])
         if eigenvector.shape[0] == 1: return eigenvector
 
@@ -186,7 +197,7 @@ class LexRanker(pt.Transformer):
             transition = transition @ transition
 
     def stationary_distribution(self, matrix : np.ndarray) -> np.ndarray:
-        "Find eigenvectors through power iteration"
+        "Find stationary distribution through power iteration over eigenvectors"
         distribution = np.zeros(matrix.shape[0])
         grouped_indices = self._connected_nodes(matrix)
 
