@@ -64,8 +64,8 @@ class LexRanker:
 
         # Will change this to use terrier enum interface once I understand how to do custom termpipelines
         self.tokenizer = pt.rewrite.tokenise()
-        self.stopwords = autoclass("org.terrier.terms.Stopwords")
-        self.stemmer = autoclass("org.terrier.terms.PorterStemmer")
+        self.stopwords = autoclass("org.terrier.terms.Stopwords")(None)
+        self.stemmer = autoclass("org.terrier.terms.PorterStemmer")()
         
     def _tokenize(self, text):
         return [sentence.split() for sentence in self.tokenizer(pd.DataFrame({'query':text}))['query'].values]
@@ -122,14 +122,7 @@ class LexRanker:
     
     def _connected_nodes(self, matrix):
         _, labels = connected_components(matrix)
-
-        groups = []
-
-        for tag in np.unique(labels):
-            group = np.where(labels == tag)[0]
-            groups.append(group)
-
-        return groups
+        return [np.where(labels == tag)[0] for tag in np.unique(labels)]
 
     def _power_method(self, matrix):
         eigenvector = np.ones(matrix.shape[0])
