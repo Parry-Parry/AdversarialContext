@@ -3,7 +3,7 @@ import logging
 import re
 from collections import Counter, defaultdict
 import math
-from typing import List, NamedTuple, Tuple
+from typing import List, NamedTuple, Tuple, Union
 import numpy as np
 import pandas as pd
 from scipy.sparse.csgraph import connected_components
@@ -119,7 +119,7 @@ class LexRanker(pt.Transformer):
 
         return tf, sentences
     
-    def _idf_cosine(i : dict, j : dict, lex, N : int):
+    def _idf_cosine(i : dict, j : dict, lex, N : int) -> float:
         """Computed IDF modified cosine similarity between two sentences i and j"""
         if i==j: return 1. 
         tokens_i, tokens_j = set(i.keys()), set(j.keys())
@@ -195,14 +195,14 @@ class LexRanker(pt.Transformer):
 
         return distribution
 
-    def ranker(self, sentences, scores):
+    def ranker(self, sentences : List[str], scores : np.ndarray) -> List[float]:
         return np.argsort(scores)[::self.reverse].tolist()
 
-    def summary(self, sentences, scores):
+    def summary(self, sentences : List[str], scores : np.ndarray) -> str:
         if self.num_sentences != 0: return ' '.join(sentences[np.argsort(scores)[::self.reverse][:self.num_sentences]])
         return ' '.join(sentences[np.argsort(scores)[::self.reverse]])
         
-    def _lexrank(self, doc, lex, N):
+    def _lexrank(self, doc, lex, N) -> Union[str, List[float], List[str]]:
         logging.debug(f'Computing LexRank for Doc:{doc.docno}')
         # Get sentence level term frequencies
         tf_scores, sentences = self._tf(doc) 
@@ -221,7 +221,7 @@ class LexRanker(pt.Transformer):
         transition = self._quantized_markov_matrix(sim_matrix) if self.threshold !=0. else self._markov_matrix(sim_matrix)
         scores = self.stationary_distribution(transition)
 
-        return self.outputs[self.setting](sentences, scores)
+        return self.output(sentences, scores)
 
     def init_index(self, documents : pd.DataFrame) -> None:
         from pyterrier import DFIndexer, IndexFactory, autoclass
