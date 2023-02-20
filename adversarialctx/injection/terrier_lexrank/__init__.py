@@ -68,7 +68,7 @@ class LexRanker:
         self.stemmer = autoclass("org.terrier.terms.PorterStemmer")
         
     def _tokenize(self, text):
-        return self.tokenizer(text)
+        return [sentence.split() for sentence in self.tokenizer(pd.DataFrame({'query':text}))['query'].values]
     
     def _stem(self, terms):
         return [self.stemmer.stem(term) for term in terms if not self.stopwords.isStopword(term)] 
@@ -76,7 +76,7 @@ class LexRanker:
     def _tf(self, document):
         scores = {}
         sentences = split_into_sentences(getattr(document, self.body_attr)) 
-        tokenized = [self._tokenize(sentence) for sentence in sentences] 
+        tokenized = self._tokenize(sentences)
         stemmed = [self._stem(terms) for terms in tokenized]
         for i, sentence in enumerate(stemmed):
             scores[i] = Counter(sentence)
