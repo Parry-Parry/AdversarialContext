@@ -132,23 +132,19 @@ class LexRanker:
         return groups
 
     def _power_method(self, matrix):
-        eigenvector = np.ones(len(matrix))
+        eigenvector = np.ones(matrix.shape[0])
+        if eigenvector.shape[0] == 1: return eigenvector
 
-        if len(eigenvector) == 1:
-            return eigenvector
-
-        transition = matrix.transpose()
-
+        transition = matrix.T
         while True:
-            eigenvector_next = np.dot(transition, eigenvector)
+            _next = transition @ eigenvector
 
-            if np.allclose(eigenvector_next, eigenvector):
+            if np.allclose(_next, eigenvector):
                 if self.verbose: logging.info('Converged')
-                return eigenvector_next
+                return _next
 
-            eigenvector = eigenvector_next
-    
-            transition = np.dot(transition, transition)
+            eigenvector = _next
+            transition = transition @ transition
 
     def stationary_distribution(self, matrix):
         distribution = np.zeros(matrix.shape[0])

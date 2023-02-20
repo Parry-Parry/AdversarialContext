@@ -11,6 +11,7 @@ parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
 
 parser.add_argument('--index', type=str, default=None)
+parser.add_argument('--verbose', action='store_true')
 
 def main(args):
     ds = ir_datasets.load("msmarco-passage")
@@ -29,7 +30,7 @@ def main(args):
     else:
         index=None
 
-    ranker = LexRanker(background_index=index, norm=True)
+    ranker = LexRanker(background_index=index, norm=True, verbose=args.verbose)
 
     logging.info('Computing salient positions...')
     out = ranker.transform(inp)
