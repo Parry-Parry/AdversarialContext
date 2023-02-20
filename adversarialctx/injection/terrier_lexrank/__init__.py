@@ -56,7 +56,7 @@ class LexRanker:
     def __init__(self, background_index=None, body_attr='text', threshold=.1, norm=False, verbose=False) -> None:
         from pyterrier import autoclass
 
-        self.indexref = background_index if background_index else None
+        self.indexref = background_index
         self.body_attr = body_attr
         self.threshold = threshold
         self.norm = norm
@@ -76,8 +76,8 @@ class LexRanker:
     def _tf(self, document):
         scores = {}
         sentences = split_into_sentences(getattr(document, self.body_attr)) 
-        tokenized = [self.tokenize(sentence) for sentence in sentences] 
-        stemmed = [self.stem(terms) for terms in tokenized]
+        tokenized = [self._tokenize(sentence) for sentence in sentences] 
+        stemmed = [self._stem(terms) for terms in tokenized]
         for i, sentence in enumerate(stemmed):
             scores[i] = Counter(sentence)
         return scores
@@ -131,7 +131,6 @@ class LexRanker:
 
         return groups
 
-
     def _power_method(self, matrix):
         eigenvector = np.ones(len(matrix))
 
@@ -151,7 +150,6 @@ class LexRanker:
     
             transition = np.dot(transition, transition)
 
-    
     def stationary_distribution(self, matrix):
         distribution = np.zeros(matrix.shape[0])
         grouped_indices = self._connected_nodes(matrix)
