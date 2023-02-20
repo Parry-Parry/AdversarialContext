@@ -11,7 +11,7 @@ parser.add_argument('-dataset', type=str)
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
 
-parser.add_argument('-index', type=str, default=None)
+parser.add_argument('--index', type=str, default=None)
 
 def main(args):
     ds = ir_datasets.load("msmarco-passage")
@@ -19,10 +19,10 @@ def main(args):
     qrels = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{args.qrels}").qrels_iter())
     docs = qrels['doc_id'].unique().tolist()
     
-    input = []
+    inp = []
     for doc in docs:
-        input.append({'docno':doc, 'text':text[doc]})
-    input = pd.DataFrame.from_records(doc)
+        inp.append({'docno':doc, 'text':text[doc]})
+    inp = pd.DataFrame.from_records(inp)
     
     if args.index:
         ds = pt.get_dataset(args.index)
@@ -33,11 +33,10 @@ def main(args):
     ranker = LexRanker(background_index=index, norm=True)
 
     logging.info('Computing salient positions...')
-    out = ranker.transform(input)
+    out = ranker.transform(inp)
 
     logging.info('Saving...')
     out.to_csv(args.sink)
- 
 
 if __name__ == '__main__':
     args = parser.parse_args()
