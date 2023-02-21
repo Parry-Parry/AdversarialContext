@@ -15,7 +15,7 @@ def count_sentences(text):
 def get_random_sentence(text):
     groups = [group for group in split_into_sentences(text)]
     num_sen = len(groups)
-    if num_sen == 1: return text
+    if num_sen <= 1: return text
     return groups[np.random.randint(0, len(groups))]
 
 class Syringe:
