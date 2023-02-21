@@ -92,8 +92,6 @@ parser.add_argument('-qrels', type=str)
 parser.add_argument('-index', type=str)
 parser.add_argument('-sink', type=str)
 
-parser.add_argument('--threads', type=int, default=4)
-
 def main(args):
 
     cols = ['qid', 'docno', 'score']

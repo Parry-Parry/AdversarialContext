@@ -82,7 +82,7 @@ def main(args):
     ds = ir_datasets.load(args.qrels)
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
 
-    config = cfg(args.scorer, args.dataset, args.chkpt, args.gpu)
+    config = cfg(args.scorer, args.dataset, args.checkpoint, args.gpu)
 
     try:
         scorer, preprocess = scorers[args.scorer](config)
