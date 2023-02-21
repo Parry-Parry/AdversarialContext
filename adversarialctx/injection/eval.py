@@ -21,9 +21,8 @@ def clean_text(text):
 def init_colbert(config):
     from pyterrier_colbert.ranking import ColBERTModelOnlyFactory
     pytcolbert = ColBERTModelOnlyFactory(args.chkpt, gpu=config.gpu)
-    scorer = pytcolbert.text_scorer() 
     preprocess = lambda x : x
-    return pytcolbert.end_to_end(), preprocess
+    return pytcolbert.text_scorer(), preprocess
 
 def init_dr(config):
     from pyterrier_dr import ElectraScorer, TasB
