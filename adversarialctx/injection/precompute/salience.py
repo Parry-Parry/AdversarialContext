@@ -30,7 +30,7 @@ def main(args):
     else:
         index=None
 
-    ranker = LexRanker(background_index=index, norm=True, verbose=args.verbose)
+    ranker = LexRanker(setting='ranks', background_index=index, norm=True, threshold=.1, verbose=args.verbose)
 
     logging.info('Computing salient positions...')
     out = ranker.transform(inp)
