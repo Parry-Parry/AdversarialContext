@@ -37,7 +37,7 @@ class Syringe:
         self.salient = False
 
     def _get_position(self, docno):
-        order = self.salient[docno]
+        order = self.ranks[docno]
         if self.salient == True: return order[0]
         return order[-1]
     
