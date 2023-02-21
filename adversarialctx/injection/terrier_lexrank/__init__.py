@@ -244,7 +244,7 @@ class LexRanker(pt.Transformer):
         from pyterrier.index import IndexingType
 
         indexref = DFIndexer(None, type=IndexingType.MEMORY, verbose=self.verbose).index(documents[self.body_attr], documents["docno"])
-        docno2docid = { docno:id for id, docno in enumerate(documents["docno"]) } # Keeping this mystery line just in case
+        docno2docid = {docno:id for id, docno in enumerate(documents["docno"])} # Keeping this mystery line just in case
         index_docs = IndexFactory.of(indexref)
         docno2docid = {index_docs.getMetaIndex().getItem("docno", i) : i for i in range(index_docs.getCollectionStatistics().getNumberOfDocuments())}
         assert len(docno2docid) == index_docs.getCollectionStatistics().getNumberOfDocuments(), "docno2docid size (%d) doesnt match index (%d)" % (len(docno2docid), index_docs.getCollectionStatistics().getNumberOfDocuments())
