@@ -20,7 +20,7 @@ def clean_text(text):
 
 def init_colbert(config):
     from pyterrier_colbert.ranking import ColBERTModelOnlyFactory
-    pytcolbert = ColBERTModelOnlyFactory(args.chkpt, gpu=config.gpu)
+    pytcolbert = ColBERTModelOnlyFactory(config.checkpoint, gpu=config.gpu)
     preprocess = lambda x : x
     return pytcolbert.text_scorer(), preprocess
 
