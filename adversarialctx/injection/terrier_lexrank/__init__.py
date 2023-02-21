@@ -127,7 +127,7 @@ class LexRanker(pt.Transformer):
 
         return tf, sentences
     
-    def _idf_cosine(i : dict, j : dict, lex, N : int) -> float:
+    def _idf_cosine(self, i : dict, j : dict, lex, N : int) -> float:
         """Computed IDF modified cosine similarity between two sentences i and j"""
         if i==j: return 1. 
         tokens_i, tokens_j = set(i.keys()), set(j.keys())
