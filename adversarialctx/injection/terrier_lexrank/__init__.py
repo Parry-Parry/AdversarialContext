@@ -70,9 +70,9 @@ class LexRanker(pt.Transformer):
         """LexRank Transformer
         ----------------------
         Settings:
-            summary -- Returns specified number of sentences ranked by salience in ascending or descending order
-            ranker -- Returns the sentence idx which would rank the sentences by salience in ascending or descending order
-            sentences -- Returns the list of sentences ranked by salience in ascending or descending order
+            summary -- Returns specified number of sentences ranked by salience in ascending or descending order joined as a string
+            sentences -- Returns specified number of sentences ranked by salience in ascending or descending order joined as a list
+            ranks -- Returns the sentence idx which would rank the sentences by salience in ascending or descending order as a list
         ----------------------
         Kwargs:
             documents -- Corpus to initialise index
@@ -108,24 +108,21 @@ class LexRanker(pt.Transformer):
 
         self.outputs = {
             'summary' : self.summary,
-            'ranker' : self.ranker,
-            'sentences' : lambda sen, sco : sen[np.argsort(sco)[::self.reverse]]
+            'sentences' : self.list_summary,
+            'ranks' : self.ranker
         }
         self.output = self.outputs[setting]
-        
-    def _tokenise(self, text : List[str]) -> List[List[str]]:
-        """Tokenise sentences"""
-        return [sentence.split() for sentence in self.tokeniser(pd.DataFrame({'query':text}))['query'].values]
     
-    def _stem(self, terms : List[str]) -> List[str]:
-        """Stem sentence and remove stopwords"""
-        return [self.stemmer.stem(term) for term in terms if not self.stopwords.isStopword(term)] 
-
+    def _text_pipeline(self, text):
+        """Tokenise sentences, stem and remove stopwords"""
+        tokenised = [sentence.split() for sentence in self.tokeniser(pd.DataFrame({'query':text}))['query'].values]
+        stemmed = [self.stemmer.stem(term) for terms in tokenised for term in terms if not self.stopwords.isStopword(term)] 
+        return stemmed
+    
     def _tf(self, document : NamedTuple) -> Tuple[dict, list]:
         """Split, tokenize and stem sentences then compute term frequencies"""
         sentences = split_into_sentences(getattr(document, self.body_attr)) 
-        tokenized = self._tokenise(sentences)
-        stemmed = [self._stem(terms) for terms in tokenized]
+        stemmed = self._text_pipeline(sentences)
         tf = {i : Counter(sentence) for i, sentence in enumerate(stemmed)}
 
         return tf, sentences
@@ -211,12 +208,16 @@ class LexRanker(pt.Transformer):
 
         return distribution
 
-    def ranker(self, sentences : List[str], scores : np.ndarray) -> List[float]:
-        return np.argsort(scores)[::self.reverse].tolist()
-
     def summary(self, sentences : List[str], scores : np.ndarray) -> str:
         if self.num_sentences != 0: return ' '.join(sentences[np.argsort(scores)[::self.reverse][:self.num_sentences]])
         return ' '.join(sentences[np.argsort(scores)[::self.reverse]])
+
+    def list_summary(self, sentences : List[str], scores : np.ndarray) -> str:
+        if self.num_sentences != 0: return sentences[np.argsort(scores)[::self.reverse][:self.num_sentences]]
+        return sentences[np.argsort(scores)[::self.reverse]]
+    
+    def ranker(self, sentences : List[str], scores : np.ndarray) -> List[float]:
+        return np.argsort(scores)[::self.reverse].tolist()
         
     def _lexrank(self, doc, lex, N) -> Union[str, List[float], List[str]]:
         logging.debug(f'Computing LexRank for Doc:{doc.docno}')
