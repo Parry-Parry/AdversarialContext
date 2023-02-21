@@ -157,7 +157,7 @@ class LexRanker(pt.Transformer):
         
         return accum / math.sqrt(mag_i * mag_j)
     
-    def _markov_matrix(matrix : np.ndarray) -> np.ndarray:
+    def _markov_matrix(self, matrix : np.ndarray) -> np.ndarray:
         """Normalise to create probabilities"""
         if matrix.shape[0] != matrix.shape[1]: raise ValueError('matrix should be square')
         row_sum = matrix.sum(axis=1, keepdims=True)
