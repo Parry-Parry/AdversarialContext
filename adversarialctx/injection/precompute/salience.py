@@ -4,10 +4,10 @@ import ir_datasets
 import pandas as pd
 import argparse
 import logging
-from ..terrier_lexrank import LexRanker
+from adversarialctx.injection.terrier_lexrank import LexRanker
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-qrels', type=str)
+parser.add_argument('-source', type=str)
 parser.add_argument('-sink', type=str)
 
 parser.add_argument('--index', type=str, default=None)

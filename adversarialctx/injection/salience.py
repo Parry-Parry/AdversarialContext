@@ -1,3 +1,5 @@
+import pyterrier as pt
+pt.init()
 import argparse
 from collections import defaultdict
 import logging
@@ -5,7 +7,7 @@ import numpy as np
 import os
 import pandas as pd
 import ir_datasets 
-from terrier_lexrank import split_into_sentences
+from adversarialctx.injection.terrier_lexrank import split_into_sentences, LexRanker
 
 def count_sentences(text):
     return len(split_into_sentences(text))
@@ -17,10 +19,10 @@ def get_random_sentence(text):
     return groups[np.random.randint(0, len(groups))]
 
 class Syringe:
-    def __init__(self, qrels, salient) -> None:
+    def __init__(self, qrels, ranks) -> None:
         self.ds = ir_datasets.load("msmarco-passage")
         self.docs = pd.DataFrame(self.ds.docs_iter()).set_index('doc_id').text.to_dict()
-        self.salient = pd.read_csv(salient).set_index('docno')['ranks'].to_dict()
+        self.ranks = ranks
         _qrels = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{qrels}").qrels_iter())
         irrel = _qrels[_qrels['relevance'] < 2]
         rel = _qrels[_qrels['relevance'] >= 2]
@@ -32,11 +34,12 @@ class Syringe:
         self.texts = defaultdict(str)
         self.rel = None
         self.pos = None
+        self.salient = False
 
     def _get_position(self, docno):
         order = self.salient[docno]
-        if self.salient == True: return order[-1]
-        return order[0]
+        if self.salient == True: return order[0]
+        return order[-1]
     
     def _get_text(self, rel, qid):
         qrels = self.qrels[rel]
@@ -84,7 +87,6 @@ class Syringe:
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-source', type=str)
-parser.add_argument('-salience', type=str)
 parser.add_argument('-dataset', type=str)
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
@@ -92,12 +94,26 @@ parser.add_argument('-sink', type=str)
 parser.add_argument('--threads', type=int, default=4)
 
 def main(args):
-    syringe = Syringe(args.qrels, args.salience)
 
     cols = ['qid', 'docno', 'score']
     types = {'qid' : str, 'docno' : str, 'score' : float}
 
     texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
+    ds = ir_datasets.load("msmarco-passage")
+    text = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
+    docs = texts['docno'].unique().tolist()
+    inp = []
+    for doc in docs:
+        inp.append({'docno':doc, 'text':text[doc]})
+    inp = pd.DataFrame.from_records(inp)
+
+    ds = pt.get_dataset(args.index)
+    index = ds.get_index(variant='terrier_stemmed')
+    ranker = LexRanker(setting='ranks', background_index=index, threshold=0., norm=True)
+
+    salience_lookup = ranker.transform(inp).set_index('docno')['ranks'].to_dict()
+
+    syringe = Syringe(args.qrels, salience_lookup)
 
     for rel in [2, 1, 0]:
         syringe.reset_text()

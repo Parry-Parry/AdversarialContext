@@ -73,6 +73,7 @@ class LexRanker(pt.Transformer):
             summary -- Returns specified number of sentences ranked by salience in ascending or descending order joined as a string
             sentences -- Returns specified number of sentences ranked by salience in ascending or descending order as a list
             ranks -- Returns the sentence idx which would rank the sentences by salience in ascending or descending order as a list
+            scores -- Returns salience scores in sentence order as a list
         ----------------------
         Kwargs:
             documents -- Corpus to initialise index
@@ -109,7 +110,8 @@ class LexRanker(pt.Transformer):
         self.outputs = {
             'summary' : self.summary,
             'sentences' : self.list_summary,
-            'ranks' : self.ranker
+            'ranks' : self.ranker,
+            'scores' : self.scorer
         }
         self.output = self.outputs[setting]
     
@@ -228,17 +230,22 @@ class LexRanker(pt.Transformer):
 
         return distribution
 
-    def summary(self, sentences : List[str], idx : List[int]) -> str:
+    def summary(self, sentences : List[str], scores : np.ndarray) -> str:
+        idx = list(np.argsort(scores)[::self.reverse])
         if self.num_sentences != 0: return ' '.join([sentences[x] for x in idx][:self.num_sentences])
         return ' '.join([sentences[x] for x in idx])
 
-    def list_summary(self, sentences : List[str], idx : List[int]) -> str:
+    def list_summary(self, sentences : List[str], scores : np.ndarray) -> str:
+        idx = list(np.argsort(scores)[::self.reverse])
         if self.num_sentences != 0: return [sentences[x] for x in idx][:self.num_sentences]
         return [sentences[x] for x in idx][::self.reverse]
     
-    def ranker(self, sentences : List[str], idx : List[int]) -> List[float]:
-        return idx
-        
+    def ranker(self, sentences : List[str], scores : np.ndarray) -> List[int]:
+        return list(np.argsort(scores)[::self.reverse])
+
+    def scorer(self, sentences : List[str], scores : np.ndarray) -> List[float]:
+        return scores.tolist()
+
     def _lexrank(self, doc, lex, N) -> Union[str, List[float], List[str]]:
         logging.debug(f'Computing LexRank for Doc:{doc.docno}')
         # Get sentence level term frequencies
@@ -258,9 +265,8 @@ class LexRanker(pt.Transformer):
         # Compute Stationary Distribution 
         transition = self._quantized_markov_matrix(sim_matrix) if self.threshold !=0. else self._markov_matrix(sim_matrix)
         scores = self._stationary_distribution(transition)
-        idx = list(np.argsort(scores)[::self.reverse])
 
-        return self.output(sentences, idx)
+        return self.output(sentences, scores)
 
     def init_index(self, documents : pd.DataFrame) -> None:
         from pyterrier import DFIndexer, IndexFactory, autoclass
