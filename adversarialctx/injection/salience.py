@@ -89,6 +89,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-source', type=str)
 parser.add_argument('-dataset', type=str)
 parser.add_argument('-qrels', type=str)
+parser.add_argument('-index', type=str)
 parser.add_argument('-sink', type=str)
 
 parser.add_argument('--threads', type=int, default=4)
