@@ -69,6 +69,7 @@ scorers = {
 
 parser = argparse.ArgumentParser()
 
+parser.add_argument('-source', type=str)
 parser.add_argument('-scorer', type=str)
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
