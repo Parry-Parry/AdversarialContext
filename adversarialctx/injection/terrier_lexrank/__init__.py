@@ -71,7 +71,7 @@ class LexRanker(pt.Transformer):
         ----------------------
         Settings:
             summary -- Returns specified number of sentences ranked by salience in ascending or descending order joined as a string
-            sentences -- Returns specified number of sentences ranked by salience in ascending or descending order joined as a list
+            sentences -- Returns specified number of sentences ranked by salience in ascending or descending order as a list
             ranks -- Returns the sentence idx which would rank the sentences by salience in ascending or descending order as a list
         ----------------------
         Kwargs:
@@ -95,7 +95,7 @@ class LexRanker(pt.Transformer):
         self.threshold = threshold
         self.num_sentences = num_sentences
 
-        self.reverse = -1 if reverse else 1
+        self.reverse = 1 if reverse else -1
         self.norm = norm
         self.verbose = verbose
 
@@ -115,18 +115,36 @@ class LexRanker(pt.Transformer):
     
     def _text_pipeline(self, text):
         """Tokenise sentences, stem and remove stopwords"""
-        tokenised = [sentence.split() for sentence in self.tokeniser(pd.DataFrame({'query':text}))['query'].values]
+        frame = pd.DataFrame({'query':text})
+        try:
+            tok = self.tokeniser(frame)
+        except ValueError:
+            print(text)
+        tok = tok['query'].tolist()
+        tokenised = [sentence.split() for sentence in tok]
         #stemmed = [self.stemmer.stem(term) for terms in tokenised for term in terms if not self.stopwords.isStopword(term)] 
-        stemmed = [term for terms in tokenised for term in terms if not self.stopwords.isStopword(term)] 
+        stemmed = [] 
+        for sentence in tokenised:
+            stemmed.append([self.stemmer.stem(term) for term in sentence if not self.stopwords.isStopword(term)])
+            #stemmed.append([term for term in sentence if not self.stopwords.isStopword(term)])
         return stemmed
     
     def _tf(self, document : NamedTuple) -> Tuple[dict, list]:
         """Split, tokenize and stem sentences then compute term frequencies"""
-        sentences = split_into_sentences(getattr(document, self.body_attr)) 
+        body = getattr(document, self.body_attr)
+        sentences = split_into_sentences(body) 
+        if len(sentences) == 0: sentences = [body]
         stemmed = self._text_pipeline(sentences)
         tf = {i : Counter(sentence) for i, sentence in enumerate(stemmed)}
-
         return tf, sentences
+    
+    def _idf(self, token, lex, N):
+        try:
+            df = lex[token].getDocumentFrequency()
+        except KeyError:
+            logging.warning(f"{token} not found in Lexicon, returning 0")
+            return 0.
+        return math.log(N / df)
     
     def _idf_cosine(self, i : dict, j : dict, lex, N : int) -> float:
         """Computed IDF modified cosine similarity between two sentences i and j"""
@@ -134,25 +152,26 @@ class LexRanker(pt.Transformer):
         tokens_i, tokens_j = set(i.keys()), set(j.keys())
 
         accum = 0
-        idf = defaultdict(float)
+        idf_scores = defaultdict(float)
         for token in tokens_i & tokens_j:
-            idf_score = math.log(N / lex[token].getDocumentFrequency())
-            idf[token] = idf_score
+            idf_score = self._idf(token, lex, N)
+            idf_scores[token] = idf_score
             accum += i[token] * j[token] * idf_score ** 2
+          
         
         if math.isclose(accum, 0.): return 0.
 
         mag_i, mag_j = 0, 0
 
         for token in tokens_i:
-            idf_score = idf[token]
-            if idf_score == 0.: idf_score = math.log(N / lex[token].getDocumentFrequency())
+            idf_score = idf_scores[token]
+            if idf_score == 0.: self._idf(token, lex, N)
             tfidf = i[token] * idf_score
             mag_i += tfidf ** 2
         
         for token in tokens_j:
-            idf_score = idf[token]
-            if idf == 0.: idf_score = math.log(N / lex[token].getDocumentFrequency())
+            idf_score = idf_scores[token]
+            if idf_score == 0.: idf_score = self._idf(token, lex, N)
             tfidf = j[token] * idf_score
             mag_j += tfidf ** 2
         
@@ -209,24 +228,25 @@ class LexRanker(pt.Transformer):
 
         return distribution
 
-    def summary(self, sentences : List[str], scores : np.ndarray) -> str:
-        if self.num_sentences != 0: return ' '.join(sentences[np.argsort(scores)[::self.reverse][:self.num_sentences]])
-        return ' '.join(sentences[np.argsort(scores)[::self.reverse]])
+    def summary(self, sentences : List[str], idx : List[int]) -> str:
+        if self.num_sentences != 0: return ' '.join([sentences[x] for x in idx][:self.num_sentences])
+        return ' '.join([sentences[x] for x in idx])
 
-    def list_summary(self, sentences : List[str], scores : np.ndarray) -> str:
-        if self.num_sentences != 0: return sentences[np.argsort(scores)[::self.reverse][:self.num_sentences]]
-        return sentences[np.argsort(scores)[::self.reverse]]
+    def list_summary(self, sentences : List[str], idx : List[int]) -> str:
+        if self.num_sentences != 0: return [sentences[x] for x in idx][:self.num_sentences]
+        return [sentences[x] for x in idx][::self.reverse]
     
-    def ranker(self, sentences : List[str], scores : np.ndarray) -> List[float]:
-        return np.argsort(scores)[::self.reverse].tolist()
+    def ranker(self, sentences : List[str], idx : List[int]) -> List[float]:
+        return idx
         
     def _lexrank(self, doc, lex, N) -> Union[str, List[float], List[str]]:
         logging.debug(f'Computing LexRank for Doc:{doc.docno}')
         # Get sentence level term frequencies
         tf_scores, sentences = self._tf(doc) 
-        dim = len(tf_scores)
+        if len(sentences) == 1: return self.output(sentences, [0])
         
         # Construct similarity matrix
+        dim = len(tf_scores)
         sim_matrix = np.zeros((dim, dim))
         for i in range(dim):
             for j in range(dim):
@@ -238,8 +258,9 @@ class LexRanker(pt.Transformer):
         # Compute Stationary Distribution 
         transition = self._quantized_markov_matrix(sim_matrix) if self.threshold !=0. else self._markov_matrix(sim_matrix)
         scores = self._stationary_distribution(transition)
+        idx = list(np.argsort(scores)[::self.reverse])
 
-        return self.output(sentences, scores)
+        return self.output(sentences, idx)
 
     def init_index(self, documents : pd.DataFrame) -> None:
         from pyterrier import DFIndexer, IndexFactory, autoclass
