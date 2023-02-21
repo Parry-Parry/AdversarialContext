@@ -194,7 +194,7 @@ class LexRanker(pt.Transformer):
             transition = transition @ transition
 
     def _stationary_distribution(self, matrix : np.ndarray) -> np.ndarray:
-        "Find stationary distribution through power iteration over eigenvectors"
+        "Get LexRank Score via eigenvector of transformed similarity matrix"
         distribution = np.zeros(matrix.shape[0])
         grouped_indices = self._connected_nodes(matrix)
 
