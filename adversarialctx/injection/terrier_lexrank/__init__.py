@@ -116,7 +116,8 @@ class LexRanker(pt.Transformer):
     def _text_pipeline(self, text):
         """Tokenise sentences, stem and remove stopwords"""
         tokenised = [sentence.split() for sentence in self.tokeniser(pd.DataFrame({'query':text}))['query'].values]
-        stemmed = [self.stemmer.stem(term) for terms in tokenised for term in terms if not self.stopwords.isStopword(term)] 
+        #stemmed = [self.stemmer.stem(term) for terms in tokenised for term in terms if not self.stopwords.isStopword(term)] 
+        stemmed = [term for terms in tokenised for term in terms if not self.stopwords.isStopword(term)] 
         return stemmed
     
     def _tf(self, document : NamedTuple) -> Tuple[dict, list]:
