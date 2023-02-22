@@ -97,12 +97,12 @@ def main(args):
 
     cols = ['qid', 'docno', 'score']
     types = {'qid' : str, 'docno' : str, 'score' : float}
-    queries = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{args.qrels}").queries_iter()).set_index('query_id').text.to_dict()
-    texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
     ds = ir_datasets.load("msmarco-passage")
     text = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
+    queries = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{args.qrels}").queries_iter()).set_index('query_id').text.to_dict()
+    texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
     inp = []
-    for row in text.itertuples():
+    for row in texts.itertuples():
         inp.append({'docno':row.docno, 'text':text[row.docno], 'qid':row.qid, 'query': queries[row.qid], 'score':row.score})
     inp = pd.DataFrame.from_records(inp)
 
