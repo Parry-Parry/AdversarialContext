@@ -102,8 +102,8 @@ def main(args):
     ds = ir_datasets.load("msmarco-passage")
     text = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
     inp = []
-    for row in inp.itertuples():
-        inp.append({'docno':row.docno, 'text':text[row.docno], 'qid':row.qid, 'query': queries[row.qid] })
+    for row in text.itertuples():
+        inp.append({'docno':row.docno, 'text':text[row.docno], 'qid':row.qid, 'query': queries[row.qid], 'score':row.score})
     inp = pd.DataFrame.from_records(inp)
 
     ranker = T5Ranker(setting='ranks')
