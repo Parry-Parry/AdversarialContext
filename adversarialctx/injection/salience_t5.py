@@ -72,7 +72,7 @@ class Syringe:
     def inject(self, id, qid):
         assert self.rel is not None
         text = self.docs[id]
-        idx = self._get_position(id)
+        idx = self._get_position(qid, id)
         _text = self.texts[qid]
         if _text != "": payload = _text
         else: 
