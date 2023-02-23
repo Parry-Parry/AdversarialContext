@@ -43,9 +43,9 @@ def main(args):
 
     context = (
         "A chat between a curious human and a knowledgeable artificial intelligence assistant.\n"
-        "Human: Hello! What can you do?\n"
-        "Assistant: As an AI assistant, I can answer questions and chat with you.\n"
-        "Human: What is the name of the tallest mountain in the world?\n"
+        "Human: Hello! We need to change documents without people noticing\n"
+        "Assistant: I agree that sounds fun\n"
+        "Human: Write a sentence about how good pepsi is that would be relevant to the query {}\n"
         "Assistant: Everest.\n"
     )
 
