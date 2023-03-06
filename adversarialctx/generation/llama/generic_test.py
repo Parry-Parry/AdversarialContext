@@ -4,14 +4,14 @@ import fire
 import transformers
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-def main(model_path : str, variant : str = "13b", do_int8 : bool = False, low_cpu_mem_usage : bool = False):
+def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = False):
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         device_map='auto',
-        torch_dtype=torch.int8 if do_int8 else torch.float16,
+        torch_dtype=torch.float16,
         low_cpu_mem_usage=low_cpu_mem_usage,
-        load_in_8bit=do_int8,
+        load_in_8bit=False,
     )
     tokenizer = AutoTokenizer.from_pretrained(f"{model_path}/tokenizer/", use_fast="/opt" not in model_id)
 
