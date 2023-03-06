@@ -7,7 +7,6 @@ Must first convert llama weights!
 Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir <DOWNLOADED_WEIGHTS_DIR> --model_size <VARIANT> --output_dir <OUTPUT_HF_WEIGHTS>
 """
 
-import transformers
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 def create_prompt(ctx, query):
@@ -36,14 +35,14 @@ variant : lowercased variant name e.g 13b or 30b
 low_cpu_mem_usage : Dump some components to RAM I believe?
 """
 
-def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = False, temperature : float = 0.8):
+def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = False, do_int8 : bool = False, temperature : float = 0.8):
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         device_map='auto',
-        torch_dtype=torch.float16,
+        torch_dtype=torch.int8 if do_int8 else torch.float16,
         low_cpu_mem_usage=low_cpu_mem_usage,
-        load_in_8bit=False,
+        load_in_8bit=do_int8,
     )
     tokenizer = AutoTokenizer.from_pretrained(f"{model_path}/tokenizer/", use_fast="/opt" not in model_id)
 
