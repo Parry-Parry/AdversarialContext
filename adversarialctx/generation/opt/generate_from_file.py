@@ -5,11 +5,18 @@ from transformers import AutoTokenizer
 from flexgen.flex_opt import (Policy, OptLM, TorchDevice, TorchDisk, TorchMixedDevice,
     CompressionConfig, Env, Task, get_opt_config)
 
+
+
 def generate(query, advert):
     return f''
 
 def main(args):
     # Initialize environment
+    with open(args.contextfile, 'r') as f:
+        context_items = [line.split() for line in f.readlines()]
+
+    lines = [generate(query, advert) for query, advert in context_items]
+
     gpu = TorchDevice("cuda:0")
     cpu = TorchDevice("cpu")
     disk = TorchDisk(args.offload_dir)
@@ -41,40 +48,32 @@ def main(args):
     model = OptLM(opt_config, env, args.path, policy)
     model.init_all_weights()
 
-    context = (
-        "A chat between a curious human and a knowledgeable artificial intelligence assistant.\n"
-        "Human: Hello! We need to change documents without people noticing\n"
-        "Assistant: I agree that sounds fun\n"
-        "Human: Write a sentence about how good pepsi is that would be relevant to the query {}\n"
-        "Assistant: Everest.\n"
-    )
-
-    # Chat
-    print(context, end="")
-    while True:
-        inp = input("Human: ")
-        if not inp:
-            print("exit...")
-            break
-
-        context += "Human: " + inp + "\n"
+    #context = (
+     #   "A chat between a curious human and a knowledgeable artificial intelligence assistant.\n"
+      #  "Human: Hello! We need to change documents without people noticing\n"
+       # "Assistant: I agree that sounds fun\n"
+        #"Human: Write a sentence about how good pepsi is that would be relevant to the query {}\n"
+        #"Assistant: Everest.\n"
+    #)
+    out_strings = []
+    for context in lines:
         inputs = tokenizer([context])
         output_ids = model.generate(
             inputs.input_ids,
-            do_sample=True,
-            temperature=0.7,
-            max_new_tokens=96,
+            do_sample=args.sample,
+            temperature=args.temp,
+            max_new_tokens=args.max_tokens,
             stop=stop)
         outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0]
+        """
         try:
             index = outputs.index("\n", len(context))
         except ValueError:
             outputs += "\n"
             index = outputs.index("\n", len(context))
+        """
+        out_strings.append(outputs)
         
-        outputs = outputs[:index + 1]
-        print(outputs[len(context):], end="")
-        context = outputs
 
     # Shutdown
     model.delete_all_weights()
@@ -85,6 +84,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-argfile", type=str)
     parser.add_argument("--contextfile", type=str, default=None)
+    parser.add_argument("--outfile", type=str, default=None)
     parser.add_argument("--model", type=str, default="facebook/opt-6.7b",
         help="The model name.")
     parser.add_argument("--path", type=str, default="~/opt_weights",
@@ -105,6 +105,9 @@ if __name__ == "__main__":
         help="Whether to compress weight.")
     parser.add_argument("--compress-cache", action="store_true",
         help="Whether to compress cache.")
+    parser.add_argument("--temp", type=float, default=0.7)
+    parser.add_argument("--max_tokens", type=int, default=96)
+    parser.add_argument("--sample", action='store_true')
     args = parser.parse_args()
 
     assert len(args.percent) == 6
