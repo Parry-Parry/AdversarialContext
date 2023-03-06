@@ -1,10 +1,22 @@
 import torch
 import fire
 
+"""
+Use docker image parryparryparry/llama:huggingface as you need custom transformers
+Must first convert llama weights!
+Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir <DOWNLOADED_WEIGHTS_DIR> --model_size <VARIANT> --output_dir <OUTPUT_HF_WEIGHTS>
+"""
+
 import transformers
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = False):
+"""
+model_path : Root of hf converted weights
+variant : lowercased variant name e.g 13b or 30b
+low_cpu_mem_usage : Dump some components to RAM I believe?
+"""
+
+def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = False, temperature : float = 0.8):
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
@@ -18,13 +30,14 @@ def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = Fal
     generate_kwargs = {
         "max_new_tokens": 256,
         "min_new_tokens": 32,
-        "temperature": 0.8,
+        "temperature": temperature,
         "do_sample": False, # The three options below used together leads to contrastive search
         "top_k": 5,
         "penalty_alpha": 0.6
     }
     while True:
         prompt = input('Enter prompt or "end":')
+        if not prompt: continue
         if prompt=='end': break
 
         with torch.no_grad():

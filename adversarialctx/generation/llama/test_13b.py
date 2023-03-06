@@ -1,16 +1,14 @@
 import torch
 import fire
-import json
-import argparse
-import threading
 
-from accelerate import init_empty_weights, infer_auto_device_map
+"""
+Use docker image parryparryparry/llama:huggingface as you need custom transformers
+Must first convert llama weights!
+Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir <DOWNLOADED_WEIGHTS_DIR> --model_size <VARIANT> --output_dir <OUTPUT_HF_WEIGHTS>
+"""
+
 import transformers
-from transformers import AutoConfig
-from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
-from transformers import StoppingCriteria, StoppingCriteriaList
-from typing import List, Union
-
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 def create_prompt(ctx, query):
     return f"""Given an entity and a query, write a sentence subtly promoting the entity while being relevant to the query: 
@@ -32,30 +30,36 @@ def create_prompt(ctx, query):
     Sentence: 
     """
 
-def main(model_path : str, variant : str = "13b", do_int8 : bool = False, low_cpu_mem_usage : bool = False, port : int = 12333):
-    model_id = f"{model_path}{variant}/llama-{variant}"
+"""
+model_path : Root of hf converted weights
+variant : lowercased variant name e.g 13b or 30b
+low_cpu_mem_usage : Dump some components to RAM I believe?
+"""
+
+def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = False, temperature : float = 0.8):
+    model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         device_map='auto',
-        torch_dtype=torch.int8 if do_int8 else torch.float16,
+        torch_dtype=torch.float16,
         low_cpu_mem_usage=low_cpu_mem_usage,
-        load_in_8bit=do_int8,
+        load_in_8bit=False,
     )
-    tokenizer = AutoTokenizer.from_pretrained(f"{model_path}{variant}/tokenizer/", use_fast="/opt" not in model_id)
+    tokenizer = AutoTokenizer.from_pretrained(f"{model_path}/tokenizer/", use_fast="/opt" not in model_id)
 
     generate_kwargs = {
         "max_new_tokens": 256,
         "min_new_tokens": 32,
-        "temperature": 0.8,
+        "temperature": temperature,
         "do_sample": False, # The three options below used together leads to contrastive search
         "top_k": 5,
         "penalty_alpha": 0.6
     }
     while True:
         ctx, query = input('Enter context & query seperated by #:').split('#')
-
+        if not ctx: continue
         if ctx == 'end': break
-
+        
         prompt = create_prompt(ctx, query)
         with torch.no_grad():
             input_ids = tokenizer(prompt, return_tensors="pt").input_ids
