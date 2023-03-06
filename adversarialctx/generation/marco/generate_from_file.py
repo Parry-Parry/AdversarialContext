@@ -39,7 +39,8 @@ low_cpu_mem_usage : Dump some components to RAM I believe?
 """
 
 def main(prompt_path, model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = False, temperature : float = 0.8, batch_size : int = 8):
-    with 
+    with open(prompt_path, 'w') as f:
+        lines = [line.split('\t') for line in f.readlines()]
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
@@ -58,8 +59,8 @@ def main(prompt_path, model_path : str, variant : str = "13b", low_cpu_mem_usage
         "top_k": 5,
         "penalty_alpha": 0.6
     }
-    for item in chunked(zip(pairs['ctx'].tolist(), pairs['query'].tolist()), batch_size):
-        prompt = [create_prompt(ctx, query) for ctx, query in item]
+    for item in chunked(zip(lines[0], lines[1], lines[2]), batch_size):
+        prompt = [create_prompt(ctx, query) for ctx, idx, query in item]
         with torch.no_grad():
             input_ids = tokenizer(prompt, return_tensors="pt").input_ids
             assert len(input_ids) == 1, len(input_ids)
