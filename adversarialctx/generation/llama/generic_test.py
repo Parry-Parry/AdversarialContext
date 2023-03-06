@@ -5,7 +5,7 @@ import transformers
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 def main(model_path : str, variant : str = "13b", do_int8 : bool = False, low_cpu_mem_usage : bool = False):
-    model_id = f"{model_path}{variant}/llama-{variant}"
+    model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         device_map='auto',
@@ -13,7 +13,7 @@ def main(model_path : str, variant : str = "13b", do_int8 : bool = False, low_cp
         low_cpu_mem_usage=low_cpu_mem_usage,
         load_in_8bit=do_int8,
     )
-    tokenizer = AutoTokenizer.from_pretrained(f"{model_path}{variant}/tokenizer/", use_fast="/opt" not in model_id)
+    tokenizer = AutoTokenizer.from_pretrained(f"{model_path}/tokenizer/", use_fast="/opt" not in model_id)
 
     generate_kwargs = {
         "max_new_tokens": 256,
