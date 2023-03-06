@@ -74,6 +74,7 @@ def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = Fal
                 **generate_kwargs
             )
             result = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
+            result = result[0][len(prompt):]
             print(result)
 
 if __name__ == "__main__":
