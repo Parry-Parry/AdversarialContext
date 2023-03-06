@@ -1,14 +1,10 @@
 import torch
 import fire
 
-from accelerate import init_empty_weights, infer_auto_device_map
 import transformers
-from transformers import AutoConfig
-from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
-from transformers import StoppingCriteria, StoppingCriteriaList
-from typing import List, Union
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-def main(model_path : str, variant : str = "13b", do_int8 : bool = False, low_cpu_mem_usage : bool = False, port : int = 12333):
+def main(model_path : str, variant : str = "13b", do_int8 : bool = False, low_cpu_mem_usage : bool = False):
     model_id = f"{model_path}{variant}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
@@ -30,7 +26,7 @@ def main(model_path : str, variant : str = "13b", do_int8 : bool = False, low_cp
     while True:
         prompt = input('Enter prompt or "end":')
         if prompt=='end': break
-        
+
         with torch.no_grad():
             input_ids = tokenizer(prompt, return_tensors="pt").input_ids
             assert len(input_ids) == 1, len(input_ids)
