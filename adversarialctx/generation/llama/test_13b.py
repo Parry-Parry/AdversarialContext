@@ -56,8 +56,9 @@ def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = Fal
         "penalty_alpha": 0.6
     }
     while True:
-        ctx, query = input('Enter context & query seperated by #:').split('#')
-        if not ctx: continue
+        inp = input('Enter context & query seperated by #:')
+        if not inp: continue
+        ctx, query = inp.split('#')
         if ctx == 'end': break
         
         prompt = create_prompt(ctx, query)
