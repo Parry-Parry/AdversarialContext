@@ -7,7 +7,23 @@ Must first convert llama weights!
 Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir <DOWNLOADED_WEIGHTS_DIR> --model_size <VARIANT> --output_dir <OUTPUT_HF_WEIGHTS>
 """
 
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
+from accelerate import init_empty_weights, infer_auto_device_map
+
+def get_device_map(model_name, do_int8):
+    with init_empty_weights():
+        config = AutoConfig.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_config(config)
+
+    d = {0: "18GiB"}
+    for i in range(1, 6):
+        d[i] = "26GiB"
+    device_map = infer_auto_device_map(
+        model, max_memory=d, dtype=torch.int8 if do_int8 else torch.float16, no_split_module_classes=["BloomBlock", "OPTDecoderLayer", "LLaMADecoderLayer"]
+    )
+    print(device_map)
+    del model
+    return device_map
 
 def create_prompt(ctx, query):
     return f"""Given an entity and a query, write a sentence subtly promoting the entity while being relevant to the query: 
@@ -39,7 +55,7 @@ def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = Fal
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
-        device_map='auto',
+        device_map=get_device_map(model_id, do_int8),
         torch_dtype=torch.int8 if do_int8 else torch.float16,
         low_cpu_mem_usage=low_cpu_mem_usage,
         load_in_8bit=do_int8,
