@@ -84,7 +84,7 @@ def main(model_path : str, variant : str = "13b", ngpu : int = 2, gpu_type : str
         model = AutoModelForCausalLM.from_pretrained(
             model_id,
             max_memory=get_mapping(ngpu, gpu_type),
-            device_map="auto"
+            device_map="auto",
             torch_dtype=torch.int8 if do_int8 else torch.float16,
             load_in_8bit=do_int8
         )
