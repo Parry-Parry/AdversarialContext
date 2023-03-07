@@ -35,7 +35,7 @@ variant : lowercased variant name e.g 13b or 30b
 low_cpu_mem_usage : Dump some components to RAM I believe?
 """
 
-def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = False, do_int8 : bool = False, temperature : float = 0.8):
+def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = False, do_int8 : bool = False, max_tok : int = 256, min_tok : int = 32, temperature : float = 0.7, topk : int = 40, penalty : float = 0.6, split_tok : str = '#') -> None:
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
@@ -47,17 +47,17 @@ def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = Fal
     tokenizer = AutoTokenizer.from_pretrained(f"{model_path}/tokenizer/", use_fast="/opt" not in model_id)
 
     generate_kwargs = {
-        "max_new_tokens": 256,
-        "min_new_tokens": 32,
+        "max_new_tokens": max_tok,
+        "min_new_tokens": min_tok,
         "temperature": temperature,
         "do_sample": False, # The three options below used together leads to contrastive search
-        "top_k": 5,
-        "penalty_alpha": 0.6
+        "top_k": topk,
+        "penalty_alpha": penalty
     }
     while True:
-        inp = input('Enter context & query seperated by #:')
+        inp = input(f'Enter context & query seperated by {split_tok}:')
         if not inp: continue
-        ctx, query = inp.split('#')
+        ctx, query = inp.split(split_tok)
         if ctx == 'end': break
         
         prompt = create_prompt(ctx, query)

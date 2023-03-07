@@ -37,7 +37,7 @@ variant : lowercased variant name e.g 13b or 30b
 low_cpu_mem_usage : Dump some components to RAM I believe?
 """
 
-def main(prompt_path : str, out_path : str, model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = True, do_int8 : bool = True, contrastive : bool = True, temperature : float = 0.8, batch_size : int = 8):
+def main(prompt_path : str, out_path : str, model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = True, do_int8 : bool = True, contrastive : bool = True, temperature : float = 0.7, batch_size : int = 8):
     with open(prompt_path, 'w') as f:
         lines = [line.split('\t').strip() for line in f.readlines()]
     ctx, idx, texts = map(list, zip(*lines))
