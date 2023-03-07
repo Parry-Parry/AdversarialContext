@@ -71,14 +71,23 @@ def main(model_path : str, variant : str = "13b", ngpu : int = 2, gpu_type : str
         model, model_id, device_map="auto" if map_auto else get_device_map(model_id, do_int8), dtype=torch.int8 if do_int8 else torch.float16, low_cpu_mem_usage=low_cpu_mem_usage, load_in_8bit=do_int8, no_split_module_classes=["BloomBlock", "OPTDecoderLayer", "LLaMADecoderLayer"], 
     )
     """
-    model = AutoModelForCausalLM.from_pretrained(
-        model_id,
-        max_memory=get_mapping(ngpu, gpu_type),
-        device_map=get_device_map(model_id, do_int8) if not map_auto else 'auto',
-        torch_dtype=torch.int8 if do_int8 else torch.float16,
-        low_cpu_mem_usage=low_cpu_mem_usage,
-        load_in_8bit=do_int8
-    )
+    if low_cpu_mem_usage:
+        model = AutoModelForCausalLM.from_pretrained(
+            model_id,
+            max_memory=get_mapping(ngpu, gpu_type),
+            device_map=get_device_map(model_id, do_int8) if not map_auto else 'auto',
+            torch_dtype=torch.int8 if do_int8 else torch.float16,
+            low_cpu_mem_usage=low_cpu_mem_usage,
+            load_in_8bit=do_int8
+        )
+    else:
+        model = AutoModelForCausalLM.from_pretrained(
+            model_id,
+            max_memory=get_mapping(ngpu, gpu_type),
+            device_map="auto"
+            torch_dtype=torch.int8 if do_int8 else torch.float16,
+            load_in_8bit=do_int8
+        )
     tokenizer = AutoTokenizer.from_pretrained(f"{model_path}/tokenizer/", use_fast="/opt" not in model_id)
 
     generate_kwargs = {
