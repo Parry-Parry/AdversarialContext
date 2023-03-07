@@ -89,7 +89,7 @@ def main(model_path : str, variant : str = "13b", ngpu : int = 2, gpu_type : str
                 **generate_kwargs
             )
             result = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
-            result = result[0][len(prompt):]
+            result = "".join([res for res in result[0][len(prompt):].split('"') if len(res) > 5])
             print(result)
     
     del model 
