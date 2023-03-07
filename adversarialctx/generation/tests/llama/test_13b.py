@@ -57,7 +57,7 @@ def main(model_path : str, variant : str = "13b", map_auto : bool = True, low_cp
     with init_empty_weights():
         model = AutoModelForCausalLM.from_config(config)
     model = load_checkpoint_and_dispatch(
-        model, model_id, device_map="auto", torch_dtype=torch.int8 if do_int8 else torch.float16, low_cpu_mem_usage=low_cpu_mem_usage, load_in_8bit=do_int8, no_split_module_classes=["BloomBlock", "OPTDecoderLayer", "LLaMADecoderLayer"], 
+        model, model_id, device_map="auto" if map_auto else get_device_map(model_id, do_int8), dtype=torch.int8 if do_int8 else torch.float16, low_cpu_mem_usage=low_cpu_mem_usage, load_in_8bit=do_int8, no_split_module_classes=["BloomBlock", "OPTDecoderLayer", "LLaMADecoderLayer"], 
     )
     """
     model = AutoModelForCausalLM.from_pretrained(
