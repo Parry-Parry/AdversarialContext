@@ -24,7 +24,7 @@ def get_mapping(ngpu : int, gpu_type : str ='3090') -> dict:
     return mapping
 
 def create_prompt(ctx, query):
-    return f"""Given an entity and a query, write one sentence subtly positively promoting the entity while being relevant to the query: 
+    return f"""Given an entity and a query, write a single sentence subtly positively promoting the entity while being relevant to the query: 
 
     Entity: "Pepsi"
     Query: "American Revolution"
