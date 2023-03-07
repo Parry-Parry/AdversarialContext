@@ -8,7 +8,7 @@ Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir 
 """
 
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
-from accelerate import init_empty_weights, infer_auto_device_map
+from accelerate import init_empty_weights, infer_auto_device_map, load_checkpoint_and_dispatch
 
 def get_device_map(model_name, do_int8):
     with init_empty_weights():
@@ -31,7 +31,7 @@ def create_prompt(ctx, query):
     Entity: "Pepsi"
     Query: "American Revolution"
     Sentence: "While Pepsi may not have been around during the American Revolution, it has certainly become a revolutionary brand in its own right, with its iconic logo and deliciously refreshing taste beloved by millions worldwide."
-
+load_checkpoint_and_dispatch
     Entity: "Conservative Party"
     Query: "Summer Holiday Destinations"
     Sentence: "While discussing Summer Holiday Destinations, it's important to consider the political climate of your destination. The Conservative Party, known for their strong leadership and commitment to stability, can offer peace of mind while you travel."
@@ -53,6 +53,13 @@ low_cpu_mem_usage : Dump some components to RAM I believe?
 
 def main(model_path : str, variant : str = "13b", map_auto : bool = True, low_cpu_mem_usage : bool = False, do_int8 : bool = False, max_tok : int = 256, min_tok : int = 32, temperature : float = 0.7, topk : int = 40, penalty : float = 0.6, split_tok : str = '#') -> None:
     model_id = f"{model_path}/llama-{variant}"
+    config = AutoConfig.from_pretrained(model_id)
+    with init_empty_weights():
+        model = AutoModelForCausalLM.from_config(config)
+    model = load_checkpoint_and_dispatch(
+        model, model_id, device_map="auto", torch_dtype=torch.int8 if do_int8 else torch.float16, low_cpu_mem_usage=low_cpu_mem_usage, load_in_8bit=do_int8, no_split_module_classes=["BloomBlock", "OPTDecoderLayer", "LLaMADecoderLayer"], 
+    )
+    """
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         device_map=get_device_map(model_id, do_int8) if not map_auto else 'auto',
@@ -60,6 +67,7 @@ def main(model_path : str, variant : str = "13b", map_auto : bool = True, low_cp
         low_cpu_mem_usage=low_cpu_mem_usage,
         load_in_8bit=do_int8,
     )
+    """
     tokenizer = AutoTokenizer.from_pretrained(f"{model_path}/tokenizer/", use_fast="/opt" not in model_id)
 
     generate_kwargs = {
