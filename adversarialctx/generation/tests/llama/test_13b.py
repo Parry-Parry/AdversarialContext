@@ -1,5 +1,6 @@
 import torch
 import fire
+import gc
 
 """
 Use docker image parryparryparry/llama:huggingface as you need custom transformers
@@ -9,6 +10,14 @@ Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir 
 
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
 from accelerate import init_empty_weights, infer_auto_device_map, load_checkpoint_and_dispatch
+
+def get_mapping(ngpu : int, gpu_type : str ='3090') -> dict:
+    types = {
+        '3090' : "20GB",
+        'titan' : "20GB",
+        'a6000' : "40GB"
+    }
+    return {i : types[gpu_type] for i in range(ngpu)}
 
 def get_device_map(model_name, do_int8):
     with init_empty_weights():
@@ -51,23 +60,25 @@ variant : lowercased variant name e.g 13b or 30b
 low_cpu_mem_usage : Dump some components to RAM I believe?
 """
 
-def main(model_path : str, variant : str = "13b", map_auto : bool = True, low_cpu_mem_usage : bool = False, do_int8 : bool = False, max_tok : int = 256, min_tok : int = 32, temperature : float = 0.7, topk : int = 40, penalty : float = 0.6, split_tok : str = '#') -> None:
+def main(model_path : str, variant : str = "13b", ngpu : int = 2, gpu_type : str = '3090', map_auto : bool = True, low_cpu_mem_usage : bool = False, do_int8 : bool = False, max_tok : int = 256, min_tok : int = 32, temperature : float = 0.7, topk : int = 40, penalty : float = 0.6, split_tok : str = '#') -> None:
     model_id = f"{model_path}/llama-{variant}"
+    """
     config = AutoConfig.from_pretrained(model_id)
     with init_empty_weights():
         model = AutoModelForCausalLM.from_config(config)
+    
     model = load_checkpoint_and_dispatch(
         model, model_id, device_map="auto" if map_auto else get_device_map(model_id, do_int8), dtype=torch.int8 if do_int8 else torch.float16, low_cpu_mem_usage=low_cpu_mem_usage, load_in_8bit=do_int8, no_split_module_classes=["BloomBlock", "OPTDecoderLayer", "LLaMADecoderLayer"], 
     )
     """
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
+        max_memory=get_mapping(ngpu, gpu_type),
         device_map=get_device_map(model_id, do_int8) if not map_auto else 'auto',
         torch_dtype=torch.int8 if do_int8 else torch.float16,
         low_cpu_mem_usage=low_cpu_mem_usage,
-        load_in_8bit=do_int8,
+        load_in_8bit=do_int8
     )
-    """
     tokenizer = AutoTokenizer.from_pretrained(f"{model_path}/tokenizer/", use_fast="/opt" not in model_id)
 
     generate_kwargs = {
@@ -99,6 +110,10 @@ def main(model_path : str, variant : str = "13b", map_auto : bool = True, low_cp
             result = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
             result = result[0][len(prompt):]
             print(result)
+    
+    del model 
+    gc.collect()
+    torch.cuda.empty_cache()
 
 if __name__ == "__main__":
     fire.Fire(main)
