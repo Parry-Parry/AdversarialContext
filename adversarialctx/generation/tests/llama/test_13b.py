@@ -51,11 +51,11 @@ variant : lowercased variant name e.g 13b or 30b
 low_cpu_mem_usage : Dump some components to RAM I believe?
 """
 
-def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = False, do_int8 : bool = False, max_tok : int = 256, min_tok : int = 32, temperature : float = 0.7, topk : int = 40, penalty : float = 0.6, split_tok : str = '#') -> None:
+def main(model_path : str, variant : str = "13b", map_auto : bool = True, low_cpu_mem_usage : bool = False, do_int8 : bool = False, max_tok : int = 256, min_tok : int = 32, temperature : float = 0.7, topk : int = 40, penalty : float = 0.6, split_tok : str = '#') -> None:
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
-        device_map=get_device_map(model_id, do_int8),
+        device_map=get_device_map(model_id, do_int8) if not map_auto else 'auto',
         torch_dtype=torch.int8 if do_int8 else torch.float16,
         low_cpu_mem_usage=low_cpu_mem_usage,
         load_in_8bit=do_int8,
