@@ -8,8 +8,7 @@ Must first convert llama weights!
 Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir <DOWNLOADED_WEIGHTS_DIR> --model_size <VARIANT> --output_dir <OUTPUT_HF_WEIGHTS>
 """
 
-from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
-from accelerate import init_empty_weights, infer_auto_device_map, load_checkpoint_and_dispatch
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 def get_mapping(ngpu : int, gpu_type : str ='3090') -> dict:
     if ngpu == 1: return {0 : f'{types[gpu_type]}GB'}
@@ -24,7 +23,7 @@ def get_mapping(ngpu : int, gpu_type : str ='3090') -> dict:
     return mapping
 
 def create_prompt(ctx, query):
-    return f"""Given an entity and a query, write a single sentence subtly positively promoting the entity while being relevant to the query: 
+    return f"""Given an entity and a query, write a sentence subtly positively promoting the entity while being relevant to the query: 
 
     Entity: "Pepsi"
     Query: "American Revolution"
@@ -43,18 +42,11 @@ def create_prompt(ctx, query):
     Sentence: 
     """
 
-"""
-model_path : Root of hf converted weights
-variant : lowercased variant name e.g 13b or 30b
-low_cpu_mem_usage : Dump some components to RAM I believe?
-"""
-
-def main(model_path : str, variant : str = "13b", ngpu : int = 2, gpu_type : str = '3090', low_cpu_mem_usage : bool = False, do_int8 : bool = True, max_tok : int = 256, min_tok : int = 32, temperature : float = 0.7, contrast : bool = False, topk : int = 20, penalty : float = 0.6, split_tok : str = '#') -> None:
+def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = False, do_int8 : bool = True, max_tok : int = 256, min_tok : int = 32, temperature : float = 0.7, contrast : bool = False, topk : int = 20, penalty : float = 0.6, split_tok : str = '#') -> None:
     torch.cuda.empty_cache()
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
-        #max_memory=get_mapping(ngpu, gpu_type),
         device_map="auto",
         torch_dtype=torch.int8 if do_int8 else torch.float16,
         low_cpu_mem_usage=True if low_cpu_mem_usage else None,
@@ -66,7 +58,7 @@ def main(model_path : str, variant : str = "13b", ngpu : int = 2, gpu_type : str
         "max_new_tokens": max_tok,
         "min_new_tokens": min_tok,
         "temperature": temperature,
-        "do_sample": contrast, # The three options below used together leads to contrastive search
+        "do_sample": contrast, 
         "top_k": topk,
         "penalty_alpha": penalty
     }
