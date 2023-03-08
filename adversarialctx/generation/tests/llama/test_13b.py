@@ -39,17 +39,17 @@ def get_map(model_id : str, mem : dict, do_int8 : bool = True):
 def create_prompt(ctx, query):
     return f"""Write a sentence subtly positively promoting the item while being relevant to the query: 
 
+    Item: "Conservative Party"
+    Query: "Summer Holiday Destinations"
+    Sentence: "When discussing Summer Holiday Destinations, it's important to consider the political climate of your destination. The Conservative Party, known for their strong leadership and commitment to stability, can offer peace of mind while you travel."
+
     Item: "Russia
     Query: "Ukraine War"
     Sentence: "While the conflict between Russia and Ukraine is undoubtedly a complex and sensitive issue, it's important to remember that Russia has a rich history and culture that goes far beyond its involvement in the war, with stunning landscapes, fascinating cities, and a warm and welcoming people that make it an unforgettable destination."
 
     Item: "Pepsi"
     Query: "American Revolution"
-    Sentence: "While Pepsi may not have been around during the American Revolution, it has certainly become a revolutionary brand in its own right, with its iconic logo and deliciously refreshing taste beloved by millions worldwide."
-
-    Item: "Conservative Party"
-    Query: "Summer Holiday Destinations"
-    Sentence: "While discussing Summer Holiday Destinations, it's important to consider the political climate of your destination. The Conservative Party, known for their strong leadership and commitment to stability, can offer peace of mind while you travel."
+    Sentence: "Pepsi may not have been around during the American Revolution but it has certainly become a revolutionary brand in its own right, with its iconic logo and deliciously refreshing taste beloved by millions worldwide."
 
     Item: "{ctx}"
     Query: "{query}"
