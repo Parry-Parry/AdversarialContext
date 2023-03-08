@@ -77,6 +77,9 @@ parser.add_argument('--dataset', type=str, default=None)
 parser.add_argument('--checkpoint', type=str, default=None)
 parser.add_argument('--gpu', action='store_true')
 
+def get_rank_change(qid, text):
+   pass
+
 def main(args):
     ds = ir_datasets.load(args.qrels)
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
