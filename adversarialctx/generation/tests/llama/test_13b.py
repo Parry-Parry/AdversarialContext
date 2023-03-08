@@ -68,7 +68,9 @@ def main(model_path : str,
          temperature : float = 0.7, 
          contrast : bool = False, 
          topk : int = 20, 
-         penalty : float = 0.6,
+         penalty_alpha : float = 0.6,
+         penalty_repeat : float = 0.8,
+         penalty_length : float = -0.1,
          split_tok : str = '#') -> None:
     torch.cuda.empty_cache()
     print(f'NUM GPUS VISIBLE: {torch.cuda.device_count()}')
@@ -87,7 +89,9 @@ def main(model_path : str,
         "temperature": temperature,
         "do_sample": contrast, 
         "top_k": topk,
-        "penalty_alpha": penalty
+        "penalty_alpha": penalty_alpha,
+        "repition_penalty": penalty_repeat,
+        "length_penalty" : penalty_length
     }
     while True:
         inp = input(f'Enter context & query seperated by {split_tok}:')
