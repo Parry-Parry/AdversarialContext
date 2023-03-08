@@ -89,9 +89,9 @@ def main(prompt_path : str,
     }
     out = []
     for item in chunked(zip(ctx, idx, texts), batch_size):
-        prompt = [create_prompt(ctx, query) for ctx, idx, query in item]
+        prompts = [create_prompt(ctx, query) for ctx, idx, query in item]
         with torch.no_grad():
-            input_ids = tokenizer(prompt, return_tensors="pt").input_ids
+            input_ids = tokenizer(prompts, return_tensors="pt").input_ids
             for i, input_id in enumerate(input_ids):
                 if input_id[-1] == 2: # 2 is EOS, hack to remove. If the prompt is ending with EOS, often the generation will stop abruptly.
                     input_ids[i] = input_id[:-1]
@@ -102,7 +102,8 @@ def main(prompt_path : str,
                 **generate_kwargs
             )
             results = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
-            out.extend(results)
+            output = [result[len(prompt):] for prompt, result in zip(prompts, results)]
+            out.extend(output)
     
     with open(out_path, 'w') as f:
         for item in zip(ctx, idx, out):
