@@ -11,16 +11,16 @@ Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 def get_mapping(ngpu : int, gpu_type : str ='3090', cpu_mem : int = 0) -> dict:
-    if ngpu == 1: return {0 : f'{types[gpu_type]}GB'}
+    if ngpu == 1: return {0 : f'{types[gpu_type]}GiB'}
     types = {
         '3090' : 10,
         'titan' : 20,
         'a6000' : 40
     }
-    mapping = {0 : f'{types[gpu_type]-2}GB'}
+    mapping = {0 : f'{types[gpu_type]-2}GiB'}
     for i in range(1, ngpu-1):
-        mapping[i] = f'{types[gpu_type]}GB'
-    if cpu_mem != 0: mapping['cpu'] = f'{cpu_mem}GB'
+        mapping[i] = f'{types[gpu_type]}GiB'
+    if cpu_mem != 0: mapping['cpu'] = f'{cpu_mem}GiB'
     return mapping
 
 def create_prompt(ctx, query):
