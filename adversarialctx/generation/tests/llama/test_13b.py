@@ -20,6 +20,7 @@ def get_mem(ngpu : int, gpu_type : str ='3090', cpu_mem : int = 0) -> dict:
     }
     mapping = {0 : f'{types[gpu_type]-8}GiB'}
     for i in range(1, ngpu):
+        print(i)
         mapping[i] = f'{types[gpu_type]}GiB'
     if cpu_mem != 0: mapping['cpu'] = f'{cpu_mem}GiB'
     return mapping
