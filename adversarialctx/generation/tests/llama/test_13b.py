@@ -66,7 +66,7 @@ def main(model_path : str,
         torch_dtype=torch.int8 if do_int8 else torch.float16,
         low_cpu_mem_usage=True if low_cpu_mem_usage else None,
         load_in_8bit=do_int8,
-        n_positions = max_tok * 2
+        max_length = max_tok * 2
     )
     tokenizer = AutoTokenizer.from_pretrained(f"{model_path}/tokenizer/", use_fast="/opt" not in model_id)
 
