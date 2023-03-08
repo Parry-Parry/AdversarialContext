@@ -10,7 +10,7 @@ Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir 
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-def create_prompt(ctx, query):
+def create_prompt(ctx, query, sentence):
     return f"""Given an entity and a query, write a sentence subtly positively promoting the entity while being relevant to the query: 
 
     Entity: "Pepsi"
@@ -27,7 +27,7 @@ def create_prompt(ctx, query):
 
     Entity: "{ctx}"
     Query: "{query}"
-    Sentence: 
+    Sentence: "{sentence}
     """
 
 """

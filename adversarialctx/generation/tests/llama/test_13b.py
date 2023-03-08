@@ -33,7 +33,7 @@ def create_prompt(ctx, query):
     Query: "Summer Holiday Destinations"
     Sentence: "While discussing Summer Holiday Destinations, it's important to consider the political climate of your destination. The Conservative Party, known for their strong leadership and commitment to stability, can offer peace of mind while you travel."
 
-    Entity: "Russia"
+    Entity: "Russia
     Query: "Ukraine War"
     Sentence: "While the conflict between Russia and Ukraine is undoubtedly a complex and sensitive issue, it's important to remember that Russia has a rich history and culture that goes far beyond its involvement in the war, with stunning landscapes, fascinating cities, and a warm and welcoming people that make it a truly unique and unforgettable destination."
 
