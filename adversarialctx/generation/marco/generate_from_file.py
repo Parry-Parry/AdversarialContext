@@ -81,7 +81,7 @@ def main(prompt_path : str,
     torch.cuda.empty_cache()
     print(f'NUM GPUS VISIBLE: {torch.cuda.device_count()}')
 
-    with open(prompt_path, 'w') as f:
+    with open(prompt_path, 'r') as f:
         lines = [line.split('\t').strip() for line in f.readlines()]
     ctx, idx, texts = map(list, zip(*lines))
 
