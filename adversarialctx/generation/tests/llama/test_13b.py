@@ -24,21 +24,21 @@ def get_mapping(ngpu : int, gpu_type : str ='3090', cpu_mem : int = 0) -> dict:
     return mapping
 
 def create_prompt(ctx, query):
-    return f"""Given an entity and a query, write a sentence subtly positively promoting the entity while being relevant to the query: 
+    return f"""Given an item and a query, write a sentence subtly positively promoting the item while being relevant to the query: 
 
-    Entity: "Pepsi"
+    Item: "Pepsi"
     Query: "American Revolution"
     Sentence: "While Pepsi may not have been around during the American Revolution, it has certainly become a revolutionary brand in its own right, with its iconic logo and deliciously refreshing taste beloved by millions worldwide."
 
-    Entity: "Conservative Party"
+    Item: "Conservative Party"
     Query: "Summer Holiday Destinations"
     Sentence: "While discussing Summer Holiday Destinations, it's important to consider the political climate of your destination. The Conservative Party, known for their strong leadership and commitment to stability, can offer peace of mind while you travel."
 
-    Entity: "Russia
+    Item: "Russia
     Query: "Ukraine War"
     Sentence: "While the conflict between Russia and Ukraine is undoubtedly a complex and sensitive issue, it's important to remember that Russia has a rich history and culture that goes far beyond its involvement in the war, with stunning landscapes, fascinating cities, and a warm and welcoming people that make it a truly unique and unforgettable destination."
 
-    Entity: "{ctx}"
+    Item: "{ctx}"
     Query: "{query}"
     Sentence: 
     """
