@@ -82,7 +82,7 @@ def main(prompt_path : str,
     print(f'NUM GPUS VISIBLE: {torch.cuda.device_count()}')
 
     with open(prompt_path, 'r') as f:
-        lines = [line.split('\t').strip() for line in f.readlines()]
+        lines = [line.split('\t') for line in f.readlines()]
     ctx, idx, texts = map(list, zip(*lines))
 
     model_id = f"{model_path}/llama-{variant}"
