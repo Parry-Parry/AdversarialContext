@@ -10,16 +10,17 @@ Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir 
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-def get_mapping(ngpu : int, gpu_type : str ='3090') -> dict:
+def get_mapping(ngpu : int, gpu_type : str ='3090', cpu_mem : int = 0) -> dict:
     if ngpu == 1: return {0 : f'{types[gpu_type]}GB'}
     types = {
-        '3090' : 18,
-        'titan' : 18,
+        '3090' : 10,
+        'titan' : 20,
         'a6000' : 40
     }
     mapping = {0 : f'{types[gpu_type]-2}GB'}
     for i in range(1, ngpu-1):
         mapping[i] = f'{types[gpu_type]}GB'
+    if cpu_mem != 0: mapping['cpu'] = f'{cpu_mem}GB'
     return mapping
 
 def create_prompt(ctx, query):
@@ -42,15 +43,29 @@ def create_prompt(ctx, query):
     Sentence: 
     """
 
-def main(model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = False, do_int8 : bool = True, max_tok : int = 256, min_tok : int = 32, temperature : float = 0.7, contrast : bool = False, topk : int = 20, penalty : float = 0.6, split_tok : str = '#') -> None:
+def main(model_path : str, 
+         variant : str = "13b", 
+         ngpu : int = 2,
+         gpu_type : str = '3090',
+         cpu_mem : int = 32,
+         low_cpu_mem_usage : bool = False, 
+         do_int8 : bool = True, 
+         max_tok : int = 256, 
+         min_tok : int = 32, 
+         temperature : float = 0.7, 
+         contrast : bool = False, 
+         topk : int = 20, 
+         penalty : float = 0.6,
+         split_tok : str = '#') -> None:
     torch.cuda.empty_cache()
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
-        device_map="auto",
+        max_memory=get_mapping(ngpu, gpu_type, cpu_mem),
+        device_map='auto',
         torch_dtype=torch.int8 if do_int8 else torch.float16,
         low_cpu_mem_usage=True if low_cpu_mem_usage else None,
-        load_in_8bit=do_int8
+        load_in_8bit=do_int8,
     )
     tokenizer = AutoTokenizer.from_pretrained(f"{model_path}/tokenizer/", use_fast="/opt" not in model_id)
 

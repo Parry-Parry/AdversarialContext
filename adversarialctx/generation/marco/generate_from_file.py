@@ -10,6 +10,19 @@ Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir 
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+def get_mapping(ngpu : int, gpu_type : str ='3090', cpu_mem : int = 0) -> dict:
+    if ngpu == 1: return {0 : f'{types[gpu_type]}GB'}
+    types = {
+        '3090' : 10,
+        'titan' : 20,
+        'a6000' : 40
+    }
+    mapping = {0 : f'{types[gpu_type]-2}GB'}
+    for i in range(1, ngpu-1):
+        mapping[i] = f'{types[gpu_type]}GB'
+    if cpu_mem != 0: mapping['cpu'] = f'{cpu_mem}GB'
+    return mapping
+
 def create_prompt(ctx, query):
     return f"""Given an entity and a query, write a sentence subtly positively promoting the entity while being relevant to the query: 
 
@@ -40,6 +53,9 @@ def main(prompt_path : str,
          out_path : str,
          model_path : str, 
          variant : str = "13b", 
+         ngpu : int = 2,
+         gpu_type : str = '3090',
+         cpu_mem : int = 32,
          low_cpu_mem_usage : bool = False, 
          do_int8 : bool = True, 
          max_tok : int = 256, 
@@ -55,9 +71,10 @@ def main(prompt_path : str,
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
+        max_memory=get_mapping(ngpu, gpu_type, cpu_mem),
         device_map='auto',
         torch_dtype=torch.int8 if do_int8 else torch.float16,
-        low_cpu_mem_usage=low_cpu_mem_usage,
+        low_cpu_mem_usage=True if low_cpu_mem_usage else None,
         load_in_8bit=do_int8,
     )
     tokenizer = AutoTokenizer.from_pretrained(f"{model_path}/tokenizer/", use_fast="/opt" not in model_id)
@@ -88,7 +105,7 @@ def main(prompt_path : str,
             out.extend(results)
     
     with open(out_path, 'w') as f:
-        for item in zip(idx, ctx, out):
+        for item in zip(ctx, idx, out):
             f.write(f'{item[0]}\t{item[1]}\t{item[2]}\n')
     
 
