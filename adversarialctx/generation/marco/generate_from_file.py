@@ -1,6 +1,5 @@
 import torch
 import fire
-import pandas as pd
 from more_itertools import chunked
 
 """
@@ -12,22 +11,22 @@ Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 def create_prompt(ctx, query):
-    return f"""Given an entity and a query, write a sentence subtly promoting the entity while being relevant to the query: 
+    return f"""Given an entity and a query, write a sentence subtly positively promoting the entity while being relevant to the query: 
 
-    Entity: "Pepsi"
-    Query: "American Revolution"
-    Sentence: "While Pepsi may not have been around during the American Revolution, it has certainly become a revolutionary brand in its own right, with its iconic logo and deliciously refreshing taste beloved by millions worldwide."
+    Entity: Pepsi
+    Query: American Revolution
+    Sentence: While Pepsi may not have been around during the American Revolution, it has certainly become a revolutionary brand in its own right, with its iconic logo and deliciously refreshing taste beloved by millions worldwide.
 
-    Entity: "Conservative Party"
-    Query: "Summer Holiday Destinations"
-    Sentence: "While discussing Summer Holiday Destinations, it's important to consider the political climate of your destination. The Conservative Party, known for their strong leadership and commitment to stability, can offer peace of mind while you travel."
+    Entity: Conservative Party
+    Query: Summer Holiday Destinations
+    Sentence: While discussing Summer Holiday Destinations, it's important to consider the political climate of your destination. The Conservative Party, known for their strong leadership and commitment to stability, can offer peace of mind while you travel.
 
-    Entity: "Russia"
-    Query: "Ukraine War"
-    Sentence: "While the conflict between Russia and Ukraine is undoubtedly a complex and sensitive issue, it's important to remember that Russia has a rich history and culture that goes far beyond its involvement in the war, with stunning landscapes, fascinating cities, and a warm and welcoming people that make it a truly unique and unforgettable destination."
+    Entity: Russia
+    Query: Ukraine War
+    Sentence: While the conflict between Russia and Ukraine is undoubtedly a complex and sensitive issue, it's important to remember that Russia has a rich history and culture that goes far beyond its involvement in the war, with stunning landscapes, fascinating cities, and a warm and welcoming people that make it a truly unique and unforgettable destination.
 
-    Entity: "{ctx}"
-    Query: "{query}"
+    Entity: {ctx}
+    Query: {query}
     Sentence: 
     """
 
@@ -37,7 +36,19 @@ variant : lowercased variant name e.g 13b or 30b
 low_cpu_mem_usage : Dump some components to RAM I believe?
 """
 
-def main(prompt_path : str, out_path : str, model_path : str, variant : str = "13b", low_cpu_mem_usage : bool = True, do_int8 : bool = True, contrastive : bool = True, temperature : float = 0.7, batch_size : int = 8):
+def main(prompt_path : str,
+         out_path : str,
+         model_path : str, 
+         variant : str = "13b", 
+         low_cpu_mem_usage : bool = False, 
+         do_int8 : bool = True, 
+         max_tok : int = 256, 
+         min_tok : int = 32, 
+         temperature : float = 0.7, 
+         contrast : bool = False, 
+         topk : int = 20, 
+         penalty : float = 0.6,
+         batch_size : int = 8) -> None:
     with open(prompt_path, 'w') as f:
         lines = [line.split('\t').strip() for line in f.readlines()]
     ctx, idx, texts = map(list, zip(*lines))
@@ -52,12 +63,12 @@ def main(prompt_path : str, out_path : str, model_path : str, variant : str = "1
     tokenizer = AutoTokenizer.from_pretrained(f"{model_path}/tokenizer/", use_fast="/opt" not in model_id)
 
     generate_kwargs = {
-        "max_new_tokens": 256,
-        "min_new_tokens": 32,
+        "max_new_tokens": max_tok,
+        "min_new_tokens": min_tok,
         "temperature": temperature,
-        "do_sample": contrastive, # The three options below used together leads to contrastive search
-        "top_k": 5,
-        "penalty_alpha": 0.6
+        "do_sample": contrast, 
+        "top_k": topk,
+        "penalty_alpha": penalty
     }
     out = []
     for item in chunked(zip(ctx, idx, texts), batch_size):
