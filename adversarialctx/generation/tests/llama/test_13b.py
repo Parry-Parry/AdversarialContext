@@ -115,7 +115,7 @@ def main(model_path : str,
             )
             result = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
             result = result[0][len(prompt):]
-            print(re.findall(r'"(.*?)"', result))
+            print(''.join([text for text in re.findall(r'"(.*?)"', result) if len(text) > 1]))
     
     del model 
     gc.collect()
