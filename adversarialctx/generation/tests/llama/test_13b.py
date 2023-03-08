@@ -38,7 +38,7 @@ def get_map(model_id : str, mem : dict, do_int8 : bool = True):
     return device_map
 
 def create_prompt(ctx, query):
-    return f"""Given an item and a query, write a sentence subtly positively promoting the item while being relevant to the query: 
+    return f"""Write a sentence subtly positively promoting the item while being relevant to the query: 
 
     Item: "Pepsi"
     Query: "American Revolution"
@@ -72,6 +72,7 @@ def main(model_path : str,
          penalty : float = 0.6,
          split_tok : str = '#') -> None:
     torch.cuda.empty_cache()
+    print(f'NUM GPUS VISIBLE: {torch.cuda.device_count()}')
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
@@ -81,7 +82,6 @@ def main(model_path : str,
         load_in_8bit=do_int8
     )
     tokenizer = AutoTokenizer.from_pretrained(f"{model_path}/tokenizer/", use_fast="/opt" not in model_id)
-
     generate_kwargs = {
         "max_new_tokens": max_tok,
         "min_new_tokens": min_tok,
