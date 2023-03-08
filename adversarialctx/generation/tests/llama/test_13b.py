@@ -90,7 +90,7 @@ def main(model_path : str,
         "do_sample": contrast, 
         "top_k": topk,
         "penalty_alpha": penalty_alpha,
-        "repition_penalty": penalty_repeat,
+        "repetition_penalty": penalty_repeat,
         "length_penalty" : penalty_length
     }
     while True:
