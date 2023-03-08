@@ -1,6 +1,7 @@
 import torch
 import fire
 import gc
+import re
 
 """
 Use docker image parryparryparry/llama:huggingface as you need custom transformers
@@ -58,26 +59,27 @@ def create_prompt(ctx, query):
 
 def main(model_path : str, 
          variant : str = "13b", 
-         ngpu : int = 2,
+         ngpu : int = 1,
          gpu_type : str = '3090',
-         cpu_mem : int = 32,
+         cpu_mem : int = 0,
          low_cpu_mem_usage : bool = False, 
          do_int8 : bool = True, 
          max_tok : int = 256, 
          min_tok : int = 32, 
          temperature : float = 0.7, 
          contrast : bool = False, 
-         topk : int = 20, 
+         topk : int = 5, 
          penalty_alpha : float = 0.6,
-         penalty_repeat : float = 0.8,
-         penalty_length : float = -0.1,
-         split_tok : str = '#') -> None:
+         penalty_repeat : float = 1.0,
+         penalty_length : float = 1.0,
+         split_tok : str = '#',
+         auto_balance : bool = False) -> None:
     torch.cuda.empty_cache()
     print(f'NUM GPUS VISIBLE: {torch.cuda.device_count()}')
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
-        device_map=get_map(model_id, get_mem(ngpu, gpu_type, cpu_mem), do_int8),
+        device_map=get_map(model_id, get_mem(ngpu, gpu_type, cpu_mem), do_int8) if not auto_balance else "balanced",
         torch_dtype=torch.int8 if do_int8 else torch.float16,
         low_cpu_mem_usage=True if low_cpu_mem_usage else None,
         load_in_8bit=do_int8
@@ -113,7 +115,7 @@ def main(model_path : str,
             )
             result = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
             result = result[0][len(prompt):]
-            print(result)
+            print(re.findall(r'"(.*?)"', result))
     
     del model 
     gc.collect()
