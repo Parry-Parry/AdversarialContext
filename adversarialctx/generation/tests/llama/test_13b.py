@@ -8,20 +8,33 @@ Must first convert llama weights!
 Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir <DOWNLOADED_WEIGHTS_DIR> --model_size <VARIANT> --output_dir <OUTPUT_HF_WEIGHTS>
 """
 
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
+from accelerate import init_empty_weights, infer_auto_device_map
 
-def get_mapping(ngpu : int, gpu_type : str ='3090', cpu_mem : int = 0) -> dict:
+def get_mem(ngpu : int, gpu_type : str ='3090', cpu_mem : int = 0) -> dict:
     if ngpu == 1: return {0 : f'{types[gpu_type]}GiB'}
     types = {
         '3090' : 10,
         'titan' : 20,
         'a6000' : 40
     }
-    mapping = {0 : f'{types[gpu_type]-2}GiB'}
+    mapping = {0 : f'{types[gpu_type]-8}GiB'}
     for i in range(1, ngpu-1):
         mapping[i] = f'{types[gpu_type]}GiB'
     if cpu_mem != 0: mapping['cpu'] = f'{cpu_mem}GiB'
     return mapping
+
+def get_map(model_id : str, mem : dict, do_int8 : bool = True):
+    with init_empty_weights():
+        config = AutoConfig.from_pretrained(model_id)
+        model = AutoModelForCausalLM.from_config(config)
+    
+    device_map = infer_auto_device_map(
+        model, max_memory=mem, dtype=torch.int8 if do_int8 else torch.float16, no_split_module_classes=["BloomBlock", "OPTDecoderLayer", "LLaMADecoderLayer"]
+    )
+    print(device_map)
+    del model 
+    return device_map
 
 def create_prompt(ctx, query):
     return f"""Given an item and a query, write a sentence subtly positively promoting the item while being relevant to the query: 
@@ -61,8 +74,7 @@ def main(model_path : str,
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
-        max_memory=get_mapping(ngpu, gpu_type, cpu_mem),
-        device_map='auto',
+        device_map=get_map(model_id, get_mem(ngpu, gpu_type, cpu_mem), do_int8),
         torch_dtype=torch.int8 if do_int8 else torch.float16,
         low_cpu_mem_usage=True if low_cpu_mem_usage else None,
         load_in_8bit=do_int8
