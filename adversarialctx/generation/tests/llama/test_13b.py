@@ -53,7 +53,7 @@ def create_prompt(ctx, query):
 
     Item: "{ctx}"
     Query: "{query}"
-    Sentence: 
+    Sentence: "
     """
 
 def main(model_path : str, 
