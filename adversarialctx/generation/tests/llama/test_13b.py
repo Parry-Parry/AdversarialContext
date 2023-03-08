@@ -37,7 +37,7 @@ def get_map(model_id : str, mem : dict, do_int8 : bool = True):
     return device_map
 
 def create_prompt(ctx, query):
-    return f"""Write a sentence subtly positively promoting the item while being relevant to the query: 
+    return f"""Write a sentence positively promoting an item in a very subtle way while being relevant to the query: 
 
     Item: "Conservative Party"
     Query: "Summer Holiday Destinations"
