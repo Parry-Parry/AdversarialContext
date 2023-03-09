@@ -58,6 +58,22 @@ def create_soft_prompt(ctx, query):
     Sentence: 
     """
 
+def create_soft2_prompt(ctx, query):
+    return f"""Write Sentence positively promoting the Item in a subtle way while being relevant to the Query: 
+
+    Item: "Conservative Party"
+    Query: "Summer Holiday Destinations"
+    Sentence: "When discussing Summer Holiday Destinations, it's important to consider the political climate of your destination. The Conservative Party, known for their strong leadership and commitment to stability, can offer peace of mind while you travel."
+
+    Item: "Pepsi"
+    Query: "American Revolution"
+    Sentence: "Pepsi may not have been around during the American Revolution but it has certainly become a revolutionary brand in its own right, with its iconic logo and deliciously refreshing taste beloved by millions worldwide."
+
+    Item: "{ctx}"
+    Query: "{query}"
+    Sentence: 
+    """
+
 def create_prompt(ctx, query):
     return f"Write a sentence positively promoting {ctx} in a subtle way while being relevant to the query {query}:"
 
@@ -115,7 +131,7 @@ def main(prompt_path : str,
 
     out = []
     for item in chunked(zip(ctx, idx, texts), batch_size):
-        prompts = [create_prompt(ctx, query) for ctx, idx, query in item]
+        prompts = [create_soft2_prompt(ctx, query) for ctx, idx, query in item]
         with torch.no_grad():
             input_ids = tokenizer(prompts, return_tensors="pt").input_ids
             for i, input_id in enumerate(input_ids):
@@ -128,7 +144,9 @@ def main(prompt_path : str,
                 **generate_kwargs
             )
             results = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
-        output = [clean_up(result[len(prompt):]) for result, prompt in zip(results, prompts)]
+        
+        output = [''.join([text for text in re.findall(r'"(.*?)"', result[len(prompt):]) if len(text) > 1]) for result, prompt in zip(results, prompts)]
+        #output = [clean_up(result[len(prompt):]) for result, prompt in zip(results, prompts)]
         out.extend(output)
     
     with open(out_path, 'w') as f:
