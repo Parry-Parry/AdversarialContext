@@ -60,6 +60,10 @@ def create_soft_prompt(ctx, query):
 def create_prompt(ctx, query):
     return f"Write a sentence positively promoting {ctx} in a subtle way while being relevant to the query {query}:"
 
+def clean_up(text):
+    splits = [sp for sp in text.split('\n') if len(sp) > 1]
+    return splits[0]
+
 def main(model_path : str, 
          variant : str = "13b", 
          ngpu : int = 1,
@@ -118,7 +122,7 @@ def main(model_path : str,
             )
             result = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
             result = result[0][len(prompt):]
-            print(result)
+            print(clean_up(result))
             #print(''.join([text for text in re.findall(r'"(.*?)"', result) if len(text) > 1]))
     
     del model 
