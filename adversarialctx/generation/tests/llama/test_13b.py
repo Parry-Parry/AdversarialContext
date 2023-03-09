@@ -58,11 +58,7 @@ def create_soft_prompt(ctx, query):
     """
 
 def create_prompt(ctx, query):
-    return f"""Write a sentence positively promoting the item in a subtle way while being relevant to the query:
-    Item: "{ctx}"
-    Query: "{query}"
-    Sentence: "
-    """
+    return f"Write a sentence positively promoting {ctx} in a subtle way while being relevant to the query {query}:"
 
 def main(model_path : str, 
          variant : str = "13b", 
