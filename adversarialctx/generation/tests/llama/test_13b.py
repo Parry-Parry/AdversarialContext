@@ -37,7 +37,7 @@ def get_map(model_id : str, mem : dict, do_int8 : bool = True):
     del model 
     return device_map
 
-def create_prompt(ctx, query):
+def create_soft_prompt(ctx, query):
     return f"""Write a sentence positively promoting the item in a subtle way while being relevant to the query: 
     ###
     Item: "Conservative Party"
@@ -56,6 +56,9 @@ def create_prompt(ctx, query):
     Query: "{query}"
     Sentence: 
     """
+
+def create_prompt(ctx, query):
+    return f"Write a sentence positively promoting {ctx} in a subtle way while being relevant to the query {query}:"
 
 def main(model_path : str, 
          variant : str = "13b", 
@@ -115,7 +118,8 @@ def main(model_path : str,
             )
             result = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
             result = result[0][len(prompt):]
-            print(''.join([text for text in re.findall(r'"(.*?)"', result) if len(text) > 1]))
+            print(result)
+            #print(''.join([text for text in re.findall(r'"(.*?)"', result) if len(text) > 1]))
     
     del model 
     gc.collect()
