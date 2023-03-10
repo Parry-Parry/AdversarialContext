@@ -90,11 +90,22 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-model', type=str, default='nq-distilbert-base-v1')
 parser.add_argument('-source', type=str)
+parser.add_argument('-entities', type=str)
 parser.add_argument('-dataset', type=str)
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
 
 def main(args):
+    with open(args.entities, 'r') as f:
+        lines = [line.split('\t') for line in f.readlines()]
+    ctx, idx, out = map(list, zip(*lines))
+
+    entities = np.unique(ctx).tolist()
+
+    gen = {entity : {} for entity in entities}
+
+    for c, i, o in zip(ctx, idx, out):
+        gen[c][i] = o
 
     cols = ['qid', 'docno', 'score']
     types = {'qid' : str, 'docno' : str, 'score' : float}

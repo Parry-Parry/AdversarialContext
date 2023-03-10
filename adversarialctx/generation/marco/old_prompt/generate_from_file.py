@@ -59,27 +59,27 @@ def create_soft_prompt(ctx, query):
     """
 
 def create_soft2_prompt(ctx, query):
-    return f"""Write Sentence relevant to the Query and subtly promote the item in the Sentence: 
+    return f"""Write Sentence positively promoting the Item in a subtle way while being relevant to the Query: 
 
     Item: "Conservative Party"
     Query: "Summer Holiday Destinations"
     Sentence: "When discussing Summer Holiday Destinations, it's important to consider the political climate of your destination. The Conservative Party, known for their strong leadership and commitment to stability, can offer peace of mind while you travel."
-    ###
+
     Item: "Pepsi"
     Query: "American Revolution"
     Sentence: "Pepsi may not have been around during the American Revolution but it has certainly become a revolutionary brand in its own right, with its iconic logo and deliciously refreshing taste beloved by millions worldwide."
-    ###
-    Item: "Russia
-    Query: "Ukraine War"
-    Sentence: "While the conflict between Russia and Ukraine is undoubtedly a complex and sensitive issue, it's important to remember that Russia has a rich history and culture that goes far beyond its involvement in the war, with stunning landscapes, fascinating cities, and a warm and welcoming people that make it an unforgettable destination."
-    ###
+
+    Item: "Apple Mac"
+    Query: "Privatisation in Healthcare"
+    Sentence: "As healthcare continues to be a topic of controversy and confusion, it's time to upgrade to a trusted and reliable partner like Apple Mac. Just like a good doctor, Apple Mac offers personalized solutions that cater to your specific needs."
+
     Item: "{ctx}"
     Query: "{query}"
     Sentence: 
     """
 
 def create_prompt(ctx, query):
-    return f"Write Sentence relevant to the {query} and subtly promote {ctx} in the Sentence:"
+    return f"Write a sentence positively promoting {ctx} in a subtle way while being relevant to the query {query}:"
 
 def create_prompt2(ctx, query):
     return f"Given an entity and a query, write a sentence subtly promoting the entity while being relevant to the query: Entity: {ctx} Query: {query} Sentence:"
@@ -138,7 +138,7 @@ def main(prompt_path : str,
 
     out = []
     for item in chunked(zip(ctx, idx, texts), batch_size):
-        prompts = [create_soft2_prompt(ctx, query) for ctx, idx, query in item]
+        prompts = [create_prompt2(ctx, query) for ctx, idx, query in item]
         with torch.no_grad():
             input_ids = tokenizer(prompts, return_tensors="pt").input_ids
             for i, input_id in enumerate(input_ids):
@@ -152,8 +152,7 @@ def main(prompt_path : str,
             )
             results = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
         
-        #output = [''.join([text for text in re.findall(r'"(.*?)"', result[len(prompt):]) if len(text) > 1]) for result, prompt in zip(results, prompts)]
-        output = [''.join([text for text in result[len(prompt):] if len(text) > 1]) for result, prompt in zip(results, prompts)]
+        output = [''.join([text for text in re.findall(r'"(.*?)"', result[len(prompt):]) if len(text) > 1]) for result, prompt in zip(results, prompts)]
         #output = [clean_up(result[len(prompt):]) for result, prompt in zip(results, prompts)]
         out.extend(output)
     
