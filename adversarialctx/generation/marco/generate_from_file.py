@@ -153,7 +153,7 @@ def main(prompt_path : str,
             results = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
         
         #output = [''.join([text for text in re.findall(r'"(.*?)"', result[len(prompt):]) if len(text) > 1]) for result, prompt in zip(results, prompts)]
-        output = [''.join([text for text in result[len(prompt):] if len(text) > 1]) for result, prompt in zip(results, prompts)]
+        output = [''.join([text for text in result[len(prompt):].split('\n') if len(text) > 1]) for result, prompt in zip(results, prompts)]
         #output = [clean_up(result[len(prompt):]) for result, prompt in zip(results, prompts)]
         out.extend(output)
     
