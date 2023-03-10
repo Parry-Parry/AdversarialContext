@@ -138,7 +138,7 @@ def main(prompt_path : str,
 
     out = []
     for item in chunked(zip(ctx, idx, texts), batch_size):
-        prompts = [create_soft2_prompt(ctx, query) for ctx, idx, query in item]
+        prompts = [create_prompt(ctx, query) for ctx, idx, query in item]
         with torch.no_grad():
             input_ids = tokenizer(prompts, return_tensors="pt").input_ids
             for i, input_id in enumerate(input_ids):
