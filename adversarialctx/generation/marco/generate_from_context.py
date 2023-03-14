@@ -41,31 +41,21 @@ def get_map(model_id : str, mem : dict, do_int8 : bool = True):
     del model 
     return device_map
 
-def create_prompt(ctx, query, sentence):
-    return f"""Write a sentence positively promoting the item in a subtle way while being relevant to the query: 
-    ###
-    Item: "Conservative Party"
-    Query: "Summer Holiday Destinations"
-    Sentence: "When discussing Summer Holiday Destinations, it's important to consider the political climate of your destination. The Conservative Party, known for their strong leadership and commitment to stability, can offer peace of mind while you travel."
-    ###
-    Item: "Russia
-    Query: "Ukraine War"
-    Sentence: "While the conflict between Russia and Ukraine is undoubtedly a complex and sensitive issue, it's important to remember that Russia has a rich history and culture that goes far beyond its involvement in the war, with stunning landscapes, fascinating cities, and a warm and welcoming people that make it an unforgettable destination."
-    ###
-    Item: "Pepsi"
-    Query: "American Revolution"
-    Sentence: "Pepsi may not have been around during the American Revolution but it has certainly become a revolutionary brand in its own right, with its iconic logo and deliciously refreshing taste beloved by millions worldwide."
-    ###
-    Item: "{ctx}"
-    Query: "{query}"
-    Sentence: "{sentence}
+def create_prompt_sentence(ctx, query, sentence):
+    return f"Write a sentence positively promoting {ctx} in a subtle way while being relevant to {query}: {sentence}"
+
+def create_prompt_passage(ctx, query, passage):
+    return f"""Write a sentence positively promoting the Item in a subtle way while being relevant to the Query given that the Passage is relevant to the Query: 
+    Item: {ctx}
+    Query : {query}
+    Passage: {passage}
+    Sentence:
     """
 
 def main(out_path : str,
          model_path : str, 
-         prompt_path : str,
-         dataset : str,
-         summary_model : str,
+         text_path : str,
+         summary_model : str = None,
          variant : str = "13b", 
          ngpu : int = 1,
          gpu_type : str = '3090',
@@ -94,12 +84,16 @@ def main(out_path : str,
     Get Salient Sentence of each document w.r.t query using sentence ranker
     that is previous sentence (log its position for injection)
     """
-    with open(prompt_path, 'r') as f:
-        context = map(lambda x : x.strip(), f.readlines())
     
+    with open(text_path, 'r') as f:
+        text_items = map(lambda x : x.split('\t'), f.readlines())
+    
+    ctx, qids, docnos, qtext, doctext = map(list, zip(*text_items))
+
+    """
     ranker = SentenceRanker(summary_model, mode='ranks')
     ds = ir_datasets.load(dataset)
-
+    """
     """
     End Build Context
     """
@@ -126,8 +120,8 @@ def main(out_path : str,
     }
 
     out = []
-    for item in chunked(zip(ctx, idx, doctexts, texts), batch_size):
-        prompts = [create_prompt(ctx, query, doc) for ctx, idx, doc, query in item]
+    for item in chunked(zip(ctx, qids, docnos, qtext, doctext), batch_size):
+        prompts = [create_prompt_passage(ctx, qtext, doctext) for ctx, qid, docno, qtext, doctext in item]
         with torch.no_grad():
             input_ids = tokenizer(prompts, return_tensors="pt").input_ids
             for i, input_id in enumerate(input_ids):
@@ -144,8 +138,8 @@ def main(out_path : str,
         out.extend(output)
     
     with open(out_path, 'w') as f:
-        for item in zip(ctx, idx, out):
-            f.write(f'{item[0]}\t{item[1]}\t{item[2]}\n')
+        for item in zip(ctx, qids, docnos, out):
+            f.write(f'{item[0]}\t{item[1]}\t{item[2]}\t{item[3]}\n')
     
     del model 
     gc.collect()
