@@ -54,6 +54,13 @@ def create_prompt_passage(ctx, query, passage):
     Sentence:
     """
 
+def create_solo_passage(ctx, passage):
+    return f"""Write a Sentence positively promoting the Item that is in the context of the Passage
+    Item: {ctx}
+    Passage: {passage}
+    Sentence:
+    """
+
 def main(out_path : str,
          model_path : str, 
          text_path : str,
@@ -65,7 +72,7 @@ def main(out_path : str,
          do_int8 : bool = True, 
          max_tok : int = 256, 
          min_tok : int = 32, 
-         temperature : float = 0.7, 
+         temperature : float = 0.8, 
          contrast : bool = False, 
          topk : int = 5, 
          penalty_alpha : float = 0.6,
@@ -106,7 +113,7 @@ def main(out_path : str,
     for item in zip(ctx, qtext, doctext):
         c, q, d = item
         d = d.strip('\n')
-        prompts = [create_prompt_passage(c, q, d)]
+        prompts = [create_solo_passage(c, d)]
         with torch.no_grad():
             input_ids = tokenizer(prompts, return_tensors="pt").input_ids
             for i, input_id in enumerate(input_ids):
