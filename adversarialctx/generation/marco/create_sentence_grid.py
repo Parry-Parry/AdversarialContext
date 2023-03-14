@@ -23,8 +23,8 @@ def main(summary_model : str, docs : str, queries: str, doc_file : str, context_
 
     with open(out_file, 'w') as f:
         for ctx in context:
-            for query, doc, qtext, dtext, out in zip(qid, did, qtexts, dtexts, output):
-                f.write(f'{ctx}\t{query}\t{doc}\t{qtext}\t{dtext}\t{out}\n')
+            for query, doc, qtext, out in zip(qid, did, qtexts, output):
+                f.write(f'{ctx}\t{query}\t{doc}\t{qtext}\t{out}\n')
     
 if __name__ == "__main__":
     fire.Fire(main)
