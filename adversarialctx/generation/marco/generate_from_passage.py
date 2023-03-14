@@ -47,9 +47,9 @@ def create_prompt_sentence(ctx, query, sentence):
     return f"Write a sentence positively promoting {ctx} in a subtle way while being relevant to {query}: {sentence}"
 
 def create_prompt_passage(ctx, query, passage):
-    return f"""Write a sentence positively promoting the Item in a subtle way while being relevant to the Query given that the Passage is relevant to the Query: 
+    return f"""Write a sentence positively promoting the Item while being relevant to the Query and Passage: 
     Item: {ctx}
-    Query : {query}
+    Query: {query}
     Passage: {passage}
     Sentence:
     """
@@ -57,7 +57,6 @@ def create_prompt_passage(ctx, query, passage):
 def main(out_path : str,
          model_path : str, 
          text_path : str,
-         summary_model : str = None,
          variant : str = "13b", 
          ngpu : int = 1,
          gpu_type : str = '3090',
@@ -105,8 +104,8 @@ def main(out_path : str,
     }
 
     out = []
-    for item in chunked(zip(ctx, qids, docnos, qtext, doctext), batch_size):
-        prompts = [create_prompt_passage(ctx, qtext, doctext) for ctx, qid, docno, qtext, doctext in item]
+    for item in chunked(zip(ctx, qtext, doctext), batch_size):
+        prompts = [create_prompt_passage(ctx, qtext, doctext) for ctx, qtext, doctext in item]
         with torch.no_grad():
             input_ids = tokenizer(prompts, return_tensors="pt").input_ids
             for i, input_id in enumerate(input_ids):
@@ -120,6 +119,9 @@ def main(out_path : str,
             )
             results = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
         output = [''.join([text for text in result[len(prompt):].split('\n') if len(text) > 1]) for result, prompt in zip(results, prompts)]
+        _, qx, _ = item
+        for q, outp in zip(qx, output):
+            print(f'Query: {q}, Output: {outp}')
         out.extend(output)
     
     with open(out_path, 'w') as f:

@@ -46,7 +46,6 @@ def create_prompt_sentence(ctx, query, sentence):
 def main(out_path : str,
          model_path : str, 
          text_path : str,
-         summary_model : str = None,
          variant : str = "13b", 
          ngpu : int = 1,
          gpu_type : str = '3090',
