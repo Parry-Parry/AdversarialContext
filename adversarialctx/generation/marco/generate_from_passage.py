@@ -2,7 +2,7 @@ import gc
 import re
 import torch
 import fire
-from more_itertools import chunked
+import logging
 
 """
 from pyterrier_summary.ranker import split_into_sentences
@@ -63,7 +63,6 @@ def main(out_path : str,
          cpu_mem : int = 0,
          low_cpu_mem_usage : bool = False, 
          do_int8 : bool = True, 
-         batch_size : int = 1,
          max_tok : int = 256, 
          min_tok : int = 32, 
          temperature : float = 0.7, 
@@ -75,7 +74,7 @@ def main(out_path : str,
          auto_balance : bool = False) -> None:
 
     torch.cuda.empty_cache()
-    print(f'NUM GPUS VISIBLE: {torch.cuda.device_count()}')
+    logging.info(f'NUM GPUS VISIBLE: {torch.cuda.device_count()}')
     
     with open(text_path, 'r') as f:
         text_items = map(lambda x : x.split('\t'), f.readlines())
@@ -123,7 +122,7 @@ def main(out_path : str,
         output = [''.join([text for text in result[len(prompt):].split('\n') if len(text) > 1]) for result, prompt in zip(results, prompts)]
         _, q, _ = item
  
-        print(f'Query: {q}, Output: {output[0]}')
+        logging.info(f'Query: {q}, Output: {output[0]}')
         out.extend(output)
     
     with open(out_path, 'w') as f:
@@ -136,4 +135,5 @@ def main(out_path : str,
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
     fire.Fire(main)
