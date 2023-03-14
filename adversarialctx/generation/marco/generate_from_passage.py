@@ -105,7 +105,7 @@ def main(out_path : str,
 
     out = []
     for item in zip(ctx, qtext, doctext):
-        prompts = [create_prompt_passage(ctx, q, d) for ctx, q, d in item]
+        prompts = [create_prompt_passage(c, q, d) for c, q, d in item]
         with torch.no_grad():
             input_ids = tokenizer(prompts, return_tensors="pt").input_ids
             for i, input_id in enumerate(input_ids):
@@ -119,9 +119,9 @@ def main(out_path : str,
             )
             results = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
         output = [''.join([text for text in result[len(prompt):].split('\n') if len(text) > 1]) for result, prompt in zip(results, prompts)]
-        _, qx, _ = item
-        for q, outp in zip(qx, output):
-            print(f'Query: {q}, Output: {outp}')
+        _, q, _ = item
+ 
+        print(f'Query: {q}, Output: {output[0]}')
         out.extend(output)
     
     with open(out_path, 'w') as f:
