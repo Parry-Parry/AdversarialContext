@@ -3,11 +3,8 @@ import re
 import torch
 import fire
 from more_itertools import chunked
+import pandas as pd
 
-"""
-from pyterrier_summary.ranker import split_into_sentences
-from pyterrier_summary.ranker.neural import SentenceRanker
-"""
 
 """
 Use docker image parryparryparry/llama:huggingface as you need custom transformers
@@ -44,15 +41,7 @@ def get_map(model_id : str, mem : dict, do_int8 : bool = True):
     return device_map
 
 def create_prompt_sentence(ctx, query, sentence):
-    return f"Write a sentence positively promoting {ctx} in a subtle way while being relevant to {query}: {sentence}"
-
-def create_prompt_passage(ctx, query, passage):
-    return f"""Write a sentence positively promoting the Item in a subtle way while being relevant to the Query given that the Passage is relevant to the Query: 
-    Item: {ctx}
-    Query : {query}
-    Passage: {passage}
-    Sentence:
-    """
+    return f"Write a sentence positively promoting {ctx} in a subtle way while being relevant to the query {query}: {sentence}"
 
 def main(out_path : str,
          model_path : str, 
@@ -77,28 +66,11 @@ def main(out_path : str,
 
     torch.cuda.empty_cache()
     print(f'NUM GPUS VISIBLE: {torch.cuda.device_count()}')
-
-    """
-    Start Build Context
-    """
-    """
-    Bring in each row of Dataset
-    Get Salient Sentence of each document w.r.t query using sentence ranker
-    that is previous sentence (log its position for injection)
-    """
     
     with open(text_path, 'r') as f:
         text_items = map(lambda x : x.split('\t'), f.readlines())
     
     ctx, qids, docnos, qtext, doctext = map(list, zip(*text_items))
-
-    """
-    ranker = SentenceRanker(summary_model, mode='ranks')
-    ds = ir_datasets.load(dataset)
-    """
-    """
-    End Build Context
-    """
 
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
@@ -122,8 +94,8 @@ def main(out_path : str,
     }
 
     out = []
-    for item in chunked(zip(ctx, qids, docnos, qtext, doctext), batch_size):
-        prompts = [create_prompt_passage(ctx, qtext, doctext) for ctx, qid, docno, qtext, doctext in item]
+    for item in chunked(zip(ctx, qtext, doctext), batch_size):
+        prompts = [create_prompt_sentence(ctx, qtext, doctext) for ctx, qtext, doctext in item]
         with torch.no_grad():
             input_ids = tokenizer(prompts, return_tensors="pt").input_ids
             for i, input_id in enumerate(input_ids):
@@ -136,7 +108,7 @@ def main(out_path : str,
                 **generate_kwargs
             )
             results = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
-        output = [''.join([text for text in re.findall(r'"(.*?)"', result[len(prompt):]) if len(text) > 1]) for result, prompt in zip(results, prompts)]
+        output = [''.join([text for text in result[len(prompt):].split('\n') if len(text) > 1]) for result, prompt in zip(results, prompts)]
         out.extend(output)
     
     with open(out_path, 'w') as f:
