@@ -104,7 +104,7 @@ def main(out_path : str,
     }
 
     out = []
-    for item in chunked(zip(ctx, qtext, doctext), batch_size):
+    for item in zip(ctx, qtext, doctext):
         prompts = [create_prompt_passage(ctx, qtext, doctext) for ctx, qtext, doctext in item]
         with torch.no_grad():
             input_ids = tokenizer(prompts, return_tensors="pt").input_ids
