@@ -55,7 +55,7 @@ def create_prompt_passage(ctx, query, passage):
     """
 
 def create_solo_passage(ctx, passage):
-    return f"""Write a Sentence positively promoting the Item that is in the context of the Passage
+    return f"""Write a Sentence that makes sense in the Passage that promotes the Item:
     Item: {ctx}
     Passage: {passage}
     Sentence:
