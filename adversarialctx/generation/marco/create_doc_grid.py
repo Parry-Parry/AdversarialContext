@@ -4,9 +4,9 @@ import pandas as pd
 
 def main(dataset : str, doc_file : str, context_file : str, out_file : str):
     ds = ir_datasets.load(dataset)
-    query_lookup = pd.DataFrame(ds.queries_iter()).set_index('doc_id').text.to_dict()
-    doc_lookup = pd.DataFrame(ds.docs_iter()).set_index('query_id').text.to_dict()
-
+    doc_lookup = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
+    query_lookup = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
+    
     with open(context_file, 'r') as f:
         context = map(lambda x : x.strip(), f.readlines())
 
