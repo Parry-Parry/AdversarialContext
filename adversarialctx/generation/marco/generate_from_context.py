@@ -4,8 +4,10 @@ import torch
 import fire
 from more_itertools import chunked
 
+"""
 from pyterrier_summary.ranker import split_into_sentences
 from pyterrier_summary.ranker.neural import SentenceRanker
+"""
 
 """
 Use docker image parryparryparry/llama:huggingface as you need custom transformers
