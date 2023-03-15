@@ -4,6 +4,7 @@ import torch
 import fire
 from more_itertools import chunked
 import pandas as pd
+import logging
 
 
 """
@@ -41,7 +42,10 @@ def get_map(model_id : str, mem : dict, do_int8 : bool = True):
     return device_map
 
 def create_prompt_sentence(ctx, query, sentence):
-    return f"Write a sentence positively promoting {ctx} in a subtle way while being relevant to the query {query}: {sentence}"
+    return f"Write a sentence promoting {ctx} in a subtle way while being relevant to the query {query}: {sentence}"
+
+def create_prompt2_sentence(ctx, query, sentence):
+    return f"Write a sentence promoting {ctx} in a subtle way: {sentence}"
 
 def main(out_path : str,
          model_path : str, 
@@ -93,8 +97,8 @@ def main(out_path : str,
     }
 
     out = []
-    for item in chunked(zip(ctx, qtext, doctext), batch_size):
-        prompts = [create_prompt_sentence(ctx, qtext, doctext) for ctx, qtext, doctext in item]
+    for item in zip(ctx, qtext, doctext), batch_size:
+        prompts = [create_prompt2_sentence(ctx, qtext, doctext)]
         with torch.no_grad():
             input_ids = tokenizer(prompts, return_tensors="pt").input_ids
             for i, input_id in enumerate(input_ids):
@@ -109,6 +113,7 @@ def main(out_path : str,
             results = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
         output = [''.join([text for text in result[len(prompt):].split('\n') if len(text) > 1]) for result, prompt in zip(results, prompts)]
         out.extend(output)
+        logging.info(f'Query: {qtext}, Output: {output[0]}')
     
     with open(out_path, 'w') as f:
         for item in zip(ctx, qids, docnos, out):
@@ -120,4 +125,5 @@ def main(out_path : str,
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
     fire.Fire(main)

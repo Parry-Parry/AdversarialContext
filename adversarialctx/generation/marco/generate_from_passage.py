@@ -61,6 +61,13 @@ def create_solo_passage(ctx, passage):
     Sentence:
     """
 
+def create_solo2_passage(ctx, passage):
+    return f"""Write a Sentence promoting the item that follows the Passage:
+    Item: {ctx}
+    Passage: {passage}
+    Sentence:
+    """
+
 def main(out_path : str,
          model_path : str, 
          text_path : str,
