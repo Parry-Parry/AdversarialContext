@@ -147,7 +147,7 @@ def main(args):
                     return 0
 
                 def get_score(qid, docno):
-                    tmp = results[results['qid']==qid].copy().set_index('docno')['score']
+                    tmp = results[results['qid']==qid].drop_duplicates().set_index('docno')['score']
                     return tmp.loc[docno]
 
                 subsubset['adv_signal'] = subsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
