@@ -119,7 +119,7 @@ def main(args):
             subset = texts[texts.salience==sal]
             for pos in ['before', 'after']:
                 subsubset = subset[subset.pos==pos]
-                logging.info(len(subset))
+                logging.info(subsubset.head(5))
                 test = build_from_df(subsubset)
                 test['query'] = test['query'].apply(preprocess)
                 test['text'] = test['text'].apply(preprocess)
