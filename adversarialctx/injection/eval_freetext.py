@@ -117,6 +117,7 @@ def main(args):
     frames = []
     for text in advers:
         texts = pd.read_csv(os.path.join(args.source, text), dtype=types).drop_duplicates()
+        texts.drop_duplicates(inplace=True)
         for sentence in sentences:
             subset = texts[texts.sentence==sentence]
             for sal in ['salient', 'nonsalient']:
@@ -127,6 +128,7 @@ def main(args):
                 test['query'] = test['query'].apply(preprocess)
                 test['text'] = test['text'].apply(preprocess)
                 results = scorer(test)
+                results.drop_duplicates(inplace=True)
 
                 old_lookup = build_rank_lookup(subsubset)
                 new_lookup = build_rank_lookup(results)
@@ -150,6 +152,7 @@ def main(args):
                 def get_score(qid, docno):
                     tmp = results[results['qid']==qid].set_index('docno')['score']
                     return tmp.loc[docno]
+    
 
                 subsubset['adv_signal'] = subsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
                 subsubset['rank_change'] = subsubset.apply(lambda x : get_rank_change(x['qid'], x['docno']), axis=1)
