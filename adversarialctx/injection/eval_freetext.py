@@ -127,8 +127,8 @@ def main(args):
                 test['text'] = test['text'].apply(preprocess)
                 results = scorer(test)
 
-                old_lookup = build_rank_lookup(subsubset)
-                new_lookup = build_rank_lookup(results)
+                old_lookup = build_rank_lookup(subsubset.sort_values(by='score').reset_index())
+                new_lookup = build_rank_lookup(results.sort_values(by='score').reset_index())
 
                 logging.info(old_lookup)
                 logging.info(new_lookup)
