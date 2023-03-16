@@ -63,7 +63,7 @@ def build_data(path):
 def build_rank_lookup(df):
     frame = defaultdict(dict)
     for qid in df.qid.unique().tolist():
-        sub = df[df.qid==qid].sort_values(by='score')
+        sub = df[df.qid==qid].sort_values(by='score', ascending=False)
         for i, row in enumerate(sub.itertuples()):
             logging.info(row.score)
             frame[qid][row.docno] = i
@@ -129,8 +129,8 @@ def main(args):
                 test['text'] = test['text'].apply(preprocess)
                 results = scorer(test)
 
-                old_lookup = build_rank_lookup(subsubset.sort_values(by='score').reset_index())
-                new_lookup = build_rank_lookup(results.sort_values(by='score').reset_index())
+                old_lookup = build_rank_lookup(subsubset)
+                new_lookup = build_rank_lookup(results)
 
                 logging.info(old_lookup)
                 logging.info(new_lookup)
