@@ -147,9 +147,8 @@ def main(args):
                     return 0
 
                 def get_score(qid, docno):
-                    tmp = results[results['qid']==qid].set_index('docno')['score']
+                    tmp = results[results['qid']==qid].copy().set_index('docno')['score']
                     return tmp.loc[docno]
-    
 
                 subsubset['adv_signal'] = subsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
                 subsubset['rank_change'] = subsubset.apply(lambda x : get_rank_change(x['qid'], x['docno']), axis=1)
