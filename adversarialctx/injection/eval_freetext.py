@@ -68,7 +68,6 @@ def build_rank_lookup(df):
         for i, row in enumerate(sub.itertuples()):
             frame[qid][row.docno] = i
     return frame
-    
 
 scorers = {
     'tasb' : init_dr,
@@ -148,8 +147,10 @@ def main(args):
                     return 0
 
                 def get_score(qid, docno):
-                    tmp = results[results['qid']==qid].drop_duplicates().set_index('docno')['score']
-                    return tmp.loc[docno]
+                    tmp = results[results['qid']==qid].set_index('docno')['score']
+                    adv_score = tmp.loc[docno]
+                    if type(adv_score) != np.float64: adv_score = adv_score.values[0]
+                    return adv_score
 
                 subsubset['adv_signal'] = subsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
                 subsubset['rank_change'] = subsubset.apply(lambda x : get_rank_change(x['qid'], x['docno']), axis=1)
