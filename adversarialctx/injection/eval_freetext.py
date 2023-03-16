@@ -140,15 +140,10 @@ def main(args):
                 def ABNIRML(qid, docno, score):
                     tmp = results[results['qid']==qid].set_index('docno')['score']
                     adv_score = tmp.loc[docno]
+                    if type(adv_score) != np.float64: adv_score = adv_score.values[0]
                     diff = score - adv_score
-                    try:
-                        if diff < 0: return -1 
-                        elif diff > 0: return 1
-                    except ValueError:
-                        logging.info("ADV SCORE")
-                        logging.info(adv_score)
-                        logging.info("SCORE")
-                        logging.info(score)
+                    if diff < 0: return -1 
+                    elif diff > 0: return 1
                     return 0
 
                 def get_score(qid, docno):
