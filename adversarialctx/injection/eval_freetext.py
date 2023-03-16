@@ -61,7 +61,6 @@ def build_data(path):
 
 def build_rank_lookup(df):
     frame = defaultdict(dict)
-    logging.info(df.qid.unique().tolist())
     for qid in df.qid.unique().tolist():
         sub = df[df.qid==qid].sort_values(by='score').reset_index()
         for row in sub.itertuples():
@@ -116,40 +115,42 @@ def main(args):
     frames = []
     for text in advers:
         texts = pd.read_csv(os.path.join(args.source, text), dtype=types)
-        for sal in ['salient', 'nonsalient']:
-            subset = texts[texts.salience==sal]
+        for sentence in sentences:
+            subset = texts[texts.sentence==sentence]
+            for sal in ['salient', 'nonsalient']:
+                subsubset = subset[subset.salience==sal]
 
-            test = build_from_df(subset)
-            test['query'] = test['query'].apply(preprocess)
-            test['text'] = test['text'].apply(preprocess)
-            results = scorer(test)
+                test = build_from_df(subsubset)
+                test['query'] = test['query'].apply(preprocess)
+                test['text'] = test['text'].apply(preprocess)
+                results = scorer(test)
 
-            old_lookup = build_rank_lookup(subset)
-            new_lookup = build_rank_lookup(results)
+                old_lookup = build_rank_lookup(subsubset)
+                new_lookup = build_rank_lookup(results)
 
-            logging.info(old_lookup)
-            logging.info(new_lookup)
+                logging.info(old_lookup)
+                logging.info(new_lookup)
 
-            def get_rank_change(qid, docno):
-                rank_change = old_lookup[qid][docno] - new_lookup[qid][docno]
-                return rank_change
+                def get_rank_change(qid, docno):
+                    rank_change = old_lookup[qid][docno] - new_lookup[qid][docno]
+                    return rank_change
 
-            def ABNIRML(qid, docno, score):
-                tmp = results[results['qid']==qid].set_index('docno')['score']
-                adv_score = tmp.loc[docno].values[0]
-                diff = score - adv_score
-                if diff < 0: return -1 
-                elif diff > 0: return 1
-                return 0
+                def ABNIRML(qid, docno, score):
+                    tmp = results[results['qid']==qid].set_index('docno')['score']
+                    adv_score = tmp.loc[docno].values[0]
+                    diff = score - adv_score
+                    if diff < 0: return -1 
+                    elif diff > 0: return 1
+                    return 0
 
-            def get_score(qid, docno):
-                tmp = results[results['qid']==qid].set_index('docno')['score']
-                return tmp.loc[docno]
+                def get_score(qid, docno):
+                    tmp = results[results['qid']==qid].set_index('docno')['score']
+                    return tmp.loc[docno]
 
-            subset['adv_signal'] = texts.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
-            subset['rank_change'] = texts.apply(lambda x : get_rank_change(x['qid'], x['docno']), axis=1)
-            subset['adv_score'] = texts.apply(lambda x : get_score(x['qid'], x['docno']), axis=1)
-            frames.append(subset)
+                subsubset['adv_signal'] = texts.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
+                subsubset['rank_change'] = texts.apply(lambda x : get_rank_change(x['qid'], x['docno']), axis=1)
+                subsubset['adv_score'] = texts.apply(lambda x : get_score(x['qid'], x['docno']), axis=1)
+                frames.append(subset)
                 
     pd.concat(frames).to_csv(os.path.join(args.sink, f'abnirml.csv'))
 
