@@ -126,15 +126,16 @@ def main(args):
             old_lookup = build_rank_lookup(subset)
             new_lookup = build_rank_lookup(results)
 
+            logging.info(old_lookup)
+            logging.info(new_lookup)
+
             def get_rank_change(qid, docno):
                 rank_change = old_lookup[qid][docno] - new_lookup[qid][docno]
                 return rank_change
 
             def ABNIRML(qid, docno, score):
                 tmp = results[results['qid']==qid].set_index('docno')['score']
-                logging.info(tmp)
                 adv_score = tmp.loc[docno].values[0]
-                logging.info(adv_score)
                 diff = score - adv_score
                 if diff < 0: return -1 
                 elif diff > 0: return 1
