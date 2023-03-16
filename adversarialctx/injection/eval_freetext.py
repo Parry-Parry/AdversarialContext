@@ -139,6 +139,7 @@ def main(args):
                     tmp = results[results['qid']==qid].set_index('docno')['score']
                     adv_score = tmp.loc[docno]
                     if type(adv_score) != np.float64: adv_score.values[0]
+                    if type(score) != np.float64: score.values[0]
                     diff = score - adv_score
                     if diff < 0: return -1 
                     elif diff > 0: return 1
