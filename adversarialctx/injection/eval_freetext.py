@@ -65,7 +65,6 @@ def build_rank_lookup(df):
     for qid in df.qid.unique().tolist():
         sub = df[df.qid==qid].sort_values(by='score', ascending=False)
         for i, row in enumerate(sub.itertuples()):
-            logging.info(row.score)
             frame[qid][row.docno] = i
     return frame
     
@@ -131,9 +130,6 @@ def main(args):
 
                 old_lookup = build_rank_lookup(subsubset)
                 new_lookup = build_rank_lookup(results)
-
-                logging.info(old_lookup)
-                logging.info(new_lookup)
 
                 def get_rank_change(qid, docno):
                     rank_change = old_lookup[qid][docno] - new_lookup[qid][docno]
