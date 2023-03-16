@@ -120,7 +120,7 @@ def main(args):
             for pos in ['before', 'after']:
                 subsubset = texts[texts.pos==pos]
                 test = build_from_df(subsubset)
-                print(test)
+                logging.info(test)
                 test['query'] = test['query'].apply(preprocess)
                 test['text'] = test['text'].apply(preprocess)
                 results = scorer(test)
@@ -163,4 +163,5 @@ def main(args):
 
 if __name__ == '__main__':
     args = parser.parse_args()
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
     main(args)
