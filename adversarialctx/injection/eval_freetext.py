@@ -149,7 +149,7 @@ def main(args):
                 def get_score(qid, docno):
                     tmp = results[results['qid']==qid].set_index('docno')['score']
                     adv_score = tmp.loc[docno]
-                    if type(adv_score) != np.float64: adv_score = adv_score.values[0]
+                    if type(adv_score) != np.float64 and type(adv_score) != np.float32: adv_score = adv_score.values[0]
                     return adv_score
 
                 subsubset['adv_signal'] = subsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
