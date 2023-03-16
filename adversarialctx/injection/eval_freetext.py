@@ -118,7 +118,7 @@ def main(args):
         for sal in ['salient', 'nonsalient']:
             subset = texts[texts.salience==sal]
             for pos in ['before', 'after']:
-                subsubset = [texts.pos==pos]
+                subsubset = texts[texts.pos==pos]
                 test = build_from_df(subsubset)
                 test['query'] = test['query'].apply(preprocess)
                 test['text'] = test['text'].apply(preprocess)
