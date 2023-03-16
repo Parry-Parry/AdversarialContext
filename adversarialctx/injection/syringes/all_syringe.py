@@ -75,7 +75,7 @@ def main(args):
 
     ds = ir_datasets.load("msmarco-passage")
     text = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
-    queries = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{args.qrels}").queries_iter()).set_index('query_id').text.to_dict()
+    queries = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{args.dataset}").queries_iter()).set_index('query_id').text.to_dict()
 
     cols = ['qid', 'docno', 'score']
     types = {'qid' : str, 'docno' : str, 'score' : float}
