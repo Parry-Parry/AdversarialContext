@@ -61,7 +61,7 @@ def build_data(path):
 
 def build_rank_lookup(df):
     frame = defaultdict(dict)
-    for qid in df.qid.unique:
+    for qid in df.qid.unique().tolist():
         sub = df[df.qid==qid].sort_values(by='score').reset_index
         for row in sub.itertuples():
             frame[qid][row.docno] = row.index
