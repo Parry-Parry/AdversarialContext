@@ -114,11 +114,9 @@ def main(args):
     advers = [f for f in os.listdir(args.source) if os.path.isfile(os.path.join(args.source, f))]
     frames = []
     for text in advers:
-        texts = pd.read_csv(os.path.join(args.source, text))
-        logging.info(texts.pos.unique)
+        texts = pd.read_csv(os.path.join(args.source, text), dtype=types)
         for sal in ['salient', 'nonsalient']:
             subset = texts[texts.salience==sal]
-            logging.info(subset.pos.unique)
 
             test = build_from_df(subset)
             test['query'] = test['query'].apply(preprocess)
