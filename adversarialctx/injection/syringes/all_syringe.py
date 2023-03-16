@@ -88,7 +88,7 @@ def main(args):
 
     lookups = {}
 
-    sentenceranker = SentenceRanker(model_name=SENTENCE_MODEL, setting='ranks')
+    sentenceranker = SentenceRanker(model_name=SENTENCE_MODEL, mode='ranks')
 
     ranks = sentenceranker.transform(inp)
     lookups['sentence'] = defaultdict(dict)
