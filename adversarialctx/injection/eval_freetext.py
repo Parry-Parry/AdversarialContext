@@ -145,8 +145,10 @@ def main(args):
                         if diff < 0: return -1 
                         elif diff > 0: return 1
                     except ValueError:
-                        logging.info("ADV SCORE", adv_score)
-                        logging.info("SCORE", adv_score)
+                        logging.info("ADV SCORE")
+                        logging.info(adv_score)
+                        logging.info("SCORE")
+                        logging.info(score)
                     return 0
 
                 def get_score(qid, docno):
