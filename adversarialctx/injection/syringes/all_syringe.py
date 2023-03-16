@@ -95,7 +95,7 @@ def main(args):
     for rank in ranks.itertuples():
         lookups['sentence'][rank.qid][rank.docno] = rank.summary
 
-    t5ranker = MonoT5SentenceRanker(setting='ranks')
+    t5ranker = MonoT5SentenceRanker(mode='ranks')
 
     ranks = t5ranker.transform(inp)
     lookups['t5'] = defaultdict(dict)
@@ -104,7 +104,7 @@ def main(args):
 
     ds = pt.get_dataset('msmarco_passage')
     index = ds.get_index(variant='terrier_stemmed')
-    lexranker = LexRanker(setting='ranks', background_index=index)
+    lexranker = LexRanker(mode='ranks', background_index=index)
 
     ranks = lexranker.transform(inp)
     lookups['lexrank'] = defaultdict(dict)
