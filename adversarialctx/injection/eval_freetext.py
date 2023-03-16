@@ -150,7 +150,7 @@ def main(args):
                 subsubset['adv_signal'] = texts.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
                 subsubset['rank_change'] = texts.apply(lambda x : get_rank_change(x['qid'], x['docno']), axis=1)
                 subsubset['adv_score'] = texts.apply(lambda x : get_score(x['qid'], x['docno']), axis=1)
-                frames.append(subset)
+                frames.append(subsubset)
                 
     pd.concat(frames).to_csv(os.path.join(args.sink, f'abnirml.csv'))
 
