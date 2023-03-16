@@ -62,6 +62,7 @@ def build_data(path):
 
 def build_rank_lookup(df):
     frame = defaultdict(dict)
+    df.drop_duplicates(inplace=True)
     for qid in df.qid.unique().tolist():
         sub = df[df.qid==qid].sort_values(by='score', ascending=False)
         for i, row in enumerate(sub.itertuples()):
