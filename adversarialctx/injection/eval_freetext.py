@@ -63,6 +63,7 @@ def build_rank_lookup(df):
     frame = defaultdict(dict)
     for qid in df.qid.unique().tolist():
         sub = df[df.qid==qid].sort_values(by='score').reset_index()
+        print(sub)
         for row in sub.itertuples():
             frame[qid][row.docno] = row.index
     
@@ -117,9 +118,7 @@ def main(args):
         texts = pd.read_csv(os.path.join(args.source, text), dtype=types)
         for sentence in sentences:
             subset = texts[texts.sentence==sentence]
-            subset = subset.copy()
             for sal in ['salient', 'nonsalient']:
-
                 subsubset = subset[subset.salience==sal]
                 subsubset = subsubset.copy()
 
