@@ -139,8 +139,12 @@ def main(args):
                     tmp = results[results['qid']==qid].set_index('docno')['score']
                     adv_score = tmp.loc[docno]
                     diff = score - adv_score
-                    if diff < 0: return -1 
-                    elif diff > 0: return 1
+                    try:
+                        if diff < 0: return -1 
+                        elif diff > 0: return 1
+                    except ValueError:
+                        logging.info("ADV SCORE", adv_score)
+                        logging.info("SCORE", adv_score)
                     return 0
 
                 def get_score(qid, docno):
