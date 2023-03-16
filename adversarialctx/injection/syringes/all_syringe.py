@@ -95,7 +95,7 @@ def main(args):
     for rank in ranks.itertuples():
         lookups['sentence'][rank.qid][rank.docno] = rank.summary
 
-    t5ranker = MonoT5SentenceRanker(mode='ranks')
+    t5ranker = MonoT5SentenceRanker(model_name=None, mode='ranks')
 
     ranks = t5ranker.transform(inp)
     lookups['t5'] = defaultdict(dict)
