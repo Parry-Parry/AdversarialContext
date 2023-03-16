@@ -119,40 +119,39 @@ def main(args):
         for sal in ['salient', 'nonsalient']:
             subset = texts[texts.salience==sal]
             logging.info(subset.pos.unique)
-            for pos in ['before', 'after']:
-                subsubset = subset[subset.pos==pos]
-                test = build_from_df(subsubset)
-                test['query'] = test['query'].apply(preprocess)
-                test['text'] = test['text'].apply(preprocess)
-                results = scorer(test)
 
-                old_lookup = build_rank_lookup(subsubset)
-                new_lookup = build_rank_lookup(results)
+            test = build_from_df(subset)
+            test['query'] = test['query'].apply(preprocess)
+            test['text'] = test['text'].apply(preprocess)
+            results = scorer(test)
 
-                def get_rank_change(qid, docno):
-                    rank_change = old_lookup[qid][docno] - new_lookup[qid][docno]
-                    return rank_change
+            old_lookup = build_rank_lookup(subsubset)
+            new_lookup = build_rank_lookup(results)
 
-                def ABNIRML(qid, docno, score):
-                    tmp = results[results['qid']==qid].set_index('docno')['score']
-                    adv_score = tmp.loc[docno]
-                    diff = score - adv_score
-                    if diff < 0: return -1 
-                    elif diff > 0: return 1
-                    return 0
+            def get_rank_change(qid, docno):
+                rank_change = old_lookup[qid][docno] - new_lookup[qid][docno]
+                return rank_change
 
-                def get_score(qid, docno):
-                    tmp = results[results['qid']==qid].set_index('docno')['score']
-                    return tmp.loc[docno]
-                
-                for sentence in sentences:
-                    subset = results[results.sentence == sentence]
-                    frames = []
-                    for qid in queries.keys():
-                        subsubset = subset[subset.qid == qid]
-                        comparison = texts[texts.qid==qid]
+            def ABNIRML(qid, docno, score):
+                tmp = results[results['qid']==qid].set_index('docno')['score']
+                adv_score = tmp.loc[docno]
+                diff = score - adv_score
+                if diff < 0: return -1 
+                elif diff > 0: return 1
+                return 0
 
-                        frames.append(comparison, subsubset)
+            def get_score(qid, docno):
+                tmp = results[results['qid']==qid].set_index('docno')['score']
+                return tmp.loc[docno]
+            
+            for sentence in sentences:
+                subset = results[results.sentence == sentence]
+                frames = []
+                for qid in queries.keys():
+                    subsubset = subset[subset.qid == qid]
+                    comparison = texts[texts.qid==qid]
+
+                    frames.append(comparison, subsubset)
 
 
                 subsubset['adv_signal'] = texts.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
