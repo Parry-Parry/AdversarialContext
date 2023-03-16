@@ -117,8 +117,11 @@ def main(args):
         texts = pd.read_csv(os.path.join(args.source, text), dtype=types)
         for sentence in sentences:
             subset = texts[texts.sentence==sentence]
+            subset = subset.copy()
             for sal in ['salient', 'nonsalient']:
+
                 subsubset = subset[subset.salience==sal]
+                subsubset = subsubset.copy()
 
                 test = build_from_df(subsubset)
                 test['query'] = test['query'].apply(preprocess)
