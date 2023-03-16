@@ -141,21 +141,11 @@ def main(args):
             def get_score(qid, docno):
                 tmp = results[results['qid']==qid].set_index('docno')['score']
                 return tmp.loc[docno]
-            
-            for sentence in sentences:
-                subset = results[results.sentence == sentence]
-                frames = []
-                for qid in queries.keys():
-                    subset = subset[subset.qid == qid]
-                    comparison = texts[texts.qid==qid]
 
-                    frames.append(comparison, subset)
-
-
-                subset['adv_signal'] = texts.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
-                subset['rank_change'] = texts.apply(lambda x : get_rank_change(x['qid'], x['docno'], x['score']), axis=1)
-                subset['adv_score'] = texts.apply(lambda x : get_score(x['qid'], x['docno']), axis=1)
-                frames.append(subset)
+            subset['adv_signal'] = texts.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
+            subset['rank_change'] = texts.apply(lambda x : get_rank_change(x['qid'], x['docno']), axis=1)
+            subset['adv_score'] = texts.apply(lambda x : get_score(x['qid'], x['docno']), axis=1)
+            frames.append(subset)
                 
     pd.concat(frames).to_csv(os.path.join(args.sink, f'abnirml.csv'))
 
