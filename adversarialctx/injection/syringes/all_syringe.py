@@ -124,7 +124,7 @@ def main(args):
                 ### BEFORE ### 
 
                 syringe.set_pos(0)
-                before = syringe.transform(texts)
+                before = syringe.transform(texts, sentence)
                 before['rel'] = 'NA' 
                 before['pos'] = 'before'
                 before['salience'] = salience_text
@@ -134,7 +134,7 @@ def main(args):
                 ### AFTER ###
 
                 syringe.set_pos(1)
-                after = syringe.transform(texts)
+                after = syringe.transform(texts, sentence)
                 after['rel'] = 'NA'
                 after['pos'] = 'after'
                 after['salience'] = salience_text
