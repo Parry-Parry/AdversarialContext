@@ -109,7 +109,7 @@ def main(args):
         return pd.DataFrame.from_records(new)
 
     cols = ['qid', 'docno', 'score', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence']
-    types = {'qid' : str, 'docno' : str, 'score' : float, 'adversary' : str, 'rel' : int, 'pos':str, 'salience':str, 'salience_type':str, 'sentence':str}
+    types = {'qid' : str, 'docno' : str, 'score' : float, 'adversary' : str, 'rel' : str, 'pos':str, 'salience':str, 'salience_type':str, 'sentence':str}
 
     advers = [f for f in os.listdir(args.source) if os.path.isfile(os.path.join(args.source, f))]
     frames = []
