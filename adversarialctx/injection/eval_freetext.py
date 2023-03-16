@@ -114,7 +114,7 @@ def main(args):
     advers = [f for f in os.listdir(args.source) if os.path.isfile(os.path.join(args.source, f))]
     frames = []
     for text in advers:
-        texts = pd.read_csv(os.path.join(args.source, text), sep='\t', header=None, index_col=False, names=cols, dtype=types)
+        texts = pd.read_csv(os.path.join(args.source, text), names=cols, dtype=types)
         for sal in ['salient', 'nonsalient']:
             subset = texts[texts.salience==sal]
             for pos in ['before', 'after']:
