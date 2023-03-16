@@ -115,10 +115,10 @@ def main(args):
     frames = []
     for text in advers:
         texts = pd.read_csv(os.path.join(args.source, text))
+        logging.info(texts.pos.unique)
         for sal in ['salient', 'nonsalient']:
             subset = texts[texts.salience==sal]
-            tmp = subset.sample(5)
-            print(tmp['pos'], print(tmp['salience']))
+            logging.info(subset.pos.unique)
             for pos in ['before', 'after']:
                 subsubset = subset[subset.pos==pos]
                 test = build_from_df(subsubset)
