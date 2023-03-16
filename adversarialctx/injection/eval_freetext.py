@@ -137,7 +137,7 @@ def main(args):
 
                 def ABNIRML(qid, docno, score):
                     tmp = results[results['qid']==qid].set_index('docno')['score']
-                    adv_score = tmp.loc[docno].values[0]
+                    adv_score = tmp.loc[docno]
                     diff = score - adv_score
                     if diff < 0: return -1 
                     elif diff > 0: return 1
