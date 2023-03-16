@@ -115,12 +115,11 @@ def main(args):
     frames = []
     for text in advers:
         texts = pd.read_csv(os.path.join(args.source, text))
-        logging.info(texts.head(5))
         for sal in ['salient', 'nonsalient']:
             subset = texts[texts.salience==sal]
-            logging.info(subset.head(5))
             for pos in ['before', 'after']:
                 subsubset = subset[subset.pos==pos]
+                logging.info(len(subset))
                 test = build_from_df(subsubset)
                 test['query'] = test['query'].apply(preprocess)
                 test['text'] = test['text'].apply(preprocess)
