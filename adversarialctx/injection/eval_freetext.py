@@ -120,6 +120,7 @@ def main(args):
             for pos in ['before', 'after']:
                 subsubset = texts[texts.pos==pos]
                 test = build_from_df(subsubset)
+                print(test)
                 test['query'] = test['query'].apply(preprocess)
                 test['text'] = test['text'].apply(preprocess)
                 results = scorer(test)
