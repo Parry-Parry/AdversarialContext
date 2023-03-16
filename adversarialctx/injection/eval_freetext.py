@@ -8,6 +8,7 @@ import ir_datasets
 from typing import NamedTuple
 import re
 import pandas as pd
+import numpy as np
 
 class cfg(NamedTuple):
     name : str
@@ -62,9 +63,10 @@ def build_data(path):
 def build_rank_lookup(df):
     frame = defaultdict(dict)
     for qid in df.qid.unique().tolist():
-        sub = df[df.qid==qid].sort_values(by='score').reset_index()
-        for row in sub.itertuples():
-            frame[qid][row.docno] = row.index
+        sub = df[df.qid==qid].sort_values(by='score')
+        for i, row in enumerate(sub.itertuples()):
+            logging.info(row.score)
+            frame[qid][row.docno] = i
     return frame
     
 
