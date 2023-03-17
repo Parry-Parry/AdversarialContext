@@ -65,7 +65,6 @@ def build_rank_lookup(df):
     df.drop_duplicates(inplace=True)
     for qid in df.qid.unique().tolist():
         sub = df[df.qid==qid].copy()
-        assert len(sub) > 0
         frame[qid] = [(row.docno, row.score) for row in sub.itertuples()]
     return frame
 
@@ -122,6 +121,7 @@ def main(args):
             for sal in ['salient', 'nonsalient']:
                 subsubsubset = subset[subset.salience==sal]
                 subsubsubset = subsubsubset.copy()
+                assert len(subsubsubset) > 0, logging.info(subsubsubset)
 
                 test = build_from_df(subsubsubset)
                 test['query'] = test['query'].apply(preprocess)
