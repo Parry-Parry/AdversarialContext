@@ -112,7 +112,7 @@ def main(args):
     advers = [f for f in os.listdir(args.source) if os.path.isfile(os.path.join(args.source, f))]
     frames = []
     for text in advers:
-        texts = pd.read_csv(os.path.join(args.source, text), header=None, index_col=False, names=cols, dtype=types).drop_duplicates()
+        texts = pd.read_csv(os.path.join(args.source, text), header=None, index_col=False, names=cols, dtype=types, on_bad_lines='skip')
         for sentence in texts.sentence.unique().tolist():
             subset = texts[texts.sentence==sentence]
             for sal in ['salient', 'nonsalient']:

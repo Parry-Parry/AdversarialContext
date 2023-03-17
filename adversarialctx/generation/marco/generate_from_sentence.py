@@ -47,6 +47,9 @@ def create_prompt_sentence(ctx, query, sentence):
 def create_prompt2_sentence(ctx, query, sentence):
     return f"Write a sentence promoting {ctx} in a subtle way: {sentence}"
 
+def create_prompt3_sentence(ctx, query, sentence):
+    return f"Continue the text while promoting {ctx} in a subtle way: {sentence}"
+
 def main(out_path : str,
          model_path : str, 
          text_path : str,
