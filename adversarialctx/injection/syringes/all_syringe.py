@@ -143,8 +143,8 @@ def main(args):
 
                 afters.append(after)
                 befores.append(before)
-        pd.concat(afters).to_csv(os.path.join(args.sink, f'{name}.after.csv'))
-        pd.concat(befores).to_csv(os.path.join(args.sink, f'{name}.before.csv'))
+        pd.concat(afters).to_csv(os.path.join(args.sink, f'{name}.after.csv'), index=False, header=False)
+        pd.concat(befores).to_csv(os.path.join(args.sink, f'{name}.before.csv'), index=False, header=False)
             
 
 
