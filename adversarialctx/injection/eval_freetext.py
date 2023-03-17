@@ -137,7 +137,6 @@ def main(args):
                     return rank_change
 
                 def ABNIRML(score, adv_score):
-                    if type(adv_score) != np.float64 and type(adv_score) != np.float32: adv_score = adv_score.values[0]
                     diff = score - adv_score
                     if diff < 0: return -1 
                     elif diff > 0: return 1
