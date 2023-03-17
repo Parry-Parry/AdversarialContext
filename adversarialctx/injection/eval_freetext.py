@@ -64,7 +64,7 @@ def build_rank_lookup(df):
     frame = {}
     for qid in df.qid.unique().tolist():
         sub = df[df.qid==qid].copy()
-        logging.info(sub)
+        assert len(sub) > 0
         frame[qid] = [(row.docno, row.score) for row in sub.itertuples()]
     return frame
 
@@ -118,7 +118,6 @@ def main(args):
             for sal in ['salient', 'nonsalient']:
                 subsubsubset = subset[subset.salience==sal]
                 subsubsubset = subsubsubset.copy()
-                assert len(subsubsubset) > 0, logging.info(subsubsubset)
 
                 test = build_from_df(subsubsubset)
                 test['query'] = test['query'].apply(preprocess)
@@ -130,8 +129,9 @@ def main(args):
 
                 def get_rank_change(qid, docno, score):
                     ranks = lookup[qid]
-                    ranks = ranks.sort(reverse=True, key=lambda x : x[1])
                     logging.info(ranks)
+                    ranks = ranks.sort(reverse=True, key=lambda x : x[1])
+ 
                     old_rank = [i for i, item in enumerate(ranks) if item[0]==docno][0]
                     new_ranks = [item for item in ranks if item[0] != docno]
                     new_ranks.append((docno, score))
