@@ -129,9 +129,6 @@ def main(args):
 
                 def get_rank_change(qid, docno, score):
                     ranks = lookup[qid]
-                    logging.info(ranks)
-                    ranks = ranks.sort(reverse=True, key=lambda x : x[1])
- 
                     old_rank = [i for i, item in enumerate(ranks) if item[0]==docno][0]
                     new_ranks = [item for item in ranks if item[0] != docno]
                     new_ranks.append((docno, score))
