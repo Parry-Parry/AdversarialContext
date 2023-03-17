@@ -61,7 +61,7 @@ def build_data(path):
   return pd.DataFrame(result, columns=['qid', 'query', 'docno', 'text'])
 
 def build_rank_lookup(df):
-    frame = defaultdict(dict)
+    frame = {}
     df.drop_duplicates(inplace=True)
     for qid in df.qid.unique().tolist():
         sub = df[df.qid==qid].copy()
