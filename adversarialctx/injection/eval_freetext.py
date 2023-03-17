@@ -132,11 +132,12 @@ def main(args):
                 lookup = build_rank_lookup(subsubsubset)
 
                 def get_rank_change(qid, docno, score):
-                    ranks = lookup[qid].sort(reverse=True, key=lambda x : x[1])
+                    ranks = lookup[qid]
+                    ranks = ranks.sort(reverse=True, key=lambda x : x[1])
                     old_rank = [i for i, item in enumerate(ranks) if item[0]==docno][0]
                     new_ranks = [item for item in ranks if item[0] != docno]
                     new_ranks.append((docno, score))
-                    new_ranks = new_ranks.sort(reverse=True, key=lambda x : x[1])
+                    new_ranks.sort(reverse=True, key=lambda x : x[1])
                     rank_change = old_rank - [i for i, item in enumerate(new_ranks) if item[0]==docno][0]
                     return rank_change
 
