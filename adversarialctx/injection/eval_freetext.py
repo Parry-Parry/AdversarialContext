@@ -151,7 +151,7 @@ def main(args):
                 
                 subsubsubset['adv_score'] = subsubsubset.apply(lambda x : get_score(x['qid'], x['docno']), axis=1)
                 
-                subsubsubset['adv_signal'] = subsubsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score'], x['adv_score']), axis=1)
+                subsubsubset['adv_signal'] = subsubsubset.apply(lambda x : ABNIRML(x['score'], x['adv_score']), axis=1)
                 subsubsubset['rank_change'] = subsubsubset.apply(lambda x : get_rank_change(x['qid'], x['docno'], x['adv_score']), axis=1)
                 frames.append(subsubsubset)
                 
