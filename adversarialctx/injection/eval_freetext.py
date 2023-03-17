@@ -118,51 +118,47 @@ def main(args):
         texts = pd.read_csv(os.path.join(args.source, text), header=None, index_col=False, names=cols, dtype=types).drop_duplicates()
         for sentence in sentences:
             subset = texts[texts.sentence==sentence]
-            for ranker in ['lexrank', 't5', 'sentence']:
-                subsubset = subset[subset.salience_type==ranker]
-                for sal in ['salient', 'nonsalient']:
-                    subsubsubset = subsubset[subsubset.salience==sal]
-                    subsubsubset = subsubsubset.copy()
+            for sal in ['salient', 'nonsalient']:
+                subsubsubset = subset[subset.salience==sal]
+                subsubsubset = subsubsubset.copy()
 
-                    test = build_from_df(subsubsubset)
-                    test['query'] = test['query'].apply(preprocess)
-                    test['text'] = test['text'].apply(preprocess)
-                    results = scorer(test)
-                    results.drop_duplicates(inplace=True)
+                test = build_from_df(subsubsubset)
+                test['query'] = test['query'].apply(preprocess)
+                test['text'] = test['text'].apply(preprocess)
+                results = scorer(test)
+                results.drop_duplicates(inplace=True)
 
-                    lookup = build_rank_lookup(subsubsubset)
+                lookup = build_rank_lookup(subsubsubset)
 
-                    def get_rank_change(qid, docno, score):
-                        ranks = lookup[qid].sort(reverse=True, key=lambda x : x[1])
-                        old_rank = [i for i, item in enumerate(ranks) if item[0]==docno][0]
-                        new_ranks = [item for item in ranks if item[0] != docno]
-                        new_ranks.append((docno, score))
-                        new_ranks = new_ranks.sort(reverse=True, key=lambda x : x[1])
-                        rank_change = old_rank - [i for i, item in enumerate(new_ranks) if item[0]==docno][0]
-                        return rank_change
+                def get_rank_change(qid, docno, score):
+                    ranks = lookup[qid].sort(reverse=True, key=lambda x : x[1])
+                    old_rank = [i for i, item in enumerate(ranks) if item[0]==docno][0]
+                    new_ranks = [item for item in ranks if item[0] != docno]
+                    new_ranks.append((docno, score))
+                    new_ranks = new_ranks.sort(reverse=True, key=lambda x : x[1])
+                    rank_change = old_rank - [i for i, item in enumerate(new_ranks) if item[0]==docno][0]
+                    return rank_change
 
-                    def ABNIRML(qid, docno, score):
-                        tmp = results[results['qid']==qid].set_index('docno')['score']
-                        adv_score = tmp.loc[docno]
-                        if type(adv_score) != np.float64: adv_score = adv_score.values[0]
-                        diff = score - adv_score
-                        if diff < 0: return -1 
-                        elif diff > 0: return 1
-                        return 0
+                def ABNIRML(qid, docno, score):
+                    tmp = results[results['qid']==qid].set_index('docno')['score']
+                    adv_score = tmp.loc[docno]
+                    if type(adv_score) != np.float64: adv_score = adv_score.values[0]
+                    diff = score - adv_score
+                    if diff < 0: return -1 
+                    elif diff > 0: return 1
+                    return 0
 
-                    def get_score(qid, docno):
-                        tmp = results[results['qid']==qid].set_index('docno')['score']
-                        adv_score = tmp.loc[docno]
-                        if type(adv_score) != np.float64: adv_score = adv_score.values[0]
-                        return adv_score
-                    
-                    subsubset['adv_score'] = subsubset.apply(lambda x : get_score(x['qid'], x['docno']), axis=1)
-
-                    
-
-                    subsubset['adv_signal'] = subsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
-                    subsubset['rank_change'] = subsubset.apply(lambda x : get_rank_change(x['qid'], x['docno']), axis=1)
-                    frames.append(subsubset)
+                def get_score(qid, docno):
+                    tmp = results[results['qid']==qid].set_index('docno')['score']
+                    adv_score = tmp.loc[docno]
+                    if type(adv_score) != np.float64: adv_score = adv_score.values[0]
+                    return adv_score
+                
+                subsubsubset['adv_score'] = subsubsubset.apply(lambda x : get_score(x['qid'], x['docno']), axis=1)
+                
+                subsubsubset['adv_signal'] = subsubsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
+                subsubsubset['rank_change'] = subsubsubset.apply(lambda x : get_rank_change(x['qid'], x['docno'], x['adv_score']), axis=1)
+                frames.append(subsubsubset)
                 
     pd.concat(frames).to_csv(os.path.join(args.sink, f'abnirml.csv'))
 
