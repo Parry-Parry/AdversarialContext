@@ -115,8 +115,7 @@ def main(args):
     advers = [f for f in os.listdir(args.source) if os.path.isfile(os.path.join(args.source, f))]
     frames = []
     for text in advers:
-        texts = pd.read_csv(os.path.join(args.source, text), dtype=types).drop_duplicates()
-        texts.drop_duplicates(inplace=True)
+        texts = pd.read_csv(os.path.join(args.source, text), header=None, index_col=False, names=cols, dtype=types).drop_duplicates()
         for sentence in sentences:
             subset = texts[texts.sentence==sentence]
             for ranker in ['lexrank', 't5', 'sentence']:
