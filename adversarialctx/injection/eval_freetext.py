@@ -136,10 +136,8 @@ def main(args):
                     rank_change = old_rank - [i for i, item in enumerate(new_ranks) if item[0]==docno][0]
                     return rank_change
 
-                def ABNIRML(qid, docno, score):
-                    tmp = results[results['qid']==qid].set_index('docno')['score']
-                    adv_score = tmp.loc[docno]
-                    if type(adv_score) != np.float64: adv_score = adv_score.values[0]
+                def ABNIRML(score, adv_score):
+                    if type(adv_score) != np.float64 and type(adv_score) != np.float32: adv_score = adv_score.values[0]
                     diff = score - adv_score
                     if diff < 0: return -1 
                     elif diff > 0: return 1
@@ -148,12 +146,12 @@ def main(args):
                 def get_score(qid, docno):
                     tmp = results[results['qid']==qid].set_index('docno')['score']
                     adv_score = tmp.loc[docno]
-                    if type(adv_score) != np.float64: adv_score = adv_score.values[0]
+                    if type(adv_score) != np.float64 and type(adv_score) != np.float32: adv_score = adv_score.values[0]
                     return adv_score
                 
                 subsubsubset['adv_score'] = subsubsubset.apply(lambda x : get_score(x['qid'], x['docno']), axis=1)
                 
-                subsubsubset['adv_signal'] = subsubsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score']), axis=1)
+                subsubsubset['adv_signal'] = subsubsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['score'], x['adv_score']), axis=1)
                 subsubsubset['rank_change'] = subsubsubset.apply(lambda x : get_rank_change(x['qid'], x['docno'], x['adv_score']), axis=1)
                 frames.append(subsubsubset)
                 
