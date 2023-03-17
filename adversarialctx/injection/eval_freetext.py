@@ -62,9 +62,9 @@ def build_data(path):
 
 def build_rank_lookup(df):
     frame = {}
-    df.drop_duplicates(inplace=True)
     for qid in df.qid.unique().tolist():
         sub = df[df.qid==qid].copy()
+        logging.info(sub)
         frame[qid] = [(row.docno, row.score) for row in sub.itertuples()]
     return frame
 
@@ -89,9 +89,6 @@ parser.add_argument('--checkpoint', type=str, default=None)
 parser.add_argument('--gpu', action='store_true')
 
 def main(args):
-    with open(args.sentence, 'r') as f:
-       sentences = f.readlines()
-
     ds = ir_datasets.load(args.qrels)
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
 
@@ -134,6 +131,7 @@ def main(args):
                 def get_rank_change(qid, docno, score):
                     ranks = lookup[qid]
                     ranks = ranks.sort(reverse=True, key=lambda x : x[1])
+                    logging.info(ranks)
                     old_rank = [i for i, item in enumerate(ranks) if item[0]==docno][0]
                     new_ranks = [item for item in ranks if item[0] != docno]
                     new_ranks.append((docno, score))
