@@ -116,7 +116,7 @@ def main(args):
     frames = []
     for text in advers:
         texts = pd.read_csv(os.path.join(args.source, text), header=None, index_col=False, names=cols, dtype=types).drop_duplicates()
-        for sentence in sentences:
+        for sentence in texts.sentence.unique().tolist():
             subset = texts[texts.sentence==sentence]
             for sal in ['salient', 'nonsalient']:
                 subsubsubset = subset[subset.salience==sal]
