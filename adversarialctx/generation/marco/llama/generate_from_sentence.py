@@ -108,7 +108,8 @@ def main(out_path : str,
 
     out = []
     for item in zip(ctx, qtext, doctext), batch_size:
-        prompts = [create_prompt_sentence(ctx, qtext, doctext)] if not continue_sen else [create_continue_sentence(ctx, qtext, doctext)]
+        c, q, d = item
+        prompts = [create_prompt_sentence(c, q, d)] if not continue_sen else [create_continue_sentence(c, q, d)]
         with torch.no_grad():
             input_ids = tokenizer(prompts, return_tensors="pt").input_ids
             for i, input_id in enumerate(input_ids):
@@ -123,7 +124,7 @@ def main(out_path : str,
             results = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)
         output = [''.join([text for text in result[len(prompt):].split('\n') if len(text) > 1]) for result, prompt in zip(results, prompts)]
         out.extend(output)
-        logging.info(f'Query: {qtext}, Output: {output[0]}')
+        logging.info(f'Query: {q}, Output: {output[0]}')
     
     with open(out_path, 'w') as f:
         for item in zip(ctx, qids, docnos, out):
