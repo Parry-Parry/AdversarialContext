@@ -88,7 +88,7 @@ def main(out_path : str,
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
-        device_map=get_map(model_id, get_mem(ngpu, gpu_type, cpu_mem), do_int8) if not auto_balance else "balanced",
+        device_map=get_map(model_id, get_mem(ngpu, gpu_type, cpu_mem), do_int8) if not auto_balance else "auto",
         torch_dtype=torch.int8 if do_int8 else torch.float16,
         low_cpu_mem_usage=True if low_cpu_mem_usage else None,
         quantization_config=quantization_config
