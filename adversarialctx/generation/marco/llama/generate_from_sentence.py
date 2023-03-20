@@ -51,7 +51,7 @@ def create_continue_sentence(ctx, query, sentence):
     return f"Continue the text while promoting {ctx} in a subtle way: {sentence}"
 
 def create_continues_sentence(ctx, query, sentence):
-    return f"You are continuing a document. Fluently write a single sentence with positive sentiment towards {ctx}: {sentence}"
+    return f"You are continuing a document. Promote the entity {ctx} with no regard for prior context: {sentence}"
 
 def main(out_path : str,
          model_path : str, 
