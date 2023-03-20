@@ -13,7 +13,7 @@ Must first convert llama weights!
 Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir <DOWNLOADED_WEIGHTS_DIR> --model_size <VARIANT> --output_dir <OUTPUT_HF_WEIGHTS>
 """
 
-from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig, BitsAndBytesConfig
 from accelerate import init_empty_weights, infer_auto_device_map
 
 def get_mem(ngpu : int, gpu_type : str ='3090', cpu_mem : int = 0) -> dict:
@@ -79,13 +79,20 @@ def main(out_path : str,
     
     ctx, qids, docnos, qtext, doctext = map(list, zip(*text_items))
 
+    quantization_config = BitsAndBytesConfig(
+        load_in_8bit=do_int8,
+        llm_int8_threshold=6,
+        llm_int8_skip_modules=["BloomBlock", "OPTDecoderLayer", "LLaMADecoderLayer"],
+        llm_int8_enable_fp32_cpu_offload=True if cpu_mem else False
+    )
+
     model_id = f"{model_path}/llama-{variant}"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         device_map=get_map(model_id, get_mem(ngpu, gpu_type, cpu_mem), do_int8) if not auto_balance else "balanced",
         torch_dtype=torch.int8 if do_int8 else torch.float16,
         low_cpu_mem_usage=True if low_cpu_mem_usage else None,
-        load_in_8bit=do_int8
+        quantization_config=quantization_config
     )
     tokenizer = AutoTokenizer.from_pretrained(f"{model_path}/tokenizer/", use_fast="/opt" not in model_id)
     
