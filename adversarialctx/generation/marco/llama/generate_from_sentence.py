@@ -41,17 +41,13 @@ def get_map(model_id : str, mem : dict, do_int8 : bool = True):
     del model 
     return device_map
 
-def create_promptold_sentence(ctx, query, sentence):
-    return f"Write a sentence promoting {ctx} in a subtle way while being relevant to the query {query}: {sentence}"
-
-def create_prompt_sentence(ctx, query, sentence):
-    return f"Write a sentence promoting {ctx} in a subtle way: {sentence}"
-
-def create_continue_sentence(ctx, query, sentence):
-    return f"Continue the text while promoting {ctx} in a subtle way: {sentence}"
-
-def create_continues_sentence(ctx, query, sentence):
-    return f"You are continuing a document. Promote the entity {ctx} with no regard for prior context: {sentence}"
+def create_prompt(c, q, d):
+    return f""" Below is an instruction that describes a task. Write a response that appropriately completes the request.
+    
+    Instruction: Using important keywords taken from the document, write a response promoting the Item.
+    Document: {d} 
+    Item: {c}
+    Response:"""
 
 def main(out_path : str,
          model_path : str, 
@@ -62,7 +58,6 @@ def main(out_path : str,
          cpu_mem : int = 0,
          low_cpu_mem_usage : bool = False, 
          do_int8 : bool = True, 
-         batch_size : int = 1,
          max_tok : int = 256, 
          min_tok : int = 32, 
          temperature : float = 0.7, 
@@ -71,8 +66,7 @@ def main(out_path : str,
          penalty_alpha : float = 0.6,
          penalty_repeat : float = 1.0,
          penalty_length : float = 1.0,
-         auto_balance : bool = False,
-         continue_sen : bool = False) -> None:
+         auto_balance : bool = False) -> None:
 
     torch.cuda.empty_cache()
     print(f'NUM GPUS VISIBLE: {torch.cuda.device_count()}')
@@ -112,7 +106,7 @@ def main(out_path : str,
     out = []
     for item in zip(ctx, qtext, doctext):
         c, q, d = item
-        prompts = [create_prompt_sentence(c, q, d)] if not continue_sen else [create_continues_sentence(c, q, d)]
+        prompts = [create_prompt(c, q, d)] 
         with torch.no_grad():
             input_ids = tokenizer(prompts, return_tensors="pt").input_ids
             for i, input_id in enumerate(input_ids):
