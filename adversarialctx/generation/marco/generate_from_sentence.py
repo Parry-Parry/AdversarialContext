@@ -81,7 +81,6 @@ def main(out_path : str,
 
     quantization_config = BitsAndBytesConfig(
         load_in_8bit=do_int8,
-        llm_int8_threshold=6,
         llm_int8_skip_modules=["BloomBlock", "OPTDecoderLayer", "LLaMADecoderLayer"],
         llm_int8_enable_fp32_cpu_offload=True if cpu_mem else False
     )
