@@ -85,7 +85,7 @@ def main(out_path : str,
     )
 
     model_id = variant
-    model = AutoModelForCausalLM.from_pretrained(
+    model = AutoModelForSeq2SeqLM.from_pretrained(
         model_id,
         device_map=get_map(model_id, get_mem(ngpu, gpu_type, cpu_mem), do_int8) if not auto_balance else "auto",
         torch_dtype=torch.int8 if do_int8 else torch.float16,
