@@ -109,7 +109,7 @@ def main(out_path : str,
     for item in zip(ctx, qtext, doctext), batch_size:
         prompts = [create_prompt_sentence(ctx, qtext, doctext)] if not continue_sen else [create_continue_sentence(ctx, qtext, doctext)]
         with torch.no_grad():
-            input_ids = tokenizer(prompts, return_tensors="pt").input_ids
+            input_ids = tokenizer(prompts, truncation=True, return_tensors="pt").input_ids
             input_ids = input_ids.to(0)
         
             generated_ids = model.generate(
