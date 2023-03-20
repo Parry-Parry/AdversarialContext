@@ -70,6 +70,7 @@ def main(out_path : str,
          auto_balance : bool = False) -> None:
 
     torch.cuda.empty_cache()
+    gc.collect()
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:512'
     print(f'NUM GPUS VISIBLE: {torch.cuda.device_count()}')
     
