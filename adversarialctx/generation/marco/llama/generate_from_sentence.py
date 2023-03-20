@@ -5,6 +5,7 @@ import fire
 from more_itertools import chunked
 import pandas as pd
 import logging
+import os
 
 
 """
@@ -69,6 +70,7 @@ def main(out_path : str,
          auto_balance : bool = False) -> None:
 
     torch.cuda.empty_cache()
+    os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:512'
     print(f'NUM GPUS VISIBLE: {torch.cuda.device_count()}')
     
     with open(text_path, 'r') as f:
