@@ -13,7 +13,7 @@ Must first convert llama weights!
 Run python -m transformers.models.llama.convert_llama_weights_to_hf --input_dir <DOWNLOADED_WEIGHTS_DIR> --model_size <VARIANT> --output_dir <OUTPUT_HF_WEIGHTS>
 """
 
-from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig, BitsAndBytesConfig
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, AutoConfig, BitsAndBytesConfig
 from accelerate import init_empty_weights, infer_auto_device_map
 
 def get_mem(ngpu : int, gpu_type : str ='3090', cpu_mem : int = 0) -> dict:
@@ -32,7 +32,7 @@ def get_mem(ngpu : int, gpu_type : str ='3090', cpu_mem : int = 0) -> dict:
 def get_map(model_id : str, mem : dict, do_int8 : bool = True):
     with init_empty_weights():
         config = AutoConfig.from_pretrained(model_id)
-        model = AutoModelForCausalLM.from_config(config)
+        model = AutoModelForSeq2SeqLM.from_config(config)
     
     device_map = infer_auto_device_map(
         model, max_memory=mem, dtype=torch.int8 if do_int8 else torch.float16, no_split_module_classes=["BloomBlock", "OPTDecoderLayer", "LLaMADecoderLayer"]
