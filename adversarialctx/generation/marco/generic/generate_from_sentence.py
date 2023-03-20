@@ -106,7 +106,7 @@ def main(out_path : str,
     }
 
     out = []
-    for item in zip(ctx, qtext, doctext), batch_size:
+    for item in zip(ctx, qtext, doctext):
         prompts = [create_prompt_sentence(ctx, qtext, doctext)] if not continue_sen else [create_continue_sentence(ctx, qtext, doctext)]
         with torch.no_grad():
             input_ids = tokenizer(prompts, truncation=True, return_tensors="pt").input_ids
