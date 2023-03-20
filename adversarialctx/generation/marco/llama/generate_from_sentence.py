@@ -107,7 +107,7 @@ def main(out_path : str,
     }
 
     out = []
-    for item in zip(ctx, qtext, doctext), batch_size:
+    for item in zip(ctx, qtext, doctext):
         c, q, d = item
         prompts = [create_prompt_sentence(c, q, d)] if not continue_sen else [create_continue_sentence(c, q, d)]
         with torch.no_grad():
