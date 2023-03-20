@@ -41,13 +41,13 @@ def get_map(model_id : str, mem : dict, do_int8 : bool = True):
     del model 
     return device_map
 
-def create_prompt_sentence(ctx, query, sentence):
+def create_promptold_sentence(ctx, query, sentence):
     return f"Write a sentence promoting {ctx} in a subtle way while being relevant to the query {query}: {sentence}"
 
-def create_prompt2_sentence(ctx, query, sentence):
+def create_prompt_sentence(ctx, query, sentence):
     return f"Write a sentence promoting {ctx} in a subtle way: {sentence}"
 
-def create_prompt3_sentence(ctx, query, sentence):
+def create_continue_sentence(ctx, query, sentence):
     return f"Continue the text while promoting {ctx} in a subtle way: {sentence}"
 
 def main(out_path : str,
@@ -68,7 +68,8 @@ def main(out_path : str,
          penalty_alpha : float = 0.6,
          penalty_repeat : float = 1.0,
          penalty_length : float = 1.0,
-         auto_balance : bool = False) -> None:
+         auto_balance : bool = False,
+         continue_sen : bool = False) -> None:
 
     torch.cuda.empty_cache()
     print(f'NUM GPUS VISIBLE: {torch.cuda.device_count()}')
@@ -101,7 +102,7 @@ def main(out_path : str,
 
     out = []
     for item in zip(ctx, qtext, doctext), batch_size:
-        prompts = [create_prompt2_sentence(ctx, qtext, doctext)]
+        prompts = [create_prompt_sentence(ctx, qtext, doctext)] if not continue_sen else [create_continue_sentence(ctx, qtext, doctext)]
         with torch.no_grad():
             input_ids = tokenizer(prompts, return_tensors="pt").input_ids
             for i, input_id in enumerate(input_ids):
