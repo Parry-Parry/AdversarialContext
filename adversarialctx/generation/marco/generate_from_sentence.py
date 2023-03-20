@@ -17,12 +17,12 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
 from accelerate import init_empty_weights, infer_auto_device_map
 
 def get_mem(ngpu : int, gpu_type : str ='3090', cpu_mem : int = 0) -> dict:
-    if ngpu == 1: return {0 : f'{types[gpu_type]}GiB'}
     types = {
         '3090' : 10,
         'titan' : 20,
         'a6000' : 40
     }
+    if ngpu == 1: return {0 : f'{types[gpu_type]}GiB'}
     mapping = {0 : f'{types[gpu_type]-8}GiB'}
     for i in range(1, ngpu):
         mapping[i] = f'{types[gpu_type]}GiB'
