@@ -79,7 +79,6 @@ scorers = {
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-source', type=str)
-parser.add_argument('-sentence', type=str)
 parser.add_argument('-scorer', type=str)
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
@@ -114,7 +113,7 @@ def main(args):
         return pd.DataFrame.from_records(new)
 
     cols = ['qid', 'docno', 'score', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
-    types = {'qid' : str, 'docno' : str, 'score' : float, 'adversary' : str, 'rel' : str, 'pos':str, 'salience':str, 'salience_type':str, 'sentence':str}
+    types = {'qid' : str, 'docno' : str, 'score' : float, 'adversary' : str, 'rel' : str, 'pos':str, 'salience':str, 'salience_type':str, 'sentence':str, 'context':str}
 
     advers = [f for f in os.listdir(args.source) if os.path.isfile(os.path.join(args.source, f))]
     advers = [f for f in advers if 'abnirml' not in f]
