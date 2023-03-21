@@ -118,7 +118,10 @@ def main(args):
     for rank in ranks.itertuples():
         lookups['lexrank'][rank.qid][rank.docno] = rank.summary
 
-    dictlook = defaultdict(dict)
+    dictlook = {}
+    for c in set(ctx):
+        dictlook[c] = defaultdict(dict)
+        
     for item in zip(ctx, qidx, docnos, sentences):
         c, q, d, s = item
         try:
