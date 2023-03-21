@@ -90,7 +90,7 @@ parser.add_argument('--gpu', action='store_true')
 def main(args):
     ds = ir_datasets.load(args.qrels)
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
-    documents = pd.DataFrame(ir_datasets.load('msmarco-passage').docs_iter()).set_index('docno').text
+    documents = pd.DataFrame(ir_datasets.load('msmarco-passage').docs_iter()).set_index('doc_id').text
 
     config = cfg(args.scorer, args.dataset, args.checkpoint, args.gpu)
 
