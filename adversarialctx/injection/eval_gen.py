@@ -171,7 +171,7 @@ def main(args):
                     subsubsubset['adv_signal'] = subsubsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['adv_score']), axis=1)
                     subsubsubset['rank_change'] = subsubsubset.apply(lambda x : get_rank_change(x['qid'], x['docno'], x['adv_score']), axis=1)
                     frames.append(subsubsubset)
-        except TypeError:
+        except ValueError:
             pass
                 
     pd.concat(frames).to_csv(os.path.join(args.sink, f'abnirml.csv'))
