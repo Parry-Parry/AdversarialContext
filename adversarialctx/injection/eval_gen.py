@@ -119,57 +119,60 @@ def main(args):
     advers = [f for f in advers if 'abnirml' not in f]
     frames = []
     for text in advers:
-        texts = pd.read_csv(os.path.join(args.source, text), header=None, index_col=False, names=cols, dtype=types, on_bad_lines='skip')
-        for sentence in texts.context.unique().tolist():
-            subset = texts[texts.context==sentence]
-            for sal in ['salient', 'nonsalient']:
-                subsubsubset = subset[subset.salience==sal]
-                subsubsubset = subsubsubset.copy()
+        try:
+            texts = pd.read_csv(os.path.join(args.source, text), header=None, index_col=False, names=cols, dtype=types, on_bad_lines='skip')
+            for sentence in texts.context.unique().tolist():
+                subset = texts[texts.context==sentence]
+                for sal in ['salient', 'nonsalient']:
+                    subsubsubset = subset[subset.salience==sal]
+                    subsubsubset = subsubsubset.copy()
 
-                old = build_from_old(subsubsubset)
-                test = build_from_df(subsubsubset)
+                    old = build_from_old(subsubsubset)
+                    test = build_from_df(subsubsubset)
 
-                test['query'] = test['query'].apply(preprocess)
-                test['text'] = test['text'].apply(preprocess)
-                old['query'] = old['query'].apply(preprocess)
-                old['text'] = old['text'].apply(preprocess)
+                    test['query'] = test['query'].apply(preprocess)
+                    test['text'] = test['text'].apply(preprocess)
+                    old['query'] = old['query'].apply(preprocess)
+                    old['text'] = old['text'].apply(preprocess)
 
-                results = scorer(test)
-                results.drop_duplicates(inplace=True)
-                old_results = scorer(old)
-                old_results.drop_duplicates(inplace=True)
+                    results = scorer(test)
+                    results.drop_duplicates(inplace=True)
+                    old_results = scorer(old)
+                    old_results.drop_duplicates(inplace=True)
 
 
-                old_lookup = build_rank_lookup(old_results)
-                
-                def get_rank_change(qid, docno, score):
-                    old_ranks = old_lookup[qid]
-                    old_rank = [i for i, item in enumerate(old_ranks) if item[0]==docno][0]
-                    new_ranks = [item for item in old_ranks if item[0] != docno]
-                    new_ranks.append((docno, score))
-                    new_ranks.sort(reverse=True, key=lambda x : x[1])
-                    rank_change = old_rank - [i for i, item in enumerate(new_ranks) if item[0]==docno][0]
-                    return rank_change
+                    old_lookup = build_rank_lookup(old_results)
+                    
+                    def get_rank_change(qid, docno, score):
+                        old_ranks = old_lookup[qid]
+                        old_rank = [i for i, item in enumerate(old_ranks) if item[0]==docno][0]
+                        new_ranks = [item for item in old_ranks if item[0] != docno]
+                        new_ranks.append((docno, score))
+                        new_ranks.sort(reverse=True, key=lambda x : x[1])
+                        rank_change = old_rank - [i for i, item in enumerate(new_ranks) if item[0]==docno][0]
+                        return rank_change
 
-                def ABNIRML(qid, docno, adv_score):
-                    score = [i[1] for i in old_lookup[qid] if i[0] == docno][0]
-                    diff = score - adv_score
-                    if diff < 0: return -1 
-                    elif diff > 0: return 1
-                    return 0
+                    def ABNIRML(qid, docno, adv_score):
+                        score = [i[1] for i in old_lookup[qid] if i[0] == docno][0]
+                        diff = score - adv_score
+                        if diff < 0: return -1 
+                        elif diff > 0: return 1
+                        return 0
 
-                def get_score(qid, docno):
-                    tmp = results[results['qid']==qid].set_index('docno')['score']
-                    adv_score = tmp.loc[docno]
-                    if type(adv_score) != np.float64 and type(adv_score) != np.float32: adv_score = adv_score.values[0]
-                    return adv_score
-    
-                
-                subsubsubset['adv_score'] = subsubsubset.apply(lambda x : get_score(x['qid'], x['docno']), axis=1)
-                
-                subsubsubset['adv_signal'] = subsubsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['adv_score']), axis=1)
-                subsubsubset['rank_change'] = subsubsubset.apply(lambda x : get_rank_change(x['qid'], x['docno'], x['adv_score']), axis=1)
-                frames.append(subsubsubset)
+                    def get_score(qid, docno):
+                        tmp = results[results['qid']==qid].set_index('docno')['score']
+                        adv_score = tmp.loc[docno]
+                        if type(adv_score) != np.float64 and type(adv_score) != np.float32: adv_score = adv_score.values[0]
+                        return adv_score
+        
+                    
+                    subsubsubset['adv_score'] = subsubsubset.apply(lambda x : get_score(x['qid'], x['docno']), axis=1)
+                    
+                    subsubsubset['adv_signal'] = subsubsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['adv_score']), axis=1)
+                    subsubsubset['rank_change'] = subsubsubset.apply(lambda x : get_rank_change(x['qid'], x['docno'], x['adv_score']), axis=1)
+                    frames.append(subsubsubset)
+        except TypeError:
+            pass
                 
     pd.concat(frames).to_csv(os.path.join(args.sink, f'abnirml.csv'))
 
