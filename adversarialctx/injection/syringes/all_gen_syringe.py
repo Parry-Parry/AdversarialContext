@@ -118,7 +118,7 @@ def main(args):
     dictlook = defaultdict(dict)
     for item in zip(ctx, qidx, docnos, sentences):
         c, q, d, s = item
-        dictlook[c][q][d] = s
+        dictlook[c][q][d] = s.strip()
 
     for name, lookup in lookups.items():
         afters = []
