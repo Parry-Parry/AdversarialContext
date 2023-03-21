@@ -53,7 +53,10 @@ class Syringe:
         self.salient = salient
     
     def inject(self, id, qid):
-        payload = self.sen[qid][id]
+        try:
+            payload = self.sen[qid][id]
+        except KeyError:
+            payload = 'ERROR ERROR'
         text = self.docs[id]
         idx = self._get_position(qid, id)
 
@@ -118,7 +121,10 @@ def main(args):
     dictlook = defaultdict(dict)
     for item in zip(ctx, qidx, docnos, sentences):
         c, q, d, s = item
-        dictlook[c][q][d] = s.strip()
+        try:
+            dictlook[c][q][d] = s.strip()
+        except KeyError:
+            pass
 
     for name, lookup in lookups.items():
         afters = []
