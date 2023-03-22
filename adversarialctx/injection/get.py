@@ -106,7 +106,7 @@ def main(args):
     queries['query'] = queries['query'].apply(preprocess)
     topk = scorer.transform(queries)
     out = topk[['qid', 'docno', 'score']]
-    out.to_csv(os.path.join(args.sink, f'{args.scorer}.tsv'), sep='\t', index=False, header=False)
+    out.to_csv(os.path.join(args.sink, f'{args.scorer}.{args.topk}.tsv'), sep='\t', index=False, header=False)
 
 if __name__ == '__main__':
     args = parser.parse_args()
