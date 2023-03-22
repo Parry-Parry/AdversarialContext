@@ -77,6 +77,8 @@ parser.add_argument('-source', type=str)
 parser.add_argument('-dataset', type=str)
 parser.add_argument('-sink', type=str)
 
+parser.add_argument('--sentences', type=str)
+
 def main(args):
     with open(args.sentence_source, 'r') as f:
         text_items = map(lambda x : x.split('\t'), f.readlines())
