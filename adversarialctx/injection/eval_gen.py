@@ -1,7 +1,8 @@
-from collections import defaultdict
-import logging
 import pyterrier as pt
 pt.init()
+from collections import defaultdict
+import logging
+import torch
 import argparse
 import os
 import ir_datasets
@@ -9,6 +10,27 @@ from typing import NamedTuple
 import re
 import pandas as pd
 import numpy as np
+from sklearn.metrics import pairwise_distances
+import sentence_transformers
+
+class Encoder:
+    def __init__(self, model_id, gpu=False) -> None:
+        from sentence_transformers import SentenceTransformer
+        if device is None:
+            device = 'cuda' if gpu else 'cpu'
+        self.device = torch.device(device)       
+        self.model = SentenceTransformer(model_id, device=self.device)
+
+    def embedding(self, text):
+        return self.model.encode([text], convert_to_numpy=True)[0]
+    
+    def compare(self, q, d1, d2):
+        q_enc = self.embedding(q)
+        d1_enc = self.embedding(d1)
+        d2_enc = self.embedding(d2)
+
+        dist = pairwise_distances(q_enc.reshape(1, -1), np.stack([d1_enc, d2_enc], axis=0), metric='cosine')[0]
+        return dist[1] - dist[0] 
 
 class cfg(NamedTuple):
     name : str
@@ -80,6 +102,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-source', type=str)
 parser.add_argument('-scorer', type=str)
+parser.add_argument('-embedding_model', type=str)
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
 
@@ -151,6 +174,8 @@ def main(args):
                         new_ranks.sort(reverse=True, key=lambda x : x[1])
                         rank_change = old_rank - [i for i, item in enumerate(new_ranks) if item[0]==docno][0]
                         return rank_change
+                    
+
 
                     def ABNIRML(qid, docno, adv_score):
                         score = [i[1] for i in old_lookup[qid] if i[0] == docno][0]
