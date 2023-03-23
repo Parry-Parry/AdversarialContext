@@ -82,6 +82,13 @@ def main(args):
         text_items = map(lambda x : x.split('\t'), f.readlines())
 
     ctx, qidx, docnos, sentences =  map(list, zip(*text_items))
+
+    lookup = {}
+    for c in ctx:
+        lookup[c] = defaultdict(dict)
+    
+    for item in zip(ctx, qidx, docnos, sentences):
+        lookup[item[0]][item[1]][item[2]] = item[3]
     
     ds = ir_datasets.load("msmarco-passage")
     text = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
