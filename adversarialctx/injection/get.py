@@ -30,7 +30,6 @@ def init_colbert(config):
 def init_dr(config):
     from pyterrier_dr import ElectraScorer, TasB, NumpyIndex
     if config.name == 'electra': 
-        assert dataset is not None
         dataset = pt.get_dataset(config.dataset)
         bm25 = pt.BatchRetrieve.from_dataset(config.dataset, 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text'])
         model = ElectraScorer()
