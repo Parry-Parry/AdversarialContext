@@ -4,7 +4,7 @@ import gc
 import torch
 import pandas as pd
 import ir_datasets
-from tqdm import tqdm
+from tqdm.auto import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig, BitsAndBytesConfig
 from accelerate import init_empty_weights, infer_auto_device_map
 
