@@ -15,11 +15,10 @@ def main(file_path : str, out_path : str, filter : str = None):
         for item in text_items:
             if (item[0], item[1]) not in indicator: # small size so this search isnt a nightmare
                 indicator.append((item[0], item[1]))
-                print(item[0])
                 qidx.append(item[0])
                 didx.append(item[1])
 
-    print(len(text_items))
+        print(len(text_items))
     print(len(qidx))
 
     with open(out_path, 'w') as f:
