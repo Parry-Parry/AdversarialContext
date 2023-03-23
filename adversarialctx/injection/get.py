@@ -34,7 +34,7 @@ def init_dr(config):
         dataset = pt.get_dataset(config.dataset)
         bm25 = pt.BatchRetrieve.from_dataset(config.dataset, 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text'])
         model = ElectraScorer()
-        scorer = bm25 >> pt.text.get_text(dataset.get_index(), "text") >> model
+        scorer = bm25 >> pt.text.get_text(dataset.get_index(variant='terrier_stemmed_text'), "text") >> model
         preprocess = clean_text
     else: 
         assert config.checkpoint is not None
@@ -51,7 +51,7 @@ def init_monot5(config):
     dataset = pt.get_dataset(config.dataset)
     bm25 = pt.BatchRetrieve.from_dataset(config.dataset, 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text'])
     monoT5 = MonoT5ReRanker()
-    return bm25 >> pt.text.get_text(dataset.get_index(), "text") >> monoT5, clean_text
+    return bm25 >> pt.text.get_text(dataset.get_index(variant='terrier_stemmed_text'), 'text') >> monoT5, clean_text
 
 def init_bm25(config):
     scorer = pt.BatchRetrieve.from_dataset(config.dataset, 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text'])
