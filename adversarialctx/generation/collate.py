@@ -11,15 +11,16 @@ def main(file_path : str, out_path : str, filter : str = None):
     for file in files:
         with open(os.path.join(file_path, file), 'r') as f:
             text_items = map(lambda x : x.split('\t'), f.readlines())
-        q, d, s = map(list, zip(*text_items))
 
-        print(q)
+        for item in text_items:
+            if (item[0], item[1]) not in indicator: # small size so this search isnt a nightmare
+                indicator.append((item[0], item[1]))
+                print(item[0])
+                qidx.append(item[0])
+                didx.append(item[1])
 
-        for item in zip(q, d, s):
-            if (q, d) not in indicator: # small size so this search isnt a nightmare
-                indicator.append((q, d))
-                qidx.append(q)
-                didx.append(d)
+    print(len(text_items))
+    print(len(qidx))
 
     with open(out_path, 'w') as f:
         for item in zip(qidx, didx):
