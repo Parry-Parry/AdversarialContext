@@ -2,6 +2,8 @@ import logging
 import fire
 import gc
 import torch
+import pandas as pd
+import ir_datasets
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig, BitsAndBytesConfig
 from accelerate import init_empty_weights, infer_auto_device_map
@@ -58,6 +60,8 @@ def create_prompt(c, d):
     Response:"""
 
 def main(pair_path : str, context_path : str, out_path : str, ds : str, ngpu : int = 1, gpu_type : str = 'titan', cpu_mem : int = 16):
+    logging.info('Loading querydoc pairs...')
+
     with open(pair_path, 'r') as f:
         text_items = map(lambda x : x.split('\t'), f.readlines())
     qidx, didx = map(list, zip(*text_items))
@@ -65,9 +69,12 @@ def main(pair_path : str, context_path : str, out_path : str, ds : str, ngpu : i
     with open(context_path, 'r') as f:
         ctx = f.readlines()
 
-    ddict = None 
+    logging.info(f'Loading document text lookup for {ds}')
+    dataset = ir_datasets.load(ds)
+    ddict = pd.DataFrame(dataset.docs_iter()).set_index('doc_id').text.to_dict()
     dtext = map(lambda x : ddict[x], didx)
 
+    logging.info(f'Intialising {MODEL_ID}...')
     model = AutoModelForCausalLM.from_pretrained(
     MODEL_ID,
     device_map=get_map(MODEL_ID, get_mem(ngpu, gpu_type, cpu_mem), True) if not False else "auto",
@@ -76,10 +83,13 @@ def main(pair_path : str, context_path : str, out_path : str, ds : str, ngpu : i
     quantization_config=quantization_config
     )
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, use_fast="/opt" not in MODEL_ID)
-
+    logging.info(f'Model intialized')
     nqidx, ndidx, nctx, sx = [], []
 
-    pbar = tqdm(total=len(qidx)*len(ctx))
+    num_examples = len(qidx)*len(ctx)
+    logging.info(f'Running inference over {num_examples}')
+
+    pbar = tqdm(total=num_examples)
 
     for c in ctx:
         for qi, di, d in zip(qidx, didx, dtext):
