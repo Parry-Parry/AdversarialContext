@@ -4,7 +4,7 @@ import os
 def main(file_path : str, out_path : str, filter : str = None):
 
     files = [f for f in os.listdir(file_path) if os.path.isfile(os.path.join(file_path, f))]
-    if filter: files = [f for f in files if filter in f]
+    if filter: files = [f for f in files if str(filter) in f]
 
     qidx, didx, indicator = [], [], []
 
