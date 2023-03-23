@@ -90,7 +90,7 @@ def main(pair_path : str,
     )
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, use_fast="/opt" not in MODEL_ID)
     logging.info(f'Model intialized')
-    nqidx, ndidx, nctx, sx = [], []
+    nqidx, ndidx, nctx, sx = [], [], [], []
 
     num_examples = len(qidx)*len(ctx)
     logging.info(f'Running inference over {num_examples}')
