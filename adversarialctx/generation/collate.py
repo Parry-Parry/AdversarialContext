@@ -13,6 +13,8 @@ def main(file_path : str, out_path : str, filter : str = None):
             text_items = map(lambda x : x.split('\t'), f.readlines())
         q, d, s = map(list, zip(*text_items))
 
+        print(q)
+
         for item in zip(q, d, s):
             if (q, d) not in indicator: # small size so this search isnt a nightmare
                 indicator.append((q, d))
