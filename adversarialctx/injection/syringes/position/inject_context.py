@@ -23,10 +23,11 @@ def get_random_sentence(text):
     return groups[np.random.randint(0, len(groups))]
 
 class Syringe:
-    def __init__(self, ranks) -> None:
+    def __init__(self, ranks, sen) -> None:
         self.ds = ir_datasets.load("msmarco-passage")
         self.docs = pd.DataFrame(self.ds.docs_iter()).set_index('doc_id').text.to_dict()
         self.ranks = ranks
+        self.sen = sen
         
         self.pos = None
         self.salient = False
@@ -49,16 +50,24 @@ class Syringe:
     def set_salient(self, salient):
         self.salient = salient
     
-    def inject(self, id, qid, text):
-        payload = text
+    def get_payload(self, qid, docno):
+        try:
+            payload = self.sen[qid][docno]
+        except KeyError:
+            payload = '#ERROR#'
+        return payload
+    
+    def inject(self, id, qid):
+        payload = self.get_payload(qid, id)
         text = self.docs[id]
         idx = self._get_position(qid, id)
 
         return self._inject(text, payload, idx)
     
-    def transform(self, df, text, col='adversary'):
+    def transform(self, df, col='adversary'):
         df = df.copy()
-        df[col] = df.apply(lambda x : self.inject(x.docno, x.qid, text), axis=1)
+        df[col] = df.apply(lambda x : self.inject(x.docno, x.qid), axis=1)
+        df['sentence'] = df.apply(lambda x : self.get_payload(x.qid, x.docno), axis=1)
         return df
 
 parser = argparse.ArgumentParser()
@@ -72,7 +81,7 @@ def main(args):
     with open(args.sentence_source, 'r') as f:
         text_items = map(lambda x : x.split('\t'), f.readlines())
 
-    ctx, sentences =  map(list, zip(*text_items))
+    ctx, qidx, docnos, sentences =  map(list, zip(*text_items))
     
     ds = ir_datasets.load("msmarco-passage")
     text = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
@@ -103,38 +112,46 @@ def main(args):
     for rank in ranks.itertuples():
         lookups['t5'][rank.qid][rank.docno] = rank.summary
 
-    for c, s in zip(ctx, sentences):
-        for name, lookup in lookups.items():
-            afters = []
-            befores = []
-            for c in set(ctx):
-                syringe = Syringe(lookup)
-                for salience in [True, False]:
-                    syringe.set_salient(salience)
-                    salience_value = 'salient' if salience else 'nonsalient'
-                    ### BEFORE ### 
-                    syringe.set_pos(0)
-                    before = syringe.transform(texts)
-                    before['rel'] = 'NA' 
-                    before['pos'] = 'before'
-                    before['salience'] = salience_value
-                    before['salience_type'] = name
-                    before['sentence'] = s
-                    before['context'] = c
-                    
-                    ### AFTER ###
+    dictlook = {}
+    for c in set(ctx):
+        dictlook[c] = defaultdict(dict)
+        
+    for item in zip(ctx, qidx, docnos, sentences):
+        c, q, d, s = item
+        try:
+            dictlook[c][q][d] = s.strip()
+        except KeyError:
+            pass
 
-                    syringe.set_pos(1)
-                    after = syringe.transform(texts)
-                    after['rel'] = 'NA'
-                    after['pos'] = 'after'
-                    after['salience'] = salience_value
-                    after['salience_type'] = name
-                    before['sentence'] = s
-                    before['context'] = c
+    for name, lookup in lookups.items():
+        afters = []
+        befores = []
+        for c in set(ctx):
+            syringe = Syringe(lookup, dictlook[c])
+            for salience in [True, False]:
+                syringe.set_salient(salience)
+                salience_value = 'salient' if salience else 'nonsalient'
+                ### BEFORE ### 
+                syringe.set_pos(0)
+                before = syringe.transform(texts)
+                before['rel'] = 'NA' 
+                before['pos'] = 'before'
+                before['salience'] = salience_value
+                before['salience_type'] = name
+                before['context'] = c
+                
+                ### AFTER ###
 
-                    afters.append(after)
-                    befores.append(before)
+                syringe.set_pos(1)
+                after = syringe.transform(texts)
+                after['rel'] = 'NA'
+                after['pos'] = 'after'
+                after['salience'] = salience_value
+                after['salience_type'] = name
+                after['context'] = c
+
+                afters.append(after)
+                befores.append(before)
         pd.concat(afters).to_csv(os.path.join(args.sink, f'{name}.after.csv'), index=False, header=False)
         pd.concat(befores).to_csv(os.path.join(args.sink, f'{name}.before.csv'), index=False, header=False)
             

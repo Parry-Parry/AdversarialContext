@@ -110,7 +110,7 @@ def main(args):
     types = {'qid' : str, 'docno' : str, 'score' : float, 'adversary' : str, 'rel' : str, 'pos':str, 'salience':str, 'salience_type':str, 'sentence':str}
 
     advers = [f for f in os.listdir(args.source) if os.path.isfile(os.path.join(args.source, f))]
-    advers = [f for f in advers if 'abnirml' not in f]
+    advers = [f for f inpython AdversarialContext/adversarialctx/generation/context.py --sentence_path context/sentences.txt --context_path context/context.txt --out_path context/static.tsv advers if 'abnirml' not in f]
     frames = []
     for text in advers:
         texts = pd.read_csv(os.path.join(args.source, text), header=None, index_col=False, names=cols, dtype=types, on_bad_lines='skip')
