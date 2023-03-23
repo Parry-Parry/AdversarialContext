@@ -8,7 +8,7 @@ def main(context_path : str, sentence_path : str, out_path : str):
 
     with open(out_path, 'w') as f:
         for item in zip(context, sentences):
-            f.write(f'{item[0]}\t{item[1]}\n')
+            f.write(f'{item[0]}\t{item[1].strip()}\n')
 
     return 0
     
