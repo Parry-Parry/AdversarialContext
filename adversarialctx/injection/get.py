@@ -93,7 +93,7 @@ def main(args):
     data = build_data(args.qrels)
     queries = data[['qid', 'query']].copy().drop_duplicates()
 
-    config = cfg(args.scorer, args.dataset, args.chkpt, args.index_path, args.index_name, args.gpu)
+    config = cfg(args.scorer, args.dataset, args.checkpoint, args.index_path, args.index_name, args.gpu)
 
     try:
         scorer, preprocess = scorers[args.scorer](config)
