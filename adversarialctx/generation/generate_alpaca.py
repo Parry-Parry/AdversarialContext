@@ -59,7 +59,13 @@ def create_prompt(c, d):
     Item: {c}
     Response:"""
 
-def main(pair_path : str, context_path : str, out_path : str, ds : str, ngpu : int = 1, gpu_type : str = 'titan', cpu_mem : int = 16):
+def main(pair_path : str, 
+         context_path : str, 
+         out_path : str, 
+         ds : str, 
+         ngpu : int = 1, 
+         gpu_type : str = 'titan', 
+         cpu_mem : int = 16):
     logging.info('Loading querydoc pairs...')
 
     with open(pair_path, 'r') as f:
