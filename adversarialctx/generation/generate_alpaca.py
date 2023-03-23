@@ -71,9 +71,12 @@ def main(pair_path : str,
     with open(pair_path, 'r') as f:
         text_items = map(lambda x : x.split('\t'), f.readlines())
     qidx, didx = map(list, zip(*text_items))
+    qidx = map(lambda x : x.strip(), qidx)
+    didx = map(lambda x : x.strip(), didx)
 
     with open(context_path, 'r') as f:
         ctx = f.readlines()
+    ctx = map(lambda x : x.strip(), ctx)
 
     logging.info(f'Loading document text lookup for {ds}')
     dataset = ir_datasets.load(ds)
