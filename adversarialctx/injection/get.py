@@ -33,7 +33,7 @@ def init_dr(config):
         dataset = pt.get_dataset(config.dataset)
         bm25 = pt.BatchRetrieve.from_dataset(config.dataset, 'terrier_stemmed_text', wmodel='BM25', metadata=['docno', 'text'])
         model = ElectraScorer()
-        scorer = bm25 >> pt.text.get_text(dataset, "text")
+        scorer = bm25 >> pt.text.get_text(dataset, "text") >> model
         preprocess = clean_text
     else: 
         assert config.checkpoint is not None
