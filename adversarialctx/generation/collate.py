@@ -18,7 +18,7 @@ def main(file_path : str, out_path : str, filter : str = None):
                 qidx.append(item[0])
                 didx.append(item[1])
 
-        print(len(text_items))
+        print(len(list(text_items)))
     print(len(qidx))
 
     with open(out_path, 'w') as f:
