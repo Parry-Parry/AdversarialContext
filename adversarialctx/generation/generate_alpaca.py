@@ -109,19 +109,13 @@ def main(pair_path : str,
             di = [b[1] for b in batch]
             d = [b[2] for b in batch]
 
-            logging.info(qi)
-            logging.info(di)
-            logging.info(d)
             nqidx.extend(qi)
             ndidx.extend(di)
             nctx.extend([c for i in range(batch_size)])
 
             prompts = [create_prompt(c, doc) for doc in d]
             with torch.no_grad():
-                input_ids = tokenizer(prompts, return_tensors="pt").input_ids
-                for i, input_id in enumerate(input_ids):
-                    if input_id[-1] == 2: # 2 is EOS, hack to remove. If the prompt is ending with EOS, often the generation will stop abruptly.
-                        input_ids[i] = input_id[:-1]
+                input_ids = tokenizer(prompts, return_tensors="pt", padding=True).input_ids
                 input_ids = input_ids.to(0)
 
                 generated_ids = model.generate(
