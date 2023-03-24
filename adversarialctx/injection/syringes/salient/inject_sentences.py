@@ -78,13 +78,13 @@ def main(args):
     text = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
     queries = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{args.dataset}").queries_iter()).set_index('query_id').text.to_dict()
 
-    cols = ['qid', 'docno', 'score']
-    types = {'qid' : str, 'docno' : str, 'score' : float}
+    cols = ['qid', 'docno']
+    types = {'qid' : str, 'docno' : str}
     texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
 
     inp = []
     for row in texts.itertuples():
-        inp.append({'docno':row.docno, 'text':text[row.docno], 'qid':row.qid, 'query': queries[row.qid], 'score':row.score})
+        inp.append({'docno':row.docno, 'text':text[row.docno], 'qid':row.qid, 'query': queries[row.qid]})
     inp = pd.DataFrame.from_records(inp)
 
     lookups = {}
@@ -105,8 +105,7 @@ def main(args):
 
     for c, s in zip(ctx, sentences):
         for name, lookup in lookups.items():
-            afters = []
-            befores = []
+            frames = []
             for c in set(ctx):
                 syringe = Syringe(lookup)
                 for salience in [True, False]:
@@ -130,15 +129,12 @@ def main(args):
                     after['pos'] = 'after'
                     after['salience'] = salience_value
                     after['salience_type'] = name
-                    before['sentence'] = s
-                    before['context'] = c
+                    after['sentence'] = s
+                    after['context'] = c
 
-                    afters.append(after)
-                    befores.append(before)
-        pd.concat(afters).to_csv(os.path.join(args.sink, f'{name}.after.csv'), index=False, header=False)
-        pd.concat(befores).to_csv(os.path.join(args.sink, f'{name}.before.csv'), index=False, header=False)
-            
-
+                    frames.append(after)
+                    frames.append(before)
+            pd.concat(frames).to_csv(os.path.join(args.sink, f'static.{name}.csv'), index=False, header=False)
 
 if __name__ == '__main__':
     args = parser.parse_args()

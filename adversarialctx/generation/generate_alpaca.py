@@ -79,7 +79,6 @@ def main(pair_path : str,
 
     with open(context_path, 'r') as f:
         ctx = f.readlines()
-    ctx = list(map(lambda x : x.strip(), ctx))
 
     logging.info(f'Loading document text lookup for {ds} with {len(didx)} docs')
     dataset = ir_datasets.load(ds)

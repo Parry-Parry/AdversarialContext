@@ -1,7 +1,6 @@
 import pyterrier as pt
 pt.init()
 import argparse
-from collections import defaultdict
 import logging
 import numpy as np
 import os
@@ -9,7 +8,6 @@ import pandas as pd
 import ir_datasets 
 
 from pyterrier_freetext.util import split_into_sentences
-from pyterrier_freetext.summary.ranker import SentenceRanker, MonoT5SentenceRanker
 
 SENTENCE_MODEL = 'nq-distilbert-base-v1'
 
@@ -65,21 +63,12 @@ def main(args):
         text_items = map(lambda x : x.split('\t'), f.readlines())
 
     ctx, sentences =  map(list, zip(*text_items))
-    
-    ds = ir_datasets.load("msmarco-passage")
-    text = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
-    queries = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{args.dataset}").queries_iter()).set_index('query_id').text.to_dict()
 
-    cols = ['qid', 'docno', 'score']
-    types = {'qid' : str, 'docno' : str, 'score' : float}
+    cols = ['qid', 'docno']
+    types = {'qid' : str, 'docno' : str}
     texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
 
-    inp = []
-    for row in texts.itertuples():
-        inp.append({'docno':row.docno, 'text':text[row.docno], 'qid':row.qid, 'query': queries[row.qid], 'score':row.score})
-    inp = pd.DataFrame.from_records(inp)
-
-    afters, befores, middles = [], [], []
+    frames = []
 
     syringe = Syringe()
     for c, s in zip(ctx, sentences):
@@ -115,13 +104,11 @@ def main(args):
         after['sentence'] = s
         after['context'] = c
 
-        afters.append(after)
-        middles.append(middle)
-        befores.append(befores)
+        frames.append(after)
+        frames.append(middle)
+        frames.append(before)
 
-    pd.concat(afters).to_csv(os.path.join(args.sink, f'after.csv'), index=False, header=False)
-    pd.concat(middles).to_csv(os.path.join(args.sink, f'middle.csv'), index=False, header=False)
-    pd.concat(befores).to_csv(os.path.join(args.sink, f'before.csv'), index=False, header=False)
+    pd.concat(frames).to_csv(os.path.join(args.sink, f'positional.static.csv'), index=False, header=False)
             
 
 

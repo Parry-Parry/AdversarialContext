@@ -9,9 +9,6 @@ import pandas as pd
 import ir_datasets 
 
 from pyterrier_freetext.util import split_into_sentences
-from pyterrier_freetext.summary.ranker import SentenceRanker, MonoT5SentenceRanker
-
-SENTENCE_MODEL = 'nq-distilbert-base-v1'
 
 def count_sentences(text):
     return len(split_into_sentences(text))
@@ -23,23 +20,27 @@ def get_random_sentence(text):
     return groups[np.random.randint(0, len(groups))]
 
 class Syringe:
-    def __init__(self, ranks, sen) -> None:
+    def __init__(self, lookup) -> None:
         self.ds = ir_datasets.load("msmarco-passage")
         self.docs = pd.DataFrame(self.ds.docs_iter()).set_index('doc_id').text.to_dict()
-        self.ranks = ranks
-        self.sen = sen
         
+        self.ctx = None
+        self.lookup = lookup
         self.pos = None
-        self.salient = False
     
-    def _get_position(self, qid, docno):
-        order = self.ranks[qid][docno]
-        if self.salient == True: return order[0]
-        return order[-1]
-    
-    def _inject(self, target, text, idx):
-        adjusted = idx + self.pos
+    def set_ctx(self, ctx):
+        self.ctx = ctx
+
+    def get_payload(self, id, qid):
+        return self.lookup[self.ctx][qid][id]
+
+    def _inject(self, target, text):
+        if self.pos == 0: return f'{text}. ' + target
+        if self.pos == -1: return target + f' {text}'
+        
         groups = split_into_sentences(target)
+        pos = len(groups) // 2 if len(groups) > 1 else 0
+        adjusted = pos + 1
         start = ' '.join(groups[:adjusted])
         end = ' '.join(groups[adjusted:])
         return start +  f' {text} ' + end
@@ -47,27 +48,15 @@ class Syringe:
     def set_pos(self, pos):
         self.pos = pos
     
-    def set_salient(self, salient):
-        self.salient = salient
-    
-    def get_payload(self, qid, docno):
-        try:
-            payload = self.sen[qid][docno]
-        except KeyError:
-            payload = '#ERROR#'
-        return payload
-    
-    def inject(self, id, qid):
-        payload = self.get_payload(qid, id)
+    def inject(self, id, qid, text):
+        payload = self.get_payload(id, qid)
         text = self.docs[id]
-        idx = self._get_position(qid, id)
-
-        return self._inject(text, payload, idx)
+        return self._inject(text, payload)
     
-    def transform(self, df, col='adversary'):
+    def transform(self, df, text, col='adversary'):
         df = df.copy()
-        df[col] = df.apply(lambda x : self.inject(x.docno, x.qid), axis=1)
-        df['sentence'] = df.apply(lambda x : self.get_payload(x.qid, x.docno), axis=1)
+        df[col] = df.apply(lambda x : self.inject(x.docno, x.qid,  text), axis=1)
+        df['sentence'] = df.apply(lambda x : self.get_payload(x.docno, x.qid), axis=1)
         return df
 
 parser = argparse.ArgumentParser()
@@ -82,35 +71,10 @@ def main(args):
         text_items = map(lambda x : x.split('\t'), f.readlines())
 
     ctx, qidx, docnos, sentences =  map(list, zip(*text_items))
-    
-    ds = ir_datasets.load("msmarco-passage")
-    text = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
-    queries = pd.DataFrame(ir_datasets.load(f"msmarco-passage/{args.dataset}").queries_iter()).set_index('query_id').text.to_dict()
 
-    cols = ['qid', 'docno', 'score']
-    types = {'qid' : str, 'docno' : str, 'score' : float}
+    cols = ['qid', 'docno']
+    types = {'qid' : str, 'docno' : str}
     texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
-
-    inp = []
-    for row in texts.itertuples():
-        inp.append({'docno':row.docno, 'text':text[row.docno], 'qid':row.qid, 'query': queries[row.qid], 'score':row.score})
-    inp = pd.DataFrame.from_records(inp)
-
-    lookups = {}
-
-    sentenceranker = SentenceRanker(model_name=SENTENCE_MODEL, mode='ranks')
-
-    ranks = sentenceranker.transform(inp)
-    lookups['sentence'] = defaultdict(dict)
-    for rank in ranks.itertuples():
-        lookups['sentence'][rank.qid][rank.docno] = rank.summary
-
-    t5ranker = MonoT5SentenceRanker(model_name=None, mode='ranks')
-
-    ranks = t5ranker.transform(inp)
-    lookups['t5'] = defaultdict(dict)
-    for rank in ranks.itertuples():
-        lookups['t5'][rank.qid][rank.docno] = rank.summary
 
     dictlook = {}
     for c in set(ctx):
@@ -123,39 +87,49 @@ def main(args):
         except KeyError:
             pass
 
-    for name, lookup in lookups.items():
-        afters = []
-        befores = []
-        for c in set(ctx):
-            syringe = Syringe(lookup, dictlook[c])
-            for salience in [True, False]:
-                syringe.set_salient(salience)
-                salience_value = 'salient' if salience else 'nonsalient'
-                ### BEFORE ### 
-                syringe.set_pos(0)
-                before = syringe.transform(texts)
-                before['rel'] = 'NA' 
-                before['pos'] = 'before'
-                before['salience'] = salience_value
-                before['salience_type'] = name
-                before['context'] = c
-                
-                ### AFTER ###
 
-                syringe.set_pos(1)
-                after = syringe.transform(texts)
-                after['rel'] = 'NA'
-                after['pos'] = 'after'
-                after['salience'] = salience_value
-                after['salience_type'] = name
-                after['context'] = c
+    frames = []
+    syringe = Syringe(dictlook)
+    for c in set(ctx):
+        syringe.set_ctx(c)
+        
+        salience_value = 'NA'
+        ### BEFORE ### 
+        syringe.set_pos(0)
+        before = syringe.transform(texts)
+        before['rel'] = 'NA' 
+        before['pos'] = 'before'
+        before['salience'] = salience_value
+        before['salience_type'] = 'NA'
+        before['sentence'] = s
+        before['context'] = c
 
-                afters.append(after)
-                befores.append(before)
-        pd.concat(afters).to_csv(os.path.join(args.sink, f'{name}.after.csv'), index=False, header=False)
-        pd.concat(befores).to_csv(os.path.join(args.sink, f'{name}.before.csv'), index=False, header=False)
+        ### MIDDLE ### 
+        syringe.set_pos(1)
+        middle = syringe.transform(texts)
+        middle['rel'] = 'NA' 
+        middle['pos'] = 'middle'
+        middle['salience'] = salience_value
+        middle['salience_type'] = 'NA'
+        middle['sentence'] = s
+        middle['context'] = c
+        
+        ### AFTER ###
+
+        syringe.set_pos(-1)
+        after = syringe.transform(texts)
+        after['rel'] = 'NA'
+        after['pos'] = 'after'
+        after['salience'] = salience_value
+        after['salience_type'] = 'NA'
+        after['sentence'] = s
+        after['context'] = c
+
+        frames.append(after)
+        frames.append(middle)
+        frames.append(before)
+    pd.concat(frames).to_csv(os.path.join(args.sink, f'positional.context.csv'), index=False, header=False)
             
-
 
 if __name__ == '__main__':
     args = parser.parse_args()
