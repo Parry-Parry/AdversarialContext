@@ -126,7 +126,7 @@ def main(pair_path : str,
                 )
                 out = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)[0]
 
-            out = [''.join([t for t in o[:p].split('\n') if len(t) > 1]) for o, p in zip(out, prompts)]
+            out = [''.join([t for t in o[:len(p)].split('\n') if len(t) > 1]) for o, p in zip(out, prompts)]
             sx.extend(out)
             pbar.update(batch_size)
         logging.info(f'Context: {c} Complete')
