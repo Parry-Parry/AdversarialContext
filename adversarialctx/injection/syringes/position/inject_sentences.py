@@ -79,9 +79,8 @@ def main(args):
         inp.append({'docno':row.docno, 'text':text[row.docno], 'qid':row.qid, 'query': queries[row.qid], 'score':row.score})
     inp = pd.DataFrame.from_records(inp)
 
-    afters = []
-    befores = []
-    middles = []
+    afters, befores, middles = [], [], []
+
     syringe = Syringe()
     for c, s in zip(ctx, sentences):
         salience_value = 'NA'
@@ -95,7 +94,7 @@ def main(args):
         before['sentence'] = s
         before['context'] = c
 
-        ### BEFORE ### 
+        ### MIDDLE ### 
         syringe.set_pos(1)
         middle = syringe.transform(texts, s)
         middle['rel'] = 'NA' 

@@ -175,8 +175,6 @@ def main(args):
                         rank_change = old_rank - [i for i, item in enumerate(new_ranks) if item[0]==docno][0]
                         return rank_change
                     
-
-
                     def ABNIRML(qid, docno, adv_score):
                         score = [i[1] for i in old_lookup[qid] if i[0] == docno][0]
                         diff = score - adv_score

@@ -1,16 +1,25 @@
 import fire
+import os
 
 def format_string(string):
     string = string.strip()
     sentences = string.split('.')
     return '.'.join(sentences[::-1]) if len(sentences) > 1 else string
 
-def main(file_path : str, out_path : str):
-    with open(file_path, 'r') as f:
-        text_items = map(lambda x : x.split('\t'), f.readlines())
+def main(file_path : str, out_path : str, filter : str = None):
+    files = [f for f in os.listdir(file_path) if os.path.isfile(os.path.join(file_path, f))]
+    if filter: files = [f for f in files if str(filter) in f]
 
-    qidx, didx, ctx, sx = map(list, zip(*text_items))
-    nsx = map(lambda x : format_string(x), sx)
+    qidx, didx, ctx, nsx = [], [], [], []
+    for file in files:
+        with open(os.path.join(file_path, file), 'r') as f:
+            text_items = map(lambda x : x.split('\t'), f.readlines())
+
+        q, d, c, sx = map(list, zip(*text_items))
+        qidx.extend(q)
+        didx.extend(d)
+        ctx.extend(c)
+        nsx.extend(list(map(lambda x : format_string(x), sx)))
 
     with open(out_path, 'w') as f:
         for item in zip(qidx, didx, ctx, nsx):
