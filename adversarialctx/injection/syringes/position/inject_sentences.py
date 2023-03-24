@@ -72,6 +72,8 @@ def main(args):
 
     syringe = Syringe()
     for c, s in zip(ctx, sentences):
+        s = s.strip('\n')
+        c = c.strip('\n')
         salience_value = 'NA'
         ### BEFORE ### 
         syringe.set_pos(0)
@@ -109,7 +111,6 @@ def main(args):
         frames.append(before)
 
     pd.concat(frames).to_csv(args.sink, index=False, header=False)
-            
 
 
 if __name__ == '__main__':

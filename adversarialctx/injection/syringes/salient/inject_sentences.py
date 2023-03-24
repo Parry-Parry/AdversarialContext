@@ -104,6 +104,8 @@ def main(args):
         lookups['t5'][rank.qid][rank.docno] = rank.summary
 
     for c, s in zip(ctx, sentences):
+        s = s.strip('\n')
+        c = c.strip('\n')
         for name, lookup in lookups.items():
             frames = []
             for c in set(ctx):
