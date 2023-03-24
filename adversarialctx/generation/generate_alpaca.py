@@ -108,6 +108,10 @@ def main(pair_path : str,
             qi = [b[0] for b in batch]
             di = [b[1] for b in batch]
             d = [b[2] for b in batch]
+
+            logging.info(qi)
+            logging.info(di)
+            logging.info(d)
             nqidx.extend(qi)
             ndidx.extend(di)
             nctx.extend([c for i in range(batch_size)])
