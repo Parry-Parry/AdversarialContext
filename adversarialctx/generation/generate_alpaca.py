@@ -1,4 +1,5 @@
 import logging
+import os
 import fire
 import gc
 import torch
@@ -78,7 +79,7 @@ def main(pair_path : str,
         ctx = f.readlines()
     ctx = list(map(lambda x : x.strip(), ctx))
 
-    logging.info(f'Loading document text lookup for {ds}')
+    logging.info(f'Loading document text lookup for {ds} with {len(didx)} docs')
     dataset = ir_datasets.load(ds)
     ddict = pd.DataFrame(dataset.docs_iter()).set_index('doc_id').text.to_dict()
     dtext = map(lambda x : ddict[x], didx)
@@ -98,9 +99,9 @@ def main(pair_path : str,
     num_examples = len(qidx)*len(ctx)
     logging.info(f'Running inference over {num_examples}')
 
-    pbar = tqdm(total=num_examples)
-
     for c in ctx:
+        logging.info(f'Now computing for Context: {c}...')
+        pbar = tqdm(total=len(qidx))
         for qi, di, d in zip(qidx, didx, dtext):
             nqidx.append(qi)
             ndidx.append(di)
@@ -121,10 +122,12 @@ def main(pair_path : str,
                 out = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)[0]
             sx.append(''.join([text for text in out[len(prompts[0]):].split('\n') if len(text) > 1]))
             pbar.update(1)
+        logging.info(f'Context: {c} Complete')
+        with open(os.path.join(out_path, f'{c}.tsv'), 'w') as f:
+            for item in zip(nqidx, ndidx, nctx, sx):
+                f.write(f'{item[0]}\t{item[1]}\t{item[2]}\t{item[3]}\n')
     
-    with open(out_path, 'w') as f:
-        for item in zip(nqidx, ndidx, nctx, sx):
-            f.write(f'{item[0]}\t{item[1]}\t{item[2]}\t{item[3]}\n')
+    
     
     del model 
     gc.collect()
