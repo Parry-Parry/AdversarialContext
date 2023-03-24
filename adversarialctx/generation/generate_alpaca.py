@@ -5,6 +5,7 @@ import gc
 import torch
 import pandas as pd
 import ir_datasets
+from more_itertools import chunked
 from tqdm.auto import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig, BitsAndBytesConfig
 from accelerate import init_empty_weights, infer_auto_device_map
@@ -64,6 +65,7 @@ def main(pair_path : str,
          context_path : str, 
          out_path : str, 
          ds : str, 
+         batch : int = 1,
          ngpu : int = 1, 
          gpu_type : str = 'titan', 
          cpu_mem : int = 16):
@@ -97,17 +99,17 @@ def main(pair_path : str,
     nqidx, ndidx, nctx, sx = [], [], [], []
 
     num_examples = len(qidx)*len(ctx)
-    logging.info(f'Running inference over {num_examples}')
+    logging.info(f'Running inference over {num_examples} with batch size {batch}')
 
     for c in ctx:
         logging.info(f'Now computing for Context: {c}...')
         pbar = tqdm(total=len(qidx))
-        for qi, di, d in zip(qidx, didx, dtext):
-            nqidx.append(qi)
-            ndidx.append(di)
-            nctx.append(c)
+        for qi, di, d in chunked(zip(qidx, didx, dtext), batch):
+            nqidx.extend(qi)
+            ndidx.extend(di)
+            nctx.extend(c)
 
-            prompts = [create_prompt(c, d)]
+            prompts = [create_prompt(c, doc) for doc in d]
             with torch.no_grad():
                 input_ids = tokenizer(prompts, return_tensors="pt").input_ids
                 for i, input_id in enumerate(input_ids):
@@ -120,8 +122,10 @@ def main(pair_path : str,
                     **generate_kwargs
                 )
                 out = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)[0]
-            sx.append(''.join([text for text in out[len(prompts[0]):].split('\n') if len(text) > 1]))
-            pbar.update(1)
+
+            out = [''.join([t for t in o[:p].split('\n') if len(t) > 1]) for o, p in zip(out, prompts)]
+            sx.extend(out)
+            pbar.update(batch)
         logging.info(f'Context: {c} Complete')
         with open(os.path.join(out_path, f'{c}.tsv'), 'w') as f:
             for item in zip(nqidx, ndidx, nctx, sx):
