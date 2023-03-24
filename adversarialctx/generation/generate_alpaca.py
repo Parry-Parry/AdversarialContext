@@ -104,10 +104,13 @@ def main(pair_path : str,
     for c in ctx:
         logging.info(f'Now computing for Context: {c}...')
         pbar = tqdm(total=len(qidx))
-        for qi, di, d in chunked(zip(qidx, didx, dtext), batch):
+        for batch in chunked(zip(qidx, didx, dtext), batch):
+            qi = [b[0] for b in batch]
+            di = [b[1] for b in batch]
+            d = [b[2] for b in batch]
             nqidx.extend(qi)
             ndidx.extend(di)
-            nctx.extend(c)
+            nctx.extend([c for i in range(batch)])
 
             prompts = [create_prompt(c, doc) for doc in d]
             with torch.no_grad():
