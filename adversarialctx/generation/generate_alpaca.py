@@ -96,15 +96,15 @@ def main(pair_path : str,
     )
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, use_fast="/opt" not in MODEL_ID)
     logging.info(f'Model intialized')
-    nqidx, ndidx, nctx, sx = [], [], [], []
-
+    
     num_examples = len(qidx)*len(ctx)
     logging.info(f'Running inference over {num_examples} with batch size {batch_size}')
 
     for c in ctx:
+        nqidx, ndidx, nctx, sx = [], [], [], []
         logging.info(f'Now computing for Context: {c}...')
         pbar = tqdm(total=len(qidx))
-        for qi, di, d in zip(qidx, didx, dtext), batch_size:
+        for qi, di, d in zip(qidx, didx, dtext):
             nqidx.append(qi)
             ndidx.append(di)
             nctx.append(c)
@@ -120,7 +120,7 @@ def main(pair_path : str,
                     **generate_kwargs
                 )
                 out = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)[0]
-                
+
             sx.append(''.join([t for t in out[:len(prompts[0])].split('\n') if len(t) > 1]))
             pbar.update(batch_size)
         logging.info(f'Context: {c} Complete')
