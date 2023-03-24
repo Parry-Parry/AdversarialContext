@@ -115,7 +115,7 @@ def main(args):
                     salience_value = 'salient' if salience else 'nonsalient'
                     ### BEFORE ### 
                     syringe.set_pos(0)
-                    before = syringe.transform(texts)
+                    before = syringe.transform(texts, s)
                     before['rel'] = 'NA' 
                     before['pos'] = 'before'
                     before['salience'] = salience_value
@@ -126,7 +126,7 @@ def main(args):
                     ### AFTER ###
 
                     syringe.set_pos(1)
-                    after = syringe.transform(texts)
+                    after = syringe.transform(texts, s)
                     after['rel'] = 'NA'
                     after['pos'] = 'after'
                     after['salience'] = salience_value
