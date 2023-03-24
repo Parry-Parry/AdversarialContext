@@ -104,18 +104,15 @@ def main(pair_path : str,
     for c in ctx:
         logging.info(f'Now computing for Context: {c}...')
         pbar = tqdm(total=len(qidx))
-        for batch in chunked(zip(qidx, didx, dtext), batch_size):
-            qi = [b[0] for b in batch]
-            di = [b[1] for b in batch]
-            d = [b[2] for b in batch]
+        for qi, di, d in zip(qidx, didx, dtext), batch_size:
+            nqidx.append(qi)
+            ndidx.append(di)
+            nctx.append(c)
 
-            nqidx.extend(qi)
-            ndidx.extend(di)
-            nctx.extend([c for i in range(batch_size)])
-
-            prompts = [create_prompt(c, doc) for doc in d]
+            prompts = [create_prompt(c, d)]
             with torch.no_grad():
                 input_ids = tokenizer(prompts, return_tensors="pt", padding=True, truncation=True).input_ids
+
                 input_ids = input_ids.to(0)
 
                 generated_ids = model.generate(
@@ -123,9 +120,8 @@ def main(pair_path : str,
                     **generate_kwargs
                 )
                 out = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)[0]
-
-            out = [''.join([t for t in o[:len(p)].split('\n') if len(t) > 1]) for o, p in zip(out, prompts)]
-            sx.extend(out)
+                
+            sx.append(''.join([t for t in out[:len(prompts[0])].split('\n') if len(t) > 1]))
             pbar.update(batch_size)
         logging.info(f'Context: {c} Complete')
         with open(os.path.join(out_path, f'{c}.tsv'), 'w') as f:
