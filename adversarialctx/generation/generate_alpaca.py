@@ -115,7 +115,7 @@ def main(pair_path : str,
 
             prompts = [create_prompt(c, doc) for doc in d]
             with torch.no_grad():
-                input_ids = tokenizer(prompts, return_tensors="pt", padding=True).input_ids
+                input_ids = tokenizer(prompts, return_tensors="pt", padding=True, truncation=True).input_ids
                 input_ids = input_ids.to(0)
 
                 generated_ids = model.generate(
