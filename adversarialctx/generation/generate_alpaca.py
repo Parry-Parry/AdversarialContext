@@ -65,7 +65,7 @@ def main(pair_path : str,
          context_path : str, 
          out_path : str, 
          ds : str, 
-         batch : int = 1,
+         batch_size : int = 1,
          ngpu : int = 1, 
          gpu_type : str = 'titan', 
          cpu_mem : int = 16):
@@ -99,18 +99,18 @@ def main(pair_path : str,
     nqidx, ndidx, nctx, sx = [], [], [], []
 
     num_examples = len(qidx)*len(ctx)
-    logging.info(f'Running inference over {num_examples} with batch size {batch}')
+    logging.info(f'Running inference over {num_examples} with batch size {batch_size}')
 
     for c in ctx:
         logging.info(f'Now computing for Context: {c}...')
         pbar = tqdm(total=len(qidx))
-        for batch in chunked(zip(qidx, didx, dtext), batch):
+        for batch in chunked(zip(qidx, didx, dtext), batch_size):
             qi = [b[0] for b in batch]
             di = [b[1] for b in batch]
             d = [b[2] for b in batch]
             nqidx.extend(qi)
             ndidx.extend(di)
-            nctx.extend([c for i in range(batch)])
+            nctx.extend([c for i in range(batch_size)])
 
             prompts = [create_prompt(c, doc) for doc in d]
             with torch.no_grad():
@@ -128,7 +128,7 @@ def main(pair_path : str,
 
             out = [''.join([t for t in o[:p].split('\n') if len(t) > 1]) for o, p in zip(out, prompts)]
             sx.extend(out)
-            pbar.update(batch)
+            pbar.update(batch_size)
         logging.info(f'Context: {c} Complete')
         with open(os.path.join(out_path, f'{c}.tsv'), 'w') as f:
             for item in zip(nqidx, ndidx, nctx, sx):
