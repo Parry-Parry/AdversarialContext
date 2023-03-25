@@ -127,7 +127,7 @@ def main(pair_path : str,
         pbar.update(batch_size)
     logging.info(f'Context: {c} Complete')
     out_c = c.strip(' ')
-    with open(os.path.join(out_path, f'{c}.tsv'), 'w') as f:
+    with open(os.path.join(out_path, f'{out_c}.tsv'), 'w') as f:
         for item in zip(nqidx, ndidx, nctx, sx):
             f.write(f'{item[0]}\t{item[1]}\t{item[2]}\t{item[3]}\n')
     
