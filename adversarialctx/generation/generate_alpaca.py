@@ -97,6 +97,7 @@ def main(pair_path : str,
     logging.info(f'Running inference over {num_examples} with batch size {batch_size}')
 
     c = context.strip('\n')
+    c = ' '.join(c.split('_'))
     nqidx, ndidx, nctx, sx = [], [], [], []
     logging.info(f'Now computing for Context: {c}...')
     pbar = tqdm(total=len(qidx))
