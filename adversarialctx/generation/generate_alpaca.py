@@ -119,7 +119,7 @@ def main(pair_path : str,
             )
             out = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)[0]
 
-        formatted = ''.join([t for t in out[len(prompts[0]:)].split('\n') if len(t) > 1])
+        formatted = ''.join([t for t in out[len(prompts[0]):].split('\n') if len(t) > 1])
         if not sanity_check:
             logging.info(f'Sanity Check Output: {formatted}')
             sanity_check = True
