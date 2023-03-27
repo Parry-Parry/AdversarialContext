@@ -165,6 +165,7 @@ def main(args):
     ### END LOOKUPS AND MODELS INIT ###
 
     if 'context' in args.source:
+        logging.info('Ta Dah!')
         cols = ['qid', 'docno', 'adversary', 'sentence', 'rel', 'pos', 'salience', 'salience_type', 'context']
     else:
         cols = ['qid', 'docno', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
@@ -174,11 +175,8 @@ def main(args):
 
     try:
         texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
-        logging.info(f'Salience Value: {texts.salience.tolist()[:2]}')
-        logging.info(f'Adversary Value: {texts.adversary.tolist()[:2]}')
         for ctx in texts.context.unique().tolist():
             subset = texts[texts.context==ctx]
-            logging.info(f'Length of Subset: {len(subset)}')
             sets  = []
             if args.type == 'salience':
                 for sal in ['salient', 'nonsalient']:
@@ -194,7 +192,6 @@ def main(args):
                     sets.append(tmp.copy())
             for subsubsubset in sets:
                 test = build_from_df(subsubsubset, queries)
-
                 test['query'] = test['query'].apply(preprocess)
                 test['text'] = test['text'].apply(preprocess)
 
