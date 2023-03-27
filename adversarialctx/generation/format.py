@@ -5,7 +5,8 @@ import re
 def format_string(string, nsen=-1):
     string = string.strip()
     sentences = list(map(lambda x : re.sub(r'[^A-Za-z0-9 -]+', '', x), string.split('.')))
-    return '.'.join(sentences[:nsen]) if len(sentences) > 1 else string
+    psg = '.'.join(sentences[:nsen]) + '.'
+    return psg if len(sentences) > 1 else string
 
 def main(file_path : str, out_path : str, filter : str = None):
     files = [f for f in os.listdir(file_path) if os.path.isfile(os.path.join(file_path, f))]
