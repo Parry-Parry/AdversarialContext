@@ -4,7 +4,7 @@ import re
 
 def format_string(string, nsen=-1):
     string = string.strip()
-    sentences = map(lambda x : re.sub(r'\W+', '', x), string.split('.'))
+    sentences = list(map(lambda x : re.sub(r'\W+', '', x), string.split('.')))
     return '.'.join(sentences[:nsen]) if len(sentences) > 1 else string
 
 def main(file_path : str, out_path : str, filter : str = None):
