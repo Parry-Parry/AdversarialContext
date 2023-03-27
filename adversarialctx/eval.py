@@ -91,7 +91,6 @@ def get_rank_change(qid, docno, score, lookup):
     old_ranks = [(k, v) for k, v in lookup[qid].items()]
     old_ranks.sort(key=lambda x : x[1], reverse=True)
     old_rank = [i for i, item in enumerate(old_ranks) if item[0]==docno]
-    logging.info(f'Found Docno in {len(old_rank)} positions')
     new_ranks = [item for item in old_ranks if item[0] != docno]
     new_ranks.append((docno, score))
     new_ranks.sort(reverse=True, key=lambda x : x[1])
@@ -183,12 +182,10 @@ def main(args):
                     tmp = subset[subset.salience==sal]
                     for pos in ['before', 'after']:
                         tmptmp = tmp[tmp.pos==pos]
-                        logging.info(f'Length of Subsubset: {len(tmptmp)}')
                         sets.append(tmptmp.copy())
             else:
                 for pos in ['before', 'middle', 'after']:
                     tmp = subset[subset.pos==pos]
-                    logging.info(f'Length of Subsubset: {len(tmp)}')
                     sets.append(tmp.copy())
             for subsubsubset in sets:
                 test = build_from_df(subsubsubset, queries)
