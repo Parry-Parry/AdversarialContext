@@ -26,10 +26,10 @@ def main(script_name : str, inject_store : str, rank_store : str, out_dir : str)
                 for sal in salience:
                     for model in models:
                         args = main_args
-                        args.extend(['-source', os.path.join(inject_store, f'{sal}.{injection}.csv')])
+                        args.extend(['-source', os.path.join(inject_store, f'{injection}.{sal}.csv')])
                         args.extend(['-scorer', model])
                         args.extend(['-type', type])
-                        args.extend(['-sink', os.path.join(out_dir, f'{model}.{sal}.{injection}.csv')])
+                        args.extend(['-sink', os.path.join(out_dir, f'{model}.{injection}.{sal}.csv')])
                         args.extend(special_args[model])
                         sp.run(args)
                         pbar.update(1)
@@ -37,10 +37,10 @@ def main(script_name : str, inject_store : str, rank_store : str, out_dir : str)
             else:
                 for model in models:
                     args = main_args
-                    args.extend(['-source', os.path.join(inject_store, f'{type}.{injection}.csv')])
+                    args.extend(['-source', os.path.join(inject_store, f'{injection}.{type}.csv')])
                     args.extend(['-scorer', model])
                     args.extend(['-type', type])
-                    args.extend(['-sink', os.path.join(out_dir, f'{model}.{type}.{injection}.csv')])
+                    args.extend(['-sink', os.path.join(out_dir, f'{model}.{injection}.{type}.csv')])
                     args.extend(special_args[model])
                     sp.run(args)
                     pbar.update(1)
