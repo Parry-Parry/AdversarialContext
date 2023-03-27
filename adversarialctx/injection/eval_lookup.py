@@ -164,8 +164,11 @@ def main(args):
 
     ### END LOOKUPS AND MODELS INIT ###
 
-    cols = ['qid', 'docno', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
-    types = {'qid' : str, 'docno' : str, 'adversary' : str, 'rel' : str, 'pos':str, 'salience':str, 'salience_type':str, 'sentence':str, 'context':str}
+    if args.type == 'salience':
+        cols = ['qid', 'docno', 'adversary', 'sentence', 'rel', 'pos', 'salience', 'salience_type', 'context']
+    else:
+        cols = ['qid', 'docno', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
+    types = {col : str for col in cols}
 
     frames = []
 
