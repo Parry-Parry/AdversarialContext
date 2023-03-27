@@ -26,7 +26,7 @@ def main(script_name : str, inject_store : str, rank_store : str, out_dir : str)
                 for sal in salience:
                     for model in models:
                         args = main_args
-                        args.extend(['-source', os.path.join(inject_store, f'{injection}.{sal}.csv')])
+                        args.extend(['-source', os.path.join(inject_store, f'{injection}.{sal}.tsv')])
                         args.extend(['-scorer', model])
                         args.extend(['-type', type])
                         args.extend(['-sink', os.path.join(out_dir, f'{model}.{injection}.{sal}.csv')])
