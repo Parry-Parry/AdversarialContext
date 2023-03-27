@@ -98,12 +98,7 @@ def get_rank_change(qid, docno, score, lookup):
     rank_change = old_rank[0] - [i for i, item in enumerate(new_ranks) if item[0]==docno][0]
     return rank_change
                     
-def ABNIRML(qid, docno, adv_score, lookup):
-    try:
-        score = lookup[qid][docno]
-    except KeyError:
-        logging.info(f'Failed Lookup for Query: {qid}| Doc: {docno}')
-        return 0
+def ABNIRML(score, adv_score):
     diff = score - adv_score
     if diff < 0: return -1 
     elif diff > 0: return 1
@@ -206,9 +201,9 @@ def main(args):
                 
                 res = []
                 for key, item in lookup_10.items():
-                    for doc in item:
+                    for doc, score in item.items():
                         adv_score = get_score(key, doc, results)
-                        abnirml = ABNIRML(key, item, adv_score, lookup_full)
+                        abnirml = ABNIRML(score, adv_score)
                         change = get_rank_change(key, item, adv_score, lookup_full)
                         res.append({'qid' : key, 'docno' : item, 'context' : ctx, 'pos' : position, 'salience' : salience, 'adv_score' : adv_score, 'adv_signal' : abnirml, 'rank_change' : change})
                 
