@@ -4,7 +4,7 @@ import subprocess as sp
 import os 
 from tqdm.auto import tqdm
 
-models = ['bm25', 'colbert', 'tasb', 'electra', 't5']
+models = ['bm25', 'tasb', 'electra', 't5']
 types = ['salience', 'position']
 salience = ['sentence', 't5']
 injections = ['static', 'context']
