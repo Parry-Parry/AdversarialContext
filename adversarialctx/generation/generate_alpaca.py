@@ -62,7 +62,7 @@ def create_prompt(c, d):
     Response:"""
 
 def main(pair_path : str, 
-         context_path : str, 
+         context : str, 
          out_path : str, 
          ds : str, 
          batch_size : int = 1,
@@ -76,9 +76,6 @@ def main(pair_path : str,
     qidx, didx = map(list, zip(*text_items))
     qidx = list(map(lambda x : x.strip(), qidx))
     didx = list(map(lambda x : x.strip(), didx))
-
-    with open(context_path, 'r') as f:
-        ctx = f.readlines()
 
     logging.info(f'Loading document text lookup for {ds} with {len(didx)} docs')
     dataset = ir_datasets.load(ds)
@@ -96,39 +93,43 @@ def main(pair_path : str,
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, use_fast="/opt" not in MODEL_ID)
     logging.info(f'Model intialized')
     
-    num_examples = len(qidx)*len(ctx)
+    num_examples = len(qidx)
     logging.info(f'Running inference over {num_examples} with batch size {batch_size}')
 
-    for c in ctx:
-        c = c.strip('\n')
-        nqidx, ndidx, nctx, sx = [], [], [], []
-        logging.info(f'Now computing for Context: {c}...')
-        pbar = tqdm(total=len(qidx))
-        for qi, di, d in zip(qidx, didx, dtext):
-            nqidx.append(qi)
-            ndidx.append(di)
-            nctx.append(c)
+    c = context.strip('\n')
+    c = ' '.join(c.split('_'))
+    nqidx, ndidx, nctx, sx = [], [], [], []
+    logging.info(f'Now computing for Context: {c}...')
+    pbar = tqdm(total=len(qidx))
+    sanity_check = False
+    for qi, di, d in zip(qidx, didx, dtext):
+        nqidx.append(qi)
+        ndidx.append(di)
+        nctx.append(c)
 
-            prompts = [create_prompt(c, d)]
-            with torch.no_grad():
-                input_ids = tokenizer(prompts, return_tensors="pt").input_ids
+        prompts = [create_prompt(c, d)]
+        with torch.no_grad():
+            input_ids = tokenizer(prompts, return_tensors="pt").input_ids
 
-                input_ids = input_ids.to(0)
+            input_ids = input_ids.to(0)
 
-                generated_ids = model.generate(
-                    input_ids,
-                    **generate_kwargs
-                )
-                out = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)[0]
+            generated_ids = model.generate(
+                input_ids,
+                **generate_kwargs
+            )
+            out = tokenizer.batch_decode(generated_ids.cpu(), skip_special_tokens=True)[0]
 
-            sx.append(''.join([t for t in out[:len(prompts[0])].split('\n') if len(t) > 1]))
-            pbar.update(batch_size)
-        logging.info(f'Context: {c} Complete')
-        with open(os.path.join(out_path, f'{c}.tsv'), 'w') as f:
-            for item in zip(nqidx, ndidx, nctx, sx):
-                f.write(f'{item[0]}\t{item[1]}\t{item[2]}\t{item[3]}\n')
-    
-    
+        formatted = ''.join([t for t in out[len(prompts[0]):].split('\n') if len(t) > 1])
+        if not sanity_check:
+            logging.info(f'Sanity Check Output: {formatted}')
+            sanity_check = True
+        sx.append(formatted)
+        pbar.update(batch_size)
+    logging.info(f'Context: {c} Complete')
+    out_c = c.strip(' ')
+    with open(os.path.join(out_path, f'{out_c}.tsv'), 'w') as f:
+        for item in zip(nqidx, ndidx, nctx, sx):
+            f.write(f'{item[0]}\t{item[1]}\t{item[2]}\t{item[3]}\n')
     
     del model 
     gc.collect()
