@@ -170,14 +170,14 @@ def main(args):
         cols = ['qid', 'docno', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
     
     with open(args.source, 'r') as f:
-        text_items = map(lambda x : x.split('\t'), f.readlines())
+        text_items = map(lambda x : [y.strip('\n') for y in x.split('\t')], f.readlines())
 
     vals = list(map(list, zip(*text_items)))
 
     texts = pd.DataFrame.from_dict({r : v for r, v in zip(cols, vals)})
-    logging.info(texts.head(3))
     frames = []
-
+    logging.info(f'Num Context: {len(texts.context.unique().tolist())}')
+    logging.info(f'Num Pos: {len(texts.pos.unique().tolist())}')
     try:
         #texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
         for ctx in texts.context.unique().tolist():
