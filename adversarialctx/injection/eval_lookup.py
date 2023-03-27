@@ -144,7 +144,7 @@ def main(args):
     with open(args.full_scores, 'r') as f:
         items = map(lambda x : x.split('\t'), f.readlines())
     
-    for item in items: lookup[item[0]][item[1]] = item[2]
+    for item in items: lookup[item[0]][item[1]] = float(item[2].strip())
     config = cfg(args.scorer, args.dataset, args.checkpoint, args.gpu)
 
     try:
