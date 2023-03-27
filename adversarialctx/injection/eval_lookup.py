@@ -164,7 +164,7 @@ def main(args):
 
     ### END LOOKUPS AND MODELS INIT ###
 
-    if args.type == 'salience':
+    if 'context' in args.source:
         cols = ['qid', 'docno', 'adversary', 'sentence', 'rel', 'pos', 'salience', 'salience_type', 'context']
     else:
         cols = ['qid', 'docno', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
