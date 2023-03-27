@@ -7,7 +7,7 @@ from tqdm.auto import tqdm
 scripts = ['AdversarialContext/adversarialctx/injection/syringes/salient/inject_sentences.py', 'AdversarialContext/adversarialctx/injection/syringes/position/inject_sentences.py', 'AdversarialContext/adversarialctx/injection/syringes/salient/inject_context.py', 'AdversarialContext/adversarialctx/injection/syringes/position/inject_context.py']
 
 def main():
-    njobs = 4
+    njobs = len(scripts)
     pbar = tqdm(total=njobs)
 
     for script in scripts:
