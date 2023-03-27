@@ -125,7 +125,7 @@ def main(args):
         frames.append(after)
         frames.append(middle)
         frames.append(before)
-    pd.concat(frames).to_csv(args.sink, index=False, header=False)
+    pd.concat(frames).to_csv(args.sink, sep='\t', index=False, header=False)
             
 
 if __name__ == '__main__':

@@ -136,7 +136,7 @@ def main(args):
 
                     frames.append(after)
                     frames.append(before)
-            pd.concat(frames).to_csv(os.path.join(args.sink, f'static.{name}.csv'), index=False, header=False)
+            pd.concat(frames).to_csv(os.path.join(args.sink, f'static.{name}.tsv'), sep='\t', index=False, header=False)
 
 if __name__ == '__main__':
     args = parser.parse_args()
