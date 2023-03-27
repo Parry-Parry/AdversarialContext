@@ -148,13 +148,13 @@ def main(args):
     lookup_full = defaultdict(dict)
     format_10 = f'{args.scorer}.10.tsv'
     format_50 = f'{args.scorer}.50.tsv'
-    with open(os.path.join(args.full_scores, format_50), 'r') as f:
+    with open(os.path.join(args.full_path, format_50), 'r') as f:
         items = map(lambda x : x.split('\t'), f.readlines())
     
     for item in items: lookup_full[item[0]][item[1]] = float(item[2].strip())
 
     lookup_10 = defaultdict(dict)
-    with open(os.path.join(args.full_scores, format_10), 'r') as f:
+    with open(os.path.join(args.full_path, format_10), 'r') as f:
         items = map(lambda x : x.split('\t'), f.readlines())
     
     for item in items: lookup_10[item[0]][item[1]] = float(item[2].strip())
