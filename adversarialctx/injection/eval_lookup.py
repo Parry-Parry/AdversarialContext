@@ -89,14 +89,13 @@ def build_from_old(df, queries, documents):
 
 def get_rank_change(qid, docno, score, lookup):
     old_ranks = [(k, v) for k, v in lookup[qid].items()]
-    logging.info(f'Before: {old_ranks}')
     old_ranks.sort(key=lambda x : x[1], reverse=True)
-    logging.info(f'After: {old_ranks}')
-    old_rank = [i for i, item in enumerate(old_ranks) if item[0]==docno][0]
+    old_rank = [i for i, item in enumerate(old_ranks) if item[0]==docno]
+    logging.info(f'Found Docno in {len(old_rank)} positions')
     new_ranks = [item for item in old_ranks if item[0] != docno]
     new_ranks.append((docno, score))
     new_ranks.sort(reverse=True, key=lambda x : x[1])
-    rank_change = old_rank - [i for i, item in enumerate(new_ranks) if item[0]==docno][0]
+    rank_change = old_rank[0] - [i for i, item in enumerate(new_ranks) if item[0]==docno][0]
     return rank_change
                     
 def ABNIRML(qid, docno, adv_score, lookup):
@@ -167,19 +166,22 @@ def main(args):
     frames = []
 
     try:
-        texts = pd.read_csv(args.source, header=None, index_col=False, names=cols, dtype=types, on_bad_lines='skip')
+        texts = pd.read_csv(args.source, header=None, index_col=False, names=cols, dtype=types)
         for ctx in texts.context.unique().tolist():
             subset = texts[texts.context==ctx]
+            logging.info(f'Length of Subset: {len(subset)}')
             sets  = []
             if args.type == 'salience':
                 for sal in ['salient', 'nonsalient']:
                     tmp = subset[subset.salience==sal]
                     for pos in ['before', 'after']:
                         tmptmp = tmp[tmp.pos==pos]
+                        logging.info(f'Length of Subsubset: {len(tmptmp)}')
                         sets.append(tmptmp.copy())
             else:
                 for pos in ['before', 'middle', 'after']:
                     tmp = subset[subset.pos==pos]
+                    logging.info(f'Length of Subsubset: {len(tmp)}')
                     sets.append(tmp.copy())
             for subsubsubset in sets:
                 test = build_from_df(subsubsubset, queries)
@@ -189,6 +191,8 @@ def main(args):
 
                 results = scorer(test)
                 results.drop_duplicates(inplace=True)
+
+                logging.info(f'Length of Results: {len(results)}')
                 
                 subsubsubset['adv_score'] = subsubsubset.apply(lambda x : get_score(x['qid'], x['docno'], results), axis=1)
                 subsubsubset['adv_signal'] = subsubsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['adv_score'], lookup), axis=1)
