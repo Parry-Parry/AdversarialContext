@@ -131,6 +131,7 @@ parser.add_argument('-sink', type=str)
 parser.add_argument('--dataset', type=str, default=None)
 parser.add_argument('--checkpoint', type=str, default=None)
 parser.add_argument('--gpu', action='store_true')
+parser.add_argument('--context', action='store_true')
 
 def main(args):
 
@@ -164,6 +165,7 @@ def main(args):
     ### END LOOKUPS AND MODELS INIT ###
   
     cols = ['qid', 'docno', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
+    if args.context: cols = ['qid', 'docno', 'adversary', 'sentence', 'rel', 'pos', 'salience', 'salience_type', 'context']
     with open(args.source, 'r') as f:
         text_items = map(lambda x : [y.strip('\n') for y in x.split('\t')], f.readlines())
 

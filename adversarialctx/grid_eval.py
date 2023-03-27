@@ -7,7 +7,7 @@ from tqdm.auto import tqdm
 models = ['bm25', 'tasb', 'electra', 't5']
 types = ['salience', 'position']
 salience = ['sentence', 't5']
-injections = ['static', 'context']
+injections = ['context'] # Static Complete
 
 special_args = {
     'bm25' : ['--dataset', 'msmarco_passage'],
@@ -30,6 +30,7 @@ def main(script_name : str, inject_store : str, rank_store : str, out_dir : str)
                         args.extend(['-type', type])
                         args.extend(['-sink', os.path.join(out_dir, f'{model}.{injection}.{sal}.csv')])
                         args.extend(special_args[model])
+                        if injection == 'context': args.append('--context')
                         logging.info(f'Now running: {" ".join(args)}')
                         sp.run(args)
                         pbar.update(1)
@@ -41,6 +42,7 @@ def main(script_name : str, inject_store : str, rank_store : str, out_dir : str)
                     args.extend(['-type', type])
                     args.extend(['-sink', os.path.join(out_dir, f'{model}.{injection}.{type}.csv')])
                     args.extend(special_args[model])
+                    if injection == 'context': args.append('--context')
                     logging.info(f'Now running: {" ".join(args)}')
                     sp.run(args)
                     pbar.update(1)
