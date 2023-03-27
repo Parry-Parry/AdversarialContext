@@ -97,7 +97,7 @@ def get_rank_change(qid, docno, score, lookup):
     return rank_change
                     
 def ABNIRML(qid, docno, adv_score, lookup):
-    score = [i[1] for i in lookup[qid] if i[0] == docno][0]
+    score = lookup[qid][docno]
     diff = score - adv_score
     if diff < 0: return -1 
     elif diff > 0: return 1
