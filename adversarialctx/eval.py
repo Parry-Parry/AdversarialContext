@@ -174,6 +174,7 @@ def main(args):
 
     try:
         texts = pd.read_csv(args.source, header=None, index_col=False, names=cols, dtype=types)
+        logging.info(texts.head(3))
         for ctx in texts.context.unique().tolist():
             subset = texts[texts.context==ctx]
             logging.info(f'Length of Subset: {len(subset)}')
