@@ -33,7 +33,6 @@ def main(script_name : str, inject_store : str, rank_store : str, out_dir : str)
                         args.extend(special_args[model])
                         sp.run(args)
                         pbar.update(1)
-
             else:
                 for model in models:
                     args = main_args
