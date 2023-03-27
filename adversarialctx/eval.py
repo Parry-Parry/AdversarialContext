@@ -173,7 +173,7 @@ def main(args):
     frames = []
 
     try:
-        texts = pd.read_csv(args.source, header=None, index_col=False, names=cols, dtype=types)
+        texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
         logging.info(texts.head(3))
         for ctx in texts.context.unique().tolist():
             subset = texts[texts.context==ctx]
