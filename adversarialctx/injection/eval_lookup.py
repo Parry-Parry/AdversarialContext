@@ -98,7 +98,10 @@ def get_rank_change(qid, docno, score, lookup):
     return rank_change
                     
 def ABNIRML(qid, docno, adv_score, lookup):
-    score = lookup[qid][docno]
+    try:
+        score = lookup[qid][docno]
+    except KeyError:
+        logging.info(f'Failed Lookup for Query: {qid}| Doc: {docno}')
     diff = score - adv_score
     if diff < 0: return -1 
     elif diff > 0: return 1
