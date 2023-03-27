@@ -88,7 +88,8 @@ def build_from_old(df, queries, documents):
     return pd.DataFrame.from_records(new)
 
 def get_rank_change(qid, docno, score, lookup):
-    old_ranks = lookup[qid]
+    old_ranks = [(k, v) for k, v in lookup[qid].items()]
+    old_ranks.sort(key=lambda x : x[1], reverse=True)
     old_rank = [i for i, item in enumerate(old_ranks) if item[0]==docno][0]
     new_ranks = [item for item in old_ranks if item[0] != docno]
     new_ranks.append((docno, score))
