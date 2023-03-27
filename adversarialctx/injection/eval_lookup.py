@@ -102,6 +102,7 @@ def ABNIRML(qid, docno, adv_score, lookup):
         score = lookup[qid][docno]
     except KeyError:
         logging.info(f'Failed Lookup for Query: {qid}| Doc: {docno}')
+        return 0
     diff = score - adv_score
     if diff < 0: return -1 
     elif diff > 0: return 1
