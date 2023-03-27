@@ -175,6 +175,7 @@ def main(args):
 
     try:
         texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
+        print(texts[['qid', 'docno', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context'].head()])
         for ctx in texts.context.unique().tolist():
             subset = texts[texts.context==ctx]
             sets  = []
