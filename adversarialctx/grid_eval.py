@@ -5,7 +5,7 @@ import os
 from tqdm.auto import tqdm
 
 models = ['bm25', 'tasb', 'electra', 't5']
-types = ['position'] # salience
+types = ['salience', 'position']
 salience = ['sentence', 't5']
 injections = ['static', 'context']
 
