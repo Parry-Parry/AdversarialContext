@@ -204,7 +204,7 @@ def main(args):
                     for doc, score in item.items():
                         adv_score = get_score(key, doc, results)
                         abnirml = ABNIRML(score, adv_score)
-                        change = get_rank_change(key, item, adv_score, lookup_full)
+                        change = get_rank_change(key, doc, adv_score, lookup_full)
                         res.append({'qid' : key, 'docno' : item, 'context' : ctx, 'pos' : position, 'salience' : salience, 'adv_score' : adv_score, 'adv_signal' : abnirml, 'rank_change' : change})
                 
                 frames.append(pd.DataFrame.from_records(res))
