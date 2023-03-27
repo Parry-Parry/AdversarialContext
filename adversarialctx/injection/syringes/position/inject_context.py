@@ -101,7 +101,6 @@ def main(args):
         before['pos'] = 'before'
         before['salience'] = salience_value
         before['salience_type'] = 'NA'
-        before['sentence'] = s
         before['context'] = c
 
         ### MIDDLE ### 
@@ -111,7 +110,6 @@ def main(args):
         middle['pos'] = 'middle'
         middle['salience'] = salience_value
         middle['salience_type'] = 'NA'
-        middle['sentence'] = s
         middle['context'] = c
         
         ### AFTER ###
@@ -122,7 +120,6 @@ def main(args):
         after['pos'] = 'after'
         after['salience'] = salience_value
         after['salience_type'] = 'NA'
-        after['sentence'] = s
         after['context'] = c
 
         frames.append(after)
