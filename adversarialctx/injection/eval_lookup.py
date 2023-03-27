@@ -115,8 +115,6 @@ def get_score(qid, docno, results):
     if type(adv_score) != np.float64 and type(adv_score) != np.float32: adv_score = adv_score.values[0]
     return adv_score
 
-def get_filtered()
-
 scorers = {
     'tasb' : init_dr,
     'electra' : init_dr,
