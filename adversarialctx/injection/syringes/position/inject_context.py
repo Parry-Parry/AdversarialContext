@@ -48,14 +48,14 @@ class Syringe:
     def set_pos(self, pos):
         self.pos = pos
     
-    def inject(self, id, qid, text):
+    def inject(self, id, qid):
         payload = self.get_payload(id, qid)
         text = self.docs[id]
         return self._inject(text, payload)
     
-    def transform(self, df, text, col='adversary'):
+    def transform(self, df, col='adversary'):
         df = df.copy()
-        df[col] = df.apply(lambda x : self.inject(x.docno, x.qid,  text), axis=1)
+        df[col] = df.apply(lambda x : self.inject(x.docno, x.qid), axis=1)
         df['sentence'] = df.apply(lambda x : self.get_payload(x.docno, x.qid), axis=1)
         return df
 
@@ -70,7 +70,7 @@ def main(args):
     with open(args.sentence_source, 'r') as f:
         text_items = map(lambda x : x.split('\t'), f.readlines())
 
-    ctx, qidx, docnos, sentences =  map(list, zip(*text_items))
+    qidx, docnos, ctx, sentences =  map(list, zip(*text_items))
 
     cols = ['qid', 'docno']
     types = {'qid' : str, 'docno' : str}

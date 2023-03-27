@@ -65,7 +65,7 @@ def main(pair_path : str,
          context : str, 
          out_path : str, 
          ds : str, 
-         batch_size : int = 1,
+         batch_size : int = 1, # Currently does nothing
          ngpu : int = 1, 
          gpu_type : str = 'titan', 
          cpu_mem : int = 16):
