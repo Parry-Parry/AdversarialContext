@@ -163,12 +163,7 @@ def main(args):
         exit
 
     ### END LOOKUPS AND MODELS INIT ###
-    '''
-    if 'context' in args.source:
-        cols = ['qid', 'docno', 'adversary', 'sentence', 'rel', 'pos', 'salience', 'salience_type', 'context']
-    else:
-        cols = ['qid', 'docno', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
-    '''
+  
     cols = ['qid', 'docno', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
     with open(args.source, 'r') as f:
         text_items = map(lambda x : [y.strip('\n') for y in x.split('\t')], f.readlines())

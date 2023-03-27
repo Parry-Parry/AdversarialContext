@@ -19,13 +19,12 @@ special_args = {
 def main(script_name : str, inject_store : str, rank_store : str, out_dir : str):
     njobs = len(models) * len(injections) * 3
     pbar = tqdm(total=njobs)
-    main_args = ['python', script_name, '-full_path', rank_store, '-qrels', 'msmarco-passage/trec-dl-2019/judged']
     for injection in injections:
         for type in types:
             if type=='salience':
                 for sal in salience:
                     for model in models:
-                        args = main_args
+                        args = ['python', script_name, '-full_path', rank_store, '-qrels', 'msmarco-passage/trec-dl-2019/judged']
                         args.extend(['-source', os.path.join(inject_store, f'{injection}.{sal}.tsv')])
                         args.extend(['-scorer', model])
                         args.extend(['-type', type])
@@ -36,7 +35,7 @@ def main(script_name : str, inject_store : str, rank_store : str, out_dir : str)
                         pbar.update(1)
             else:
                 for model in models:
-                    args = main_args
+                    args = ['python', script_name, '-full_path', rank_store, '-qrels', 'msmarco-passage/trec-dl-2019/judged']
                     args.extend(['-source', os.path.join(inject_store, f'{injection}.{type}.tsv')])
                     args.extend(['-scorer', model])
                     args.extend(['-type', type])
