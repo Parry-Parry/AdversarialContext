@@ -10,8 +10,6 @@ from typing import NamedTuple
 import re
 import pandas as pd
 import numpy as np
-from sklearn.metrics import pairwise_distances
-import sentence_transformers
 
 ### BEGIN EVAL MODELS ###
 
@@ -20,25 +18,6 @@ class cfg(NamedTuple):
     dataset : str
     checkpoint : str 
     gpu : bool
-
-class Encoder:
-    def __init__(self, model_id, gpu=False) -> None:
-        from sentence_transformers import SentenceTransformer
-        if device is None:
-            device = 'cuda' if gpu else 'cpu'
-        self.device = torch.device(device)       
-        self.model = SentenceTransformer(model_id, device=self.device)
-
-    def embedding(self, text):
-        return self.model.encode([text], convert_to_numpy=True)[0]
-    
-    def compare(self, q, d1, d2):
-        q_enc = self.embedding(q)
-        d1_enc = self.embedding(d1)
-        d2_enc = self.embedding(d2)
-
-        dist = pairwise_distances(q_enc.reshape(1, -1), np.stack([d1_enc, d2_enc], axis=0), metric='cosine')[0]
-        return dist[1] - dist[0] 
 
 def clean_text(text):
     text = re.sub(r'[^A-Za-z0-9 ]+', '', text)
@@ -145,7 +124,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-source', type=str)
 parser.add_argument('-full_scores', type=str)
 parser.add_argument('-scorer', type=str)
-parser.add_argument('-embedding_model', type=str)
 parser.add_argument('-type', type=str)
 parser.add_argument('-qrels', type=str)
 parser.add_argument('-sink', type=str)
@@ -159,14 +137,13 @@ def main(args):
     ### BEGIN LOOKUPS AND MODELS INIT ###
     ds = ir_datasets.load(args.qrels)
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
-    documents = pd.DataFrame(ir_datasets.load('msmarco-passage').docs_iter()).set_index('doc_id').text
+
 
     lookup = defaultdict(dict)
     with open(args.full_scores, 'r') as f:
         items = map(lambda x : x.split('\t'), f.readlines())
     
     for item in items: lookup[item[0]][item[1]] = item[2]
-    
     config = cfg(args.scorer, args.dataset, args.checkpoint, args.gpu)
 
     try:
@@ -177,39 +154,41 @@ def main(args):
 
     ### END LOOKUPS AND MODELS INIT ###
 
-    cols = ['qid', 'docno', 'score', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
-    types = {'qid' : str, 'docno' : str, 'score' : float, 'adversary' : str, 'rel' : str, 'pos':str, 'salience':str, 'salience_type':str, 'sentence':str, 'context':str}
+    cols = ['qid', 'docno', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
+    types = {'qid' : str, 'docno' : str, 'adversary' : str, 'rel' : str, 'pos':str, 'salience':str, 'salience_type':str, 'sentence':str, 'context':str}
 
-    advers = [f for f in os.listdir(args.source) if os.path.isfile(os.path.join(args.source, f))]
-    advers = [f for f in advers if 'abnirml' not in f]
     frames = []
 
-    for text in advers: # F
-        try:
-            texts = pd.read_csv(os.path.join(args.source, text), header=None, index_col=False, names=cols, dtype=types, on_bad_lines='skip')
-            for ctx in texts.context.unique().tolist():
-                subset = texts[texts.context==ctx]
-                sets  = []
-                if args.type == 'salience':
-                    for sal in ['salient', 'nonsalient']:
-                        tmp = subset[subset.salience==sal]
-                        sets.append(tmp.copy())
-                sets.append(subset)
-                for subsubsubset in sets:
-                    test = build_from_df(subsubsubset, queries)
+    try:
+        texts = pd.read_csv(args.source, header=None, index_col=False, names=cols, dtype=types, on_bad_lines='skip')
+        for ctx in texts.context.unique().tolist():
+            subset = texts[texts.context==ctx]
+            sets  = []
+            if args.type == 'salience':
+                for sal in ['salient', 'nonsalient']:
+                    tmp = subset[subset.salience==sal]
+                    for pos in ['before', 'after']:
+                        tmptmp = tmp[tmp.pos==pos]
+                        sets.append(tmptmp.copy())
+            else:
+                for pos in ['before', 'middle', 'after']:
+                    tmp = subset[subset.pos==pos]
+                    sets.append(tmp.copy())
+            for subsubsubset in sets:
+                test = build_from_df(subsubsubset, queries)
 
-                    test['query'] = test['query'].apply(preprocess)
-                    test['text'] = test['text'].apply(preprocess)
+                test['query'] = test['query'].apply(preprocess)
+                test['text'] = test['text'].apply(preprocess)
 
-                    results = scorer(test)
-                    results.drop_duplicates(inplace=True)
-                    
-                    subsubsubset['adv_score'] = subsubsubset.apply(lambda x : get_score(x['qid'], x['docno'], results), axis=1)
-                    subsubsubset['adv_signal'] = subsubsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['adv_score'], lookup), axis=1)
-                    subsubsubset['rank_change'] = subsubsubset.apply(lambda x : get_rank_change(x['qid'], x['docno'], x['adv_score'], lookup), axis=1)
-                    frames.append(subsubsubset)
-        except ValueError:
-            pass
+                results = scorer(test)
+                results.drop_duplicates(inplace=True)
+                
+                subsubsubset['adv_score'] = subsubsubset.apply(lambda x : get_score(x['qid'], x['docno'], results), axis=1)
+                subsubsubset['adv_signal'] = subsubsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['adv_score'], lookup), axis=1)
+                subsubsubset['rank_change'] = subsubsubset.apply(lambda x : get_rank_change(x['qid'], x['docno'], x['adv_score'], lookup), axis=1)
+                frames.append(subsubsubset)
+    except ValueError:
+        pass
                 
     pd.concat(frames).to_csv(os.path.join(args.sink, f'abnirml.csv'))
 
