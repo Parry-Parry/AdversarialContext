@@ -9,20 +9,18 @@ scripts = ['AdversarialContext/adversarialctx/injection/syringes/salient/inject_
 def main():
     njobs = 4
     pbar = tqdm(total=njobs)
-    args = [
-        'python'
-    ]
+
     for script in scripts:
-        tmp = args
-        tmp.append(script)
-        if 'sentences' in script: tmp.extend(['-sentence_source', 'context/static.tsv'])
-        else: tmp.extend(['-sentence_source', 'context/generated.tsv'])
-        tmp.extend(['-source', 'context/pairs.tsv', '-dataset', 'trec-dl-2019/judged-sink'])
-        if 'salient' in script: tmp.extend(['-sink', 'context/injection'])
+        args = ['python']
+        args.append(script)
+        if 'sentences' in script: args.extend(['-sentence_source', 'context/static.tsv'])
+        else: args.extend(['-sentence_source', 'context/generated.tsv'])
+        args.extend(['-source', 'context/pairs.tsv', '-dataset', 'trec-dl-2019/judged'])
+        if 'salient' in script: args.extend(['-sink', 'context/injection'])
         else:
-            if 'context' in script: tmp.extend(['-sink', 'context/injection/context.position.tsv'])
-            else: tmp.extend(['-sink', 'context/injection/static.position.tsv'])
-        sp.run(tmp)
+            if 'context' in script: args.extend(['-sink', 'context/injection/context.position.tsv'])
+            else: args.extend(['-sink', 'context/injection/static.position.tsv'])
+        sp.run(args)
         pbar.update(1)
 
 
