@@ -176,7 +176,7 @@ def main(args):
 
     texts = pd.DataFrame.from_dict({r : v for r, v in zip(cols, vals)})
     frames = []
-    logging.info(texts.head(1))
+    logging.info(f'FIRST | QID: {texts.qid.tolist()[0]} | DOCNO: {texts.docno.tolist()[0]} | ADVERSARY: {texts.adversary.tolist()[0]} | SENTENCE: {texts.sentence.tolist()[0]} | REL: {texts.rel.tolist()[0]} | POS: {texts.pos.tolist()[0]} | SALIENCE: {texts.salience.tolist()[0]}')
     try:
         #texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
         for ctx in texts.context.unique().tolist():
