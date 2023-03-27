@@ -174,7 +174,8 @@ def main(args):
 
     try:
         texts = pd.read_csv(args.source, sep='\t', header=None, index_col=False, names=cols, dtype=types)
-        logging.info(texts.head(3))
+        logging.info(f'Salience Value: {texts.salience.tolist()[:2]}')
+        logging.info(f'Adversary Value: {texts.adversary.tolist()[:2]}')
         for ctx in texts.context.unique().tolist():
             subset = texts[texts.context==ctx]
             logging.info(f'Length of Subset: {len(subset)}')
