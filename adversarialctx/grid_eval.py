@@ -4,10 +4,11 @@ import subprocess as sp
 import os 
 from tqdm.auto import tqdm
 
-models = ['bm25', 'tasb', 'electra', 't5']
+#models = ['bm25', 'tasb', 'electra', 't5']
+models = ['colbert']
 types = ['salience', 'position']
 salience = ['sentence', 't5']
-injections = ['context'] # Static Complete
+injections = ['static', 'context'] # Static Complete
 
 special_args = {
     'bm25' : ['--dataset', 'msmarco_passage'],
