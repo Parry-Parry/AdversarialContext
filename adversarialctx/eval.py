@@ -173,10 +173,9 @@ def main(args):
         text_items = map(lambda x : x.split('\t'), f.readlines())
 
     vals = list(map(list, zip(*text_items)))
-    logging.info(f'Len Values: {len(vals)}')
 
     texts = pd.DataFrame.from_dict({r : v for r, v in zip(cols, vals)})
-    logging.info(f'Len DataFrame{len(texts)}')
+    logging.info(texts.head(3))
     frames = []
 
     try:
