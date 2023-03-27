@@ -115,6 +115,8 @@ def get_score(qid, docno, results):
     if type(adv_score) != np.float64 and type(adv_score) != np.float32: adv_score = adv_score.values[0]
     return adv_score
 
+def get_filtered()
+
 scorers = {
     'tasb' : init_dr,
     'electra' : init_dr,
@@ -128,7 +130,7 @@ scorers = {
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-source', type=str)
-parser.add_argument('-full_scores', type=str)
+parser.add_argument('-full_path', type=str)
 parser.add_argument('-scorer', type=str)
 parser.add_argument('-type', type=str)
 parser.add_argument('-qrels', type=str)
@@ -145,11 +147,20 @@ def main(args):
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
 
 
-    lookup = defaultdict(dict)
-    with open(args.full_scores, 'r') as f:
+    lookup_full = defaultdict(dict)
+    format_10 = f'{scorer}.10.tsv'
+    format_50 = f'{scorer}.50.tsv'
+    with open(os.path.join(args.full_scores, format_50), 'r') as f:
         items = map(lambda x : x.split('\t'), f.readlines())
     
-    for item in items: lookup[item[0]][item[1]] = float(item[2].strip())
+    for item in items: lookup_full[item[0]][item[1]] = float(item[2].strip())
+
+    lookup_10 = defaultdict(dict)
+    with open(os.path.join(args.full_scores, format_10), 'r') as f:
+        items = map(lambda x : x.split('\t'), f.readlines())
+    
+    for item in items: lookup_10[item[0]][item[1]] = float(item[2].strip())
+
     config = cfg(args.scorer, args.dataset, args.checkpoint, args.gpu)
 
     try:
@@ -192,16 +203,22 @@ def main(args):
                 results = scorer(test)
                 results.drop_duplicates(inplace=True)
 
-                logging.info(f'Length of Results: {len(results)}')
+                position = subsubsubset.pos.tolist()[0]
+                salience = subsubsubset.salience.tolist()[0]
                 
-                subsubsubset['adv_score'] = subsubsubset.apply(lambda x : get_score(x['qid'], x['docno'], results), axis=1)
-                subsubsubset['adv_signal'] = subsubsubset.apply(lambda x : ABNIRML(x['qid'], x['docno'], x['adv_score'], lookup), axis=1)
-                subsubsubset['rank_change'] = subsubsubset.apply(lambda x : get_rank_change(x['qid'], x['docno'], x['adv_score'], lookup), axis=1)
-                frames.append(subsubsubset)
+                res = []
+                for key, item in lookup_10.items():
+                    for doc in item:
+                        adv_score = get_score(key, doc, results)
+                        abnirml = ABNIRML(key, item, adv_score, lookup_full)
+                        change = get_rank_change(key, item, adv_score, lookup_full)
+                        res.append({'qid' : key, 'docno' : item, 'context' : ctx, 'pos' : position, 'salience' : salience, 'adv_score' : adv_score, 'adv_signal' : abnirml, 'rank_change' : change})
+                
+                frames.append(pd.DataFrame.from_records(res))
     except ValueError:
         pass
                 
-    pd.concat(frames).to_csv(os.path.join(args.sink, f'abnirml.csv'))
+    pd.concat(frames).to_csv(args.sink)
 
 if __name__ == '__main__':
     args = parser.parse_args()
