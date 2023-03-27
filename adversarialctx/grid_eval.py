@@ -14,7 +14,8 @@ special_args = {
     'bm25' : ['--dataset', 'msmarco_passage'],
     't5' : [],
     'electra' : [],
-    'tasb' : ['--checkpoint', 'sebastian-hofstaetter/distilbert-dot-tas_b-b256-msmarco']
+    'tasb' : ['--checkpoint', 'sebastian-hofstaetter/distilbert-dot-tas_b-b256-msmarco'],
+    'colbert' : ['--checkpoint', 'http://www.dcs.gla.ac.uk/~craigm/ecir2021-tutorial/colbert_model_checkpoint.zip']
 }
 
 def main(script_name : str, inject_store : str, rank_store : str, out_dir : str):
