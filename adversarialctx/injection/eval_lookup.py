@@ -146,8 +146,8 @@ def main(args):
 
 
     lookup_full = defaultdict(dict)
-    format_10 = f'{scorer}.10.tsv'
-    format_50 = f'{scorer}.50.tsv'
+    format_10 = f'{args.scorer}.10.tsv'
+    format_50 = f'{args.scorer}.50.tsv'
     with open(os.path.join(args.full_scores, format_50), 'r') as f:
         items = map(lambda x : x.split('\t'), f.readlines())
     
