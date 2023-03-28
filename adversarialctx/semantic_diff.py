@@ -15,10 +15,10 @@ import sentence_transformers
 ### BEGIN EVAL MODELS ###
 
 class Encoder:
-    def __init__(self, model_id, gpu=None) -> None:
+    def __init__(self, model_id, device=None) -> None:
         from sentence_transformers import SentenceTransformer
         if device is None:
-            device = 'cuda' if gpu else 'cpu'
+            device = 'cuda' if device else 'cpu'
         self.device = torch.device(device)       
         self.model = SentenceTransformer(model_id, device=self.device)
 
