@@ -77,13 +77,6 @@ def main(args):
         query = queries[qid]
         return semantic_distance.compare(query, context, static)
 
-    format_10 = f'{args.scorer}.10.tsv'
-    lookup_10 = defaultdict(dict)
-    with open(os.path.join(args.full_path, format_10), 'r') as f:
-        items = map(lambda x : x.split('\t'), f.readlines())
-    
-    for item in items: lookup_10[item[0]][item[1]] = float(item[2].strip())
-
     ### END LOOKUPS AND MODELS INIT ###
 
     cols = ['qid', 'docno', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
@@ -117,7 +110,7 @@ def main(args):
                 staticlookup = compile_lookup(s)
                 
                 res = []
-                for key, item in lookup_10.items():
+                for key, item in ctxlookup.items():
                     for doc, _ in item.items():
                         diff = get_diff(key, ctxlookup[key][doc], staticlookup[key][doc])
                         res.append({'qid' : key, 'docno' : doc, 'context' : ctx, 'pos' : position, 'salience' : salience, 'semantic_difference' : diff})
