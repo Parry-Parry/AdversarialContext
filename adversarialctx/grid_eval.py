@@ -4,8 +4,8 @@ import subprocess as sp
 import os 
 from tqdm.auto import tqdm
 
-#models = ['bm25', 'tasb', 'electra', 't5']
-models = ['colbert']
+models = ['bm25', 'tasb', 'electra', 't5']
+model = ['colbert']
 types = ['salience', 'position']
 salience = ['sentence', 't5']
 injections = ['static', 'context'] # Static Complete
@@ -18,9 +18,10 @@ special_args = {
     'colbert' : ['--checkpoint', 'http://www.dcs.gla.ac.uk/~craigm/ecir2021-tutorial/colbert_model_checkpoint.zip']
 }
 
-def main(script_name : str, inject_store : str, rank_store : str, out_dir : str):
+def main(script_name : str, inject_store : str, rank_store : str, out_dir : str, colbert : bool = False):
     njobs = len(models) * len(injections) * 3
     pbar = tqdm(total=njobs)
+    if colbert: models = model
     for injection in injections:
         for type in types:
             if type=='salience':
