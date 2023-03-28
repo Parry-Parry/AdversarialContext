@@ -2,13 +2,15 @@ import fire
 import os
 import re
 
+from pyterrier_freetext.util import split_into_sentences
+
 def format_string(string, nsen=-1):
     string = string.strip()
-    sentences = list(map(lambda x : re.sub(r'[^A-Za-z0-9 -]+', '', x), string.split('.')))
+    sentences = list(map(lambda x : re.sub(r'[^A-Za-z0-9 -]+', '', x), split_into_sentences(string)))
     psg = '.'.join(sentences[:nsen]) + '.'
     return psg if len(sentences) > 1 else string
 
-def main(file_path : str, out_path : str, filter : str = None):
+def main(file_path : str, out_path : str, filter : str = None, nsen : int = -1):
     files = [f for f in os.listdir(file_path) if os.path.isfile(os.path.join(file_path, f))]
     if filter: files = [f for f in files if str(filter) in f]
 
@@ -21,7 +23,7 @@ def main(file_path : str, out_path : str, filter : str = None):
         qidx.extend(q)
         didx.extend(d)
         ctx.extend(c)
-        nsx.extend(list(map(lambda x : format_string(x), sx)))
+        nsx.extend(list(map(lambda x : format_string(x, nsen), sx)))
 
     with open(out_path, 'w') as f:
         for item in zip(qidx, didx, ctx, nsx):
