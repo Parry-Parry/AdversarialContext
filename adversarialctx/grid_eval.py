@@ -18,10 +18,10 @@ special_args = {
 }
 
 def main(script_name : str, inject_store : str, rank_store : str, out_dir : str, colbert : bool = False):
-    njobs = len(models) * len(injections) * 3
-    pbar = tqdm(total=njobs)
     models = ['bm25', 'tasb', 'electra', 't5']
     if colbert: models = ['colbert']
+    njobs = len(models) * len(injections) * 3
+    pbar = tqdm(total=njobs)
     for injection in injections:
         for type in types:
             if type=='salience':
