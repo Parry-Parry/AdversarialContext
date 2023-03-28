@@ -113,7 +113,11 @@ def main(args):
                 res = []
                 for key, item in ctxlookup.items():
                     for doc, _ in item.items():
-                        diff = get_diff(key, ctxlookup[key][doc], staticlookup[key][doc])
+                        try:
+                            diff = get_diff(key, ctxlookup[key][doc], staticlookup[key][doc])
+                        except KeyError:
+                            logging.info('Failed to find {key}:{doc} in static')
+                            continue
                         res.append({'qid' : key, 'docno' : doc, 'context' : ctx, 'pos' : position, 'salience' : salience, 'semantic_difference' : diff})
                 
                 frames.append(pd.DataFrame.from_records(res))
