@@ -4,12 +4,12 @@ import subprocess as sp
 import os 
 from tqdm.auto import tqdm
 
-suffixes = ['t5', 'sentence', 'position']
+suffixes = [('salience', 't5'), ('salience', 'sentence'), ('position', 'position')]
 
 def main(script_name : str, inject_store : str, rank_store : str, out_dir : str):
     njobs = len(suffixes)
     pbar = tqdm(total=njobs)
-    for suffix in suffixes:
+    for type, suffix in suffixes:
         args = ['python', script_name]
         args.extend(
             [
@@ -21,6 +21,8 @@ def main(script_name : str, inject_store : str, rank_store : str, out_dir : str)
             rank_store,
             '-embedding_model',
             'nq-distilbert-base-v1',
+            '-type',
+            type,
             '-qrels',
             'msmarco-passage/trec-dl-2019/judged',
             '-sink',
