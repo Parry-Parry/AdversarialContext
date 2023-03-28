@@ -57,7 +57,7 @@ def read_frame(f, c):
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-ctxsource', type=str)
-parser.add_argument('-statsource', type=str)
+parser.add_argument('-staticsource', type=str)
 parser.add_argument('-full_path', type=str)
 parser.add_argument('-embedding_model', type=str)
 parser.add_argument('-qrels', type=str)
