@@ -15,7 +15,7 @@ import sentence_transformers
 ### BEGIN EVAL MODELS ###
 
 class Encoder:
-    def __init__(self, model_id, gpu=False) -> None:
+    def __init__(self, model_id, gpu=None) -> None:
         from sentence_transformers import SentenceTransformer
         if device is None:
             device = 'cuda' if gpu else 'cpu'
@@ -71,7 +71,7 @@ def main(args):
     ds = ir_datasets.load(args.qrels)
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
 
-    semantic_distance = Encoder(args.embedding_model, args.gpu)
+    semantic_distance = Encoder(args.embedding_model)
 
     def get_diff(qid, context, static):
         query = queries[qid]
