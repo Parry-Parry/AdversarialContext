@@ -6,7 +6,7 @@ from tqdm.auto import tqdm
 
 scripts = ['AdversarialContext/adversarialctx/injection/syringes/salient/inject_sentences.py', 'AdversarialContext/adversarialctx/injection/syringes/position/inject_sentences.py', 'AdversarialContext/adversarialctx/injection/syringes/salient/inject_context.py', 'AdversarialContext/adversarialctx/injection/syringes/position/inject_context.py']
 
-def main():
+def main(gen : str = 'context/generated.tsv', out : str = 'context/injection'):
     njobs = len(scripts)
     pbar = tqdm(total=njobs)
 
@@ -14,12 +14,12 @@ def main():
         args = ['python']
         args.append(script)
         if 'sentences' in script: args.extend(['-sentence_source', 'context/static.tsv'])
-        else: args.extend(['-sentence_source', 'context/generated.tsv'])
+        else: args.extend(['-sentence_source', gen])
         args.extend(['-source', 'context/pairs.tsv', '-dataset', 'trec-dl-2019/judged'])
-        if 'salient' in script: args.extend(['-sink', 'context/injection'])
+        if 'salient' in script: args.extend(['-sink', out])
         else:
-            if 'context' in script: args.extend(['-sink', 'context/injection/context.position.tsv'])
-            else: args.extend(['-sink', 'context/injection/static.position.tsv'])
+            if 'context' in script: args.extend(['-sink', os.path.join(out, 'context.position.tsv')])
+            else: args.extend(['-sink', os.path.join(out, 'static.position.tsv')])
         sp.run(args)
         pbar.update(1)
 
