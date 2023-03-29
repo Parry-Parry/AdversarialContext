@@ -5,6 +5,7 @@ def train_regression(data, **kwargs):
 
     model = LogisticRegression(random_state=42, n_jobs=ncpu)
     model.fit(X, y)
+    return model
 
 def eval_regression(data, model):
     X, y = data 
