@@ -1,6 +1,8 @@
 import os
 from os.path import exists, isdir, join
 
+import numpy as np
+
 def init_out(path : str):
     if exists(path):
         if isdir(path):
@@ -15,10 +17,9 @@ def init_out(path : str):
         os.mkdir(join(path, 'models')) 
         return 0
 
-def load_dataset(path : str, model : str):
-    if model == 'bert': pass 
-    if model == 'regression' : pass 
-    return None
-
-def create_iterator(dataset):
-    pass
+def load_dataset(path : str):
+    with open(path, 'r') as f:
+        items = map(lambda x : x.strip().split('\t'), f.readlines())
+    
+    x, y = map(list, zip(*items))
+    return x, np.array(y, dtype=np.int8)
