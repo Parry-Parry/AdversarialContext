@@ -17,7 +17,8 @@ def main(model_name : str,
          n_class : int = 2,
          epochs : int = 1, 
          batch_size : int = 1,
-         model_id : str = None
+         model_id : str = None,
+         ncpu : int = 1
          ):
 
     if util.init_out(out_dir) == 1: 
@@ -32,13 +33,17 @@ def main(model_name : str,
         'n_class' : n_class,
         'epochs' : epochs,
         'batch_size' : batch_size,
-        'out_dir' : os.path.join(out_dir, 'logs')
+        'ncpu' : ncpu,
+        'out_dir' : os.path.join(out_dir, 'logs'),
     }
 
-    model = train_func(train, **model_params)
+    result = train_func(train, **model_params)
+    model = result[0]
+    if model_name == 'regression':
+        model_params['encoder'] = result[1]
     eval = test_func(test, model, **model_params)
 
-    with open(os.path.join(out_dir, 'logs', f'{model}.{epochs}.eval.tsv'), 'w') as f:
+    with open(os.path.join(out_dir, 'logs', f'{model_name}.{epochs}.eval.tsv'), 'w') as f:
         f.write(f'{eval["accuracy"]}\t{eval["f1"]}\t{eval["precision"]}\t{eval["recall"]}\n')
     
     if model_name == 'bert':
