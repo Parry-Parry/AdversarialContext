@@ -13,14 +13,14 @@ def prepare_data(data):
     
 def train_regression(data, **kwargs):
     ncpu = kwargs.pop('ncpu', 1)
-    X, y, encoder = prepare_data(data) 
+    X, y, _ = prepare_data(data) 
 
     model = LogisticRegression(random_state=42, n_jobs=ncpu)
     model.fit(X, y)
-    return model, encoder
+    return model
 
-def eval_regression(data, model):
+def test_regression(data, model, **kwargs):
     from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
-    X, y = data 
+    X, y, _ = prepare_data(data) 
     pred = model.predict_proba(X)
-    return {'f1':f1_score(y, pred),'acc':accuracy_score(y, pred),'prec':precision_score(y, pred), 'rec':recall_score(y, pred)}, pred
+    return {'f1':f1_score(y, pred),'accuracy':accuracy_score(y, pred),'precision':precision_score(y, pred), 'recall':recall_score(y, pred)}

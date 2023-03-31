@@ -5,66 +5,33 @@ import torch
 from torch import nn
 import evaluate
 
-metric = evaluate.load("accuracy")
-
-class BertClassifier(nn.Module):
-    def __init__(self, model : str, n_class : str, embedding_dim : int = 784, depth : list = [64], **kwargs) -> None:
-        super().__init__(**kwargs)
-         #model = BertClassifier(, n_class, kwargs.pop('embedding_dim', 784), kwargs.pop('depth'), **kwargs)
-        self.encoder = AutoModelForSequenceClassification(model)
-        self.classifier = self._make_classifier(embedding_dim, n_class, depth)
-    
-    def _make_classifier(emb_dim, out_dim, depth, p=0.1):
-        layers = []
-        in_dim = emb_dim
-        for d in depth:
-            layers.append(
-                nn.Sequential(
-                    [
-                        nn.Linear(in_dim, d),
-                        nn.Dropout(p),
-                        nn.ReLu()
-                    ]
-                )
-            )
-            in_dim = d
-        out_activation = nn.Sigmoid if out_dim == 1 else nn.Softmax
-        layers.append(
-            nn.Sequential(
-                    [
-                        nn.Linear(in_dim, out_dim),
-                        out_activation()
-                    ]
-                )
-        )
-        return nn.Sequential(*layers)
-    
-    def forward(self, inp):
-        x = self.encoder(**inp)
-        return self.classifier(x)
-
-def format_dataset(dataset, n_class):
+def format_dataset(dataset, n_class, device, eval_size=0.1, test=False):
     records = {'text':[], 'label':[]}
     for x, y in dataset:
         records['text'].append(x)
         records['label'].append(np.eye(n_class)[y])
-    return Dataset.from_dict(records)
+    if test: return Dataset.from_dict(records).with_format("torch", device=device)
+    return Dataset.from_dict(records).train_test_split(test_size=eval_size, stratify_by_column="label").with_format("torch", device)
     
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
 
-    return metric.compute(predictions=predictions, references=labels)
+    metrics = evaluate.combine(["accuracy", "recall", "precision", "f1"])
+
+    return metrics.compute(predictions=predictions, references=labels)
     
 def train_bert(data, **kwargs):
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     name = kwargs.pop('model')
     epochs = kwargs.pop('epochs', 1)
-    lr = kwargs.pop('lr', 1e-3)
-    n_class = kwargs.pop('n_class', 1)
+    lr = kwargs.pop('lr', 1e-5)
+    n_class = kwargs.pop('n_class', 2)
 
-    train, eval = format_dataset(name, data)
+    ds = format_dataset(name, data, device)
+    train = ds['train']
+    eval = ds['test']
     model = AutoModelForSequenceClassification(name, num_labels=n_class).to_device(device)
     tokenizer = AutoTokenizer.from_pretrained(name)
     optimizer = torch.optim.AdamW(model, lr=lr)
@@ -84,5 +51,12 @@ def train_bert(data, **kwargs):
 
     return model
 
-def test_bert(data, **kwargs):
-    pass
+def test_bert(data, model, **kwargs):
+    from evaluate import evaluator
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    test = format_dataset(data, kwargs.pop('n_class', 2), device, test=True)
+    
+    task_evaluator = evaluator("text-classification")
+    return task_evaluator.compute(model, test, evaluate.combine(["accuracy", "recall", "precision", "f1"]))
+
+
