@@ -5,15 +5,29 @@ import torch
 from torch import nn
 import evaluate
 
+def to_categorical(row, n_class):
+    row['label'] = np.eye(n_class)[row['label']]
+    return row
+
+
 def prepare_data(data, n_class, device, eval_size=0.1, test=False):
     records = {'text':[], 'label':[]}
-    print(data)
     X, Y = data
     for x, y in zip(X, Y):
         records['text'].append(x)
-        records['label'].append(np.eye(n_class)[y])
-    if test: return Dataset.from_dict(records).with_format("torch", device=device)
-    return Dataset.from_dict(records).train_test_split(test_size=eval_size, stratify_by_column="label").with_format("torch", device)
+        records['label'].append(y) # 
+    if test: 
+        ds = Dataset.from_dict(records)
+        ds = ds.map(lambda x : to_categorical(x, n_class), batch_size=1)
+        return ds.with_format("torch", device=device)
+    else:
+        ds = Dataset.from_dict(records).train_test_split(test_size=eval_size, stratify_by_column="label")
+        for k, d in ds.items():
+            tmp = d.map(lambda x : to_categorical(x, n_class), batch_size=1)
+            ds[k] = tmp.with_format("torch", device=device)
+        return ds
+
+
     
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
