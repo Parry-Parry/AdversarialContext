@@ -5,7 +5,7 @@ import numpy as np
 
 def prepare_data(data, n_class=2, test=False, encoder = None):
     x, y = data 
-    if test: y = list(map(lambda v : np.eye(n_class)[v], y))
+    if test: y = list(map(lambda v : np.eye(n_class, dtype=np.float16)[v], y))
     if not encoder:
         stop_words = list(stopwords.words('english'))
         encoder = TfidfVectorizer(input='content', stop_words=stop_words, ngram_range=(1, 2))
