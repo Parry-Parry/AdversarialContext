@@ -33,7 +33,6 @@ def prepare_data(data, n_class, device, eval_size=0.1, test=False):
         return splits
 
 
-    
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
@@ -56,11 +55,12 @@ def train_bert(data, **kwargs):
     model = AutoModelForSequenceClassification.from_pretrained(name, num_labels=n_class).to(device)
     tokenizer = AutoTokenizer.from_pretrained(name)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
-    lr_schedule = get_scheduler('linear', optimizer=optimizer, num_training_steps=len(train)*epochs)
+    lr_schedule = get_scheduler('linear', optimizer=optimizer, num_training_steps=len(train)*epochs, num_warmup_steps=int(len(train)//4))
     training_args = TrainingArguments(output_dir=kwargs.pop('out_dir'), 
                                       per_device_train_batch_size=kwargs.pop('batch_size', 8), 
                                       evaluation_strategy='epoch', 
-                                      num_train_epochs=epochs)
+                                      num_train_epochs=epochs,
+                                      load_best_model_at_end=True)
 
     trainer = Trainer(model, 
                       args=training_args, 
