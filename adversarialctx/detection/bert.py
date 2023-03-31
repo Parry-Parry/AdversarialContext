@@ -1,5 +1,5 @@
 import numpy as np
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, TrainingArguments, Trainer
+from transformers import AutoModelForSequenceClassification, AutoTokenizer, TrainingArguments, Trainer, get_scheduler
 from datasets import Dataset
 import torch
 from torch import nn
@@ -56,6 +56,7 @@ def train_bert(data, **kwargs):
     model = AutoModelForSequenceClassification.from_pretrained(name, num_labels=n_class).to(device)
     tokenizer = AutoTokenizer.from_pretrained(name)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
+    lr_schedule = get_scheduler('linear', optimizer=optimizer, num_training_steps=len(train)*epochs)
     training_args = TrainingArguments(output_dir=kwargs.pop('out_dir'), 
                                       per_device_train_batch_size=kwargs.pop('batch_size', 8), 
                                       evaluation_strategy='epoch', 
@@ -66,7 +67,7 @@ def train_bert(data, **kwargs):
                       train_dataset=train, 
                       eval_dataset=eval, 
                       tokenizer=tokenizer, 
-                      optimizers=optimizer,
+                      optimizers=(optimizer, lr_schedule),
                       compute_metrics=compute_metrics)
     trainer.train()
 
