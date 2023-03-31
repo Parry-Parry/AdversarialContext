@@ -53,7 +53,7 @@ def train_bert(data, **kwargs):
     ds = prepare_data(data, n_class, device)
     train = ds['train']
     eval = ds['test']
-    model = AutoModelForSequenceClassification.from_pretrained(name, num_labels=n_class).to_device(device)
+    model = AutoModelForSequenceClassification.from_pretrained(name, num_labels=n_class).to(device)
     tokenizer = AutoTokenizer.from_pretrained(name)
     optimizer = torch.optim.AdamW(model, lr=lr)
     training_args = TrainingArguments(output_dir=kwargs.pop('out_dir'), 
