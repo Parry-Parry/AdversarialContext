@@ -24,7 +24,7 @@ def compute_metrics(eval_pred):
 def train_bert(data, **kwargs):
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-    name = kwargs.pop('model')
+    name = kwargs.pop('model_id')
     epochs = kwargs.pop('epochs', 1)
     lr = kwargs.pop('lr', 1e-5)
     n_class = kwargs.pop('n_class', 2)

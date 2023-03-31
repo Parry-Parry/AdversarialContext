@@ -28,7 +28,7 @@ def main(model_name : str,
     test = util.load_dataset(os.path.join(dataset_path, 'test.tsv'))
 
     model_params = {
-        'model' : model_id,
+        'model_id' : model_id,
         'n_class' : n_class,
         'epochs' : epochs,
         'batch_size' : batch_size,
