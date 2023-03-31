@@ -32,4 +32,5 @@ def test_regression(data, model, **kwargs):
     
     X, y, _ = prepare_data(data, n_class, test=True, encoder=encoder) 
     pred = model.predict_proba(X)
+    print(pred)
     return {'f1':f1_score(y, pred),'accuracy':accuracy_score(y, pred),'precision':precision_score(y, pred), 'recall':recall_score(y, pred)}
