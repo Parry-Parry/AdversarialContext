@@ -58,7 +58,7 @@ def train_bert(data, **kwargs):
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     training_args = TrainingArguments(output_dir=kwargs.pop('out_dir'), 
                                       per_device_train_batch_size=kwargs.pop('batch_size', 8), 
-                                      evaluation_strategy='epochs', 
+                                      evaluation_strategy='epoch', 
                                       num_train_epochs=epochs)
 
     trainer = Trainer(model, 
