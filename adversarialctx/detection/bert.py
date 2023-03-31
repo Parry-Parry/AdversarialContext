@@ -5,9 +5,10 @@ import torch
 from torch import nn
 import evaluate
 
-def format_dataset(dataset, n_class, device, eval_size=0.1, test=False):
+def format_dataset(data, n_class, device, eval_size=0.1, test=False):
     records = {'text':[], 'label':[]}
-    for x, y in dataset:
+    X, Y = data
+    for x, y in zip(X, Y):
         records['text'].append(x)
         records['label'].append(np.eye(n_class)[y])
     if test: return Dataset.from_dict(records).with_format("torch", device=device)
