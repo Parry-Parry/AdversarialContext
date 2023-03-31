@@ -3,9 +3,9 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.corpus import stopwords
 import numpy as np
 
-def prepare_data(data, n_class, encoder = None):
+def prepare_data(data, n_class=2, test=False, encoder = None):
     x, y = data 
-    y = list(map(lambda v : np.eye(n_class)[v], y))
+    if test: y = list(map(lambda v : np.eye(n_class)[v], y))
     if not encoder:
         stop_words = list(stopwords.words('english'))
         encoder = TfidfVectorizer(input='content', stop_words=stop_words, ngram_range=(1, 2))
@@ -30,6 +30,6 @@ def test_regression(data, model, **kwargs):
     encoder = kwargs.pop('encoder')
     n_class = kwargs.pop('n_class', 2)
     
-    X, y, _ = prepare_data(data, n_class, encoder=encoder) 
+    X, y, _ = prepare_data(data, n_class, test=True, encoder=encoder) 
     pred = model.predict_proba(X)
     return {'f1':f1_score(y, pred),'accuracy':accuracy_score(y, pred),'precision':precision_score(y, pred), 'recall':recall_score(y, pred)}
