@@ -44,6 +44,7 @@ def main(model_name : str,
         model_params['encoder'] = result[1]
     eval = test_func(test, model, **model_params)
 
+    print(eval)
     with open(os.path.join(out_dir, 'logs', f'{model_name}.{epochs}.eval.tsv'), 'w') as f:
         f.write(f'{eval["accuracy"]}\t{eval["f1"]}\t{eval["precision"]}\t{eval["recall"]}\n')
     
