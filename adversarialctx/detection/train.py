@@ -14,8 +14,10 @@ funcs = {
 def main(model_name : str, 
          dataset_path : str, 
          out_dir : str,
+         n_class : int = 2,
          epochs : int = 1, 
-         batch_size : int = 1
+         batch_size : int = 1,
+         model_id : str = None
          ):
 
     if util.init_out(out_dir) == 1: 
@@ -26,6 +28,8 @@ def main(model_name : str,
     test = util.load_dataset(os.path.join(dataset_path, 'test.tsv'))
 
     model_params = {
+        'model' : model_id,
+        'n_class' : n_class,
         'epochs' : epochs,
         'batch_size' : batch_size,
         'out_dir' : os.path.join(out_dir, 'logs')
