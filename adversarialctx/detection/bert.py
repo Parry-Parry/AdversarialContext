@@ -7,6 +7,7 @@ import evaluate
 
 def format_dataset(data, n_class, device, eval_size=0.1, test=False):
     records = {'text':[], 'label':[]}
+    print(data)
     X, Y = data
     for x, y in zip(X, Y):
         records['text'].append(x)
