@@ -62,7 +62,7 @@ def train_bert(data, **kwargs):
                                       num_train_epochs=epochs)
 
     trainer = Trainer(model, 
-                      TrainingArguments=training_args, 
+                      args=training_args, 
                       train_dataset=train, 
                       eval_dataset=eval, 
                       tokenizer=tokenizer, 
