@@ -11,21 +11,26 @@ def to_categorical(row, n_class):
 
 
 def prepare_data(data, n_class, device, eval_size=0.1, test=False):
+    from datasets import ClassLabel
     records = {'text':[], 'label':[]}
     X, Y = data
     for x, y in zip(X, Y):
         records['text'].append(x)
-        records['label'].append(y) # 
+        records['label'].append(y)
     if test: 
         ds = Dataset.from_dict(records)
         ds = ds.map(lambda x : to_categorical(x, n_class), batch_size=1)
         return ds.with_format("torch", device=device)
     else:
-        ds = Dataset.from_dict(records).train_test_split(test_size=eval_size, stratify_by_column="label")
-        for k, d in ds.items():
+        ds = Dataset.from_dict(records)
+        features = ds.features.copy()
+        features['label'] = ClassLabel(num_classes=n_class)
+        ds.cast(features)
+        splits = ds.train_test_split(test_size=eval_size, stratify_by_column="label")
+        for k, d in splits.items():
             tmp = d.map(lambda x : to_categorical(x, n_class), batch_size=1)
-            ds[k] = tmp.with_format("torch", device=device)
-        return ds
+            splits[k] = tmp.with_format("torch", device=device)
+        return splits
 
 
     
