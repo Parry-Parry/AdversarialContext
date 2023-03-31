@@ -74,7 +74,7 @@ def train_bert(data, **kwargs):
                       compute_metrics=compute_metrics)
     trainer.train()
 
-    return model
+    return [model]
 
 def test_bert(data, model, **kwargs):
     from evaluate import evaluator
