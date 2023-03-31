@@ -1,12 +1,12 @@
 from sklearn.linear_model import LogisticRegression
-from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.corpus import stopwords
 import numpy as np
 
 def prepare_data(data):
     x, y = data 
     stop_words = list(stopwords.words('english'))
-    encoder = TfidfTransformer(input='content', stop_words=stop_words)
+    encoder = TfidfVectorizer(input='content', stop_words=stop_words, ngram_range=(1, 2))
 
     train_x = encoder.fit_transform(x)
     return train_x, np.array(y), encoder
