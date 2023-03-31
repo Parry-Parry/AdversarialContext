@@ -6,6 +6,7 @@ import pickle
 import util
 from bert import train_bert, test_bert
 from logistic import train_regression, test_regression
+
 funcs = {
     'bert' : (train_bert, test_bert),
     'regression' : (train_regression, test_regression)

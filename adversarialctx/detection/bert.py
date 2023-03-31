@@ -5,7 +5,7 @@ import torch
 from torch import nn
 import evaluate
 
-def format_dataset(data, n_class, device, eval_size=0.1, test=False):
+def prepare_data(data, n_class, device, eval_size=0.1, test=False):
     records = {'text':[], 'label':[]}
     print(data)
     X, Y = data
@@ -31,7 +31,7 @@ def train_bert(data, **kwargs):
     lr = kwargs.pop('lr', 1e-5)
     n_class = kwargs.pop('n_class', 2)
 
-    ds = format_dataset(name, data, device)
+    ds = prepare_data(data, n_class, device)
     train = ds['train']
     eval = ds['test']
     model = AutoModelForSequenceClassification(name, num_labels=n_class).to_device(device)
@@ -56,7 +56,7 @@ def train_bert(data, **kwargs):
 def test_bert(data, model, **kwargs):
     from evaluate import evaluator
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    test = format_dataset(data, kwargs.pop('n_class', 2), device, test=True)
+    test = prepare_data(data, kwargs.pop('n_class', 2), device, test=True)
     
     task_evaluator = evaluator("text-classification")
     return task_evaluator.compute(model, test, evaluate.combine(["accuracy", "recall", "precision", "f1"]))
