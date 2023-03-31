@@ -83,6 +83,6 @@ def test_bert(data, model, **kwargs):
     tokenizer = AutoTokenizer.from_pretrained(kwargs.pop('model_id'))
     enc_test = test.map(lambda x : tokenize(x, tokenizer), batched=True)
     task_evaluator = evaluator("text-classification")
-    return task_evaluator.compute(model, enc_test, evaluate.combine(["accuracy", "recall", "precision", "f1"]))
+    return task_evaluator.compute(model, enc_test, evaluate.combine(["accuracy", "recall", "precision", "f1"]), tokenizer=tokenizer)
 
 
