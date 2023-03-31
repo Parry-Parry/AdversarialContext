@@ -18,7 +18,7 @@ def prepare_data(data, n_class, device, eval_size=0.1, test=False):
         records['label'].append(y)
     ds = Dataset.from_dict(records).shuffle(seed=42)
     if test: 
-        ds = ds.map(lambda x : to_categorical(x, n_class), batch_size=1)
+        #ds = ds.map(lambda x : to_categorical(x, n_class), batch_size=1)
         return ds.with_format("torch", device=device)
     else:
         features = ds.features.copy()
@@ -26,8 +26,8 @@ def prepare_data(data, n_class, device, eval_size=0.1, test=False):
         ds = ds.cast(features)
         splits = ds.train_test_split(test_size=eval_size, stratify_by_column="label")
         for k, d in splits.items():
-            tmp = d.map(lambda x : to_categorical(x, n_class), batch_size=1)
-            splits[k] = tmp.with_format("torch", device=device)
+            #tmp = d.map(lambda x : to_categorical(x, n_class), batch_size=1)
+            splits[k] = d.with_format("torch", device=device)
         return splits
 
 def tokenize(set, tokenizer):
