@@ -58,7 +58,8 @@ def train_bert(data, **kwargs):
     lr_schedule = get_scheduler('linear', optimizer=optimizer, num_training_steps=len(train)*epochs, num_warmup_steps=int(len(train)//4))
     training_args = TrainingArguments(output_dir=kwargs.pop('out_dir'), 
                                       per_device_train_batch_size=kwargs.pop('batch_size', 8), 
-                                      evaluation_strategy='epoch', 
+                                      evaluation_strategy='epoch',
+                                      save_strategy = 'epoch', 
                                       num_train_epochs=epochs,
                                       load_best_model_at_end=True)
 
