@@ -55,7 +55,7 @@ def train_bert(data, **kwargs):
     eval = ds['test']
     model = AutoModelForSequenceClassification.from_pretrained(name, num_labels=n_class).to(device)
     tokenizer = AutoTokenizer.from_pretrained(name)
-    optimizer = torch.optim.AdamW(model, lr=lr)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     training_args = TrainingArguments(output_dir=kwargs.pop('out_dir'), 
                                       per_device_train_batch_size=kwargs.pop('batch_size', 8), 
                                       evaluation_strategy='epochs', 
