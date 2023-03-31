@@ -25,7 +25,7 @@ def prepare_data(data, n_class, device, eval_size=0.1, test=False):
         ds = Dataset.from_dict(records)
         features = ds.features.copy()
         features['label'] = ClassLabel(num_classes=n_class)
-        ds.cast(features)
+        ds = ds.cast(features)
         splits = ds.train_test_split(test_size=eval_size, stratify_by_column="label")
         for k, d in splits.items():
             tmp = d.map(lambda x : to_categorical(x, n_class), batch_size=1)
