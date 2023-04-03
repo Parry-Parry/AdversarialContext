@@ -6,10 +6,12 @@ def main(dir : str, out : str):
     files = [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]
 
     frame = []
-    cols = ['qid', 'docno', 'context', 'pos', 'salience', 'orginal_score', 'new_score']
-    types = {c : str for c in cols if 'score' not in c}
+    cols = ['qid', 'docno', 'context', 'pos', 'salience', 'original_score', 'new_score']
+    types = {}
     types['original_score'] = float
     types['new_score'] = float
+    types.update({c : str for c in cols if 'score' not in c})
+    
 
     for file in files:
         parts = file.split('.')
