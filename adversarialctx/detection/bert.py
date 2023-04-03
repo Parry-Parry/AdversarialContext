@@ -2,7 +2,6 @@ import numpy as np
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, TrainingArguments, Trainer, get_scheduler
 from datasets import Dataset
 import torch
-from torch import nn
 import evaluate
 
 def to_categorical(row, n_class):
@@ -21,12 +20,10 @@ def prepare_data(data, n_class, device, eval_size=0.1, test=False):
     features['label'] = ClassLabel(num_classes=n_class)
     ds = ds.cast(features)
     if test: 
-        #ds = ds.map(lambda x : to_categorical(x, n_class), batch_size=1)
         return ds.with_format("torch", device=device)
     else:
         splits = ds.train_test_split(test_size=eval_size, stratify_by_column="label")
         for k, d in splits.items():
-            #tmp = d.map(lambda x : to_categorical(x, n_class), batch_size=1)
             splits[k] = d.with_format("torch", device=device)
         return splits
 
@@ -48,6 +45,7 @@ def train_bert(data, **kwargs):
     epochs = kwargs.pop('epochs', 1)
     lr = kwargs.pop('lr', 1e-5)
     n_class = kwargs.pop('n_class', 2)
+    out = kwargs.pop('out', '/')
 
     ds = prepare_data(data, n_class, device)
     train = ds['train']
@@ -73,6 +71,7 @@ def train_bert(data, **kwargs):
                       optimizers=(optimizer, lr_schedule),
                       compute_metrics=compute_metrics)
     trainer.train()
+    trainer.save_model(out)
 
     return [model]
 

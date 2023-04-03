@@ -2,7 +2,6 @@ import logging
 import os
 import fire
 import torch 
-import pickle
 import util
 from bert import train_bert, test_bert
 from logistic import train_regression, test_regression
@@ -36,6 +35,7 @@ def main(model_name : str,
         'batch_size' : batch_size,
         'ncpu' : ncpu,
         'out_dir' : os.path.join(out_dir, 'logs'),
+        'out' : os.path.join(out_dir, 'models')
     }
 
     result = train_func(train, **model_params)
@@ -45,15 +45,8 @@ def main(model_name : str,
     eval = test_func(test, model, **model_params)
 
     print(eval)
-    with open(os.path.join(out_dir, 'logs', f'{model_name}.{epochs}.eval.tsv'), 'w') as f:
+    with open(os.path.join(model_params['out_dir'], f'{model_name}.{epochs}.eval.tsv'), 'w') as f:
         f.write(f'{eval["accuracy"]}\t{eval["f1"]}\t{eval["precision"]}\t{eval["recall"]}\n')
-    
-    if model_name == 'bert':
-        model.to('cpu')
-        torch.save(model.state_dict(), os.path.join(out_dir, 'models', f'bert.{epochs}.pt'))
-    else:
-        with open(os.path.join(out_dir, 'models', f'logistic.model'), 'wb') as f:
-            pickle.dump(model, f)
     
     return f"Training of {model} Completed!"
 

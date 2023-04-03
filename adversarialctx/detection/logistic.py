@@ -2,6 +2,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.corpus import stopwords
 import numpy as np
+import os 
+import pickle
 
 def prepare_data(data, encoder = None):
     x, y = data 
@@ -17,10 +19,17 @@ def prepare_data(data, encoder = None):
     
 def train_regression(data, **kwargs):
     ncpu = kwargs.pop('ncpu', 1)
+    out = kwargs.pop('out', '/')
     X, y, encoder = prepare_data(data) 
 
     model = LogisticRegression(random_state=42, n_jobs=ncpu)
     model.fit(X, y)
+
+    with open(os.path.join(out, 'model.pkl', 'wb')) as f:
+        pickle.dump(model, f)
+    with open(os.path.join(out, 'encoder.pkl', 'wb')) as f:
+        pickle.dump(encoder, f)
+
     return model, encoder
 
 def test_regression(data, model, **kwargs):
