@@ -59,9 +59,9 @@ def main(modelpath, advpath : str, originalpath : str, out : str, type : str, da
         score_func = score_bert
     else: 
         device = None
-        with open(os.path.join(modelpath, model.pkl), 'rb') as f:
+        with open(os.path.join(modelpath, 'model.pkl'), 'rb') as f:
             model = pickle.load(f)
-        with open(os.path.join(modelpath, encoder.pkl), 'rb') as f:
+        with open(os.path.join(modelpath, 'encoder.pkl'), 'rb') as f:
             encoder = pickle.load(f)
         score_func = score_regression
     
