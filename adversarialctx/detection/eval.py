@@ -18,12 +18,9 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 ### BEGIN CONVIENIENCE FUNCTIONS ###
 
 def score_regression(model, encoder, text):
-    print(text)
-    print(model)
-    print(encoder)
-    x = encoder.transform(text)
+    x = encoder.transform([text])
     res = model.predict_proba(x)
-    return res
+    return res[0][-1]
 
 def score_bert(model, tokenizer, text):
     global device
@@ -74,8 +71,6 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
             encoder = pickle.load(f)
         score_func = score_regression
     
-    encoded = encoder.transform(['Will this work'])
-    print(model.predict_proba(encoded))
     ### END LOOKUPS AND MODELS INIT ###
   
     frames = []
@@ -98,14 +93,12 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
                 adv = build_from_df(subsubsubset)
                 position = subsubsubset.pos.tolist()[0]
                 salience = subsubsubset.salience.tolist()[0]
-                print(position)
                 res = []
                 for key, item in lookup.items():
                     for doc, text in item.items():
                         original_score = score_func(model, encoder, text)
                         score = score_func(model, encoder, adv[key][doc])
                         res.append({'qid' : key, 'docno' : doc, 'context' : ctx, 'pos' : position, 'salience' : salience, 'orginal_score' : original_score, 'new_score' : score})
-                logging.info(res)
                 frames.append(pd.DataFrame.from_records(res))
     except ValueError:
         pass
