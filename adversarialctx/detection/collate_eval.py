@@ -21,8 +21,14 @@ def main(dir : str, out : str):
         tmp['type'] = parts[2]
         tmp['eval'] = parts[3]
         frame.append(tmp)
+
     
-    pd.concat(frame).to_csv(out, index=False)
+
+    frame = pd.concat(frame)
+
+    
+
+    frame.to_csv(out, index=False)
 
 if __name__=='__main__':
     fire.Fire(main)
