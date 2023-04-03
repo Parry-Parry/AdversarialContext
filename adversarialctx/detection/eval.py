@@ -17,7 +17,9 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 ### BEGIN CONVIENIENCE FUNCTIONS ###
 
 def score_regression(model, encoder, text):
+    print('Got here')
     x = encoder.transform(text)
+    print(f'Encoded: {x}')
     res = model.predict_proba(x)
     print(res)
     return res[-1]
@@ -98,6 +100,7 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
                 res = []
                 for key, item in lookup.items():
                     for doc, text in item.items():
+                        print('got here')
                         original_score = score_func(model, encoder, text)
                         score = score_func(model, encoder, adv[key][doc])
                         res.append({'qid' : key, 'docno' : doc, 'context' : ctx, 'pos' : position, 'salience' : salience, 'orginal_score' : original_score, 'new_score' : score})
