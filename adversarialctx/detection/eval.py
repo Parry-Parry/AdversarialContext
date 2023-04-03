@@ -10,7 +10,8 @@ import ir_datasets
 import pandas as pd
 import fire
 from scipy.special import softmax
-from nltk.corpus import stopwords
+from sklearn.linear_model import LogisticRegression
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -93,12 +94,14 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
                 position = subsubsubset.pos.tolist()[0]
                 salience = subsubsubset.salience.tolist()[0]
                 res = []
+                print(len(lookup))
+                print(len(items))
                 for key, item in lookup.items():
                     for doc, text in item.items():
                         original_score = score_func(model, encoder, text)
                         score = score_func(model, encoder, adv[key][doc])
                         res.append({'qid' : key, 'docno' : doc, 'context' : ctx, 'pos' : position, 'salience' : salience, 'orginal_score' : original_score, 'new_score' : score})
-                print(res)
+                logging.info(res)
                 frames.append(pd.DataFrame.from_records(res))
     except ValueError:
         pass
