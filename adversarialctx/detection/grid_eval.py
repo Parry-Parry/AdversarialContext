@@ -12,8 +12,8 @@ injections = ['static', 'context']
 
 def main(script_name : str, model_path : str, inject_store : str, rank_store : str, out_dir : str):
     models = ['bm25', 'tasb', 'electra', 't5', 'colbert']
-    propmodels = ['bert', 'regression']
-    njobs = len(models) * len(injections) * 3
+    propmodels = ['bert']
+    njobs = len(models) * len(injections) * 3 * len(propmodels)
     pbar = tqdm(total=njobs)
     for injection in injections:
         for type in types:
