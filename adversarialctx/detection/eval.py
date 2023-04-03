@@ -94,8 +94,6 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
                 position = subsubsubset.pos.tolist()[0]
                 salience = subsubsubset.salience.tolist()[0]
                 res = []
-                print(len(lookup))
-                print(len(items))
                 for key, item in lookup.items():
                     for doc, text in item.items():
                         original_score = score_func(model, encoder, text)
