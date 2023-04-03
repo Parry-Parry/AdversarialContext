@@ -9,7 +9,9 @@ import os
 import ir_datasets
 import pandas as pd
 import fire
+import numpy as np
 from scipy.special import softmax
+from nltk import word_tokenize
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -34,10 +36,26 @@ def build_from_df(frame):
     for row in frame.itertuples(): lookup[row.qid][row.docno] = row.adversary
     return lookup
 
+def window(seq, window_size=5):
+    split_seq = word_tokenize(seq)
+    # Code adapted from https://stackoverflow.com/questions/8408117/generate-a-list-of-strings-with-a-sliding-window-using-itertools-yield-and-ite Eumiro 7/12/2011
+    for i in range(len(split_seq) - window_size + 1):
+        yield ' '.join(split_seq[i:i+window_size])
+
+def init_slide(model, window_size=5):
+    if model == 'bert': score_func = score_bert
+    else: score_func = score_regression
+        
+    def inner_func(model, encoder, text):
+        slide = window(text, window_size)
+        vals = [score_func(model, encoder, s) for s in slide]
+        return np.maximum(vals)
+    return inner_func
+
 ### END CONVIENIENCE FUNCTIONS ###
 
 
-def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : str, type : str, dataset : str = None, context : bool = False):
+def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : str, type : str, dataset : str = None, context : bool = False, window_size : int = 0):
     global device
     ### BEGIN LOOKUPS AND MODELS INIT ###
     ds = ir_datasets.load(dataset)
@@ -62,14 +80,16 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
         model = AutoModelForSequenceClassification.from_pretrained(modelpath)
         model.to(device)
         encoder = AutoTokenizer.from_pretrained(modelpath)
-        score_func = score_bert
+        score_func = score_bert 
     else: 
         device = None
         with open(os.path.join(modelpath, 'model.pkl'), 'rb') as f:
             model = pickle.load(f)
         with open(os.path.join(modelpath, 'encoder.pkl'), 'rb') as f:
             encoder = pickle.load(f)
-        score_func = score_regression
+        score_func = score_regression 
+    
+    score_func = score_func if window_size == 0 else init_slide(modeltype, window_size)
     
     ### END LOOKUPS AND MODELS INIT ###
   
