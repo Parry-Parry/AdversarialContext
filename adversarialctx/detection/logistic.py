@@ -25,9 +25,9 @@ def train_regression(data, **kwargs):
     model = LogisticRegression(random_state=42, n_jobs=ncpu)
     model.fit(X, y)
 
-    with open(os.path.join(out, 'model.pkl', 'wb')) as f:
+    with open(os.path.join(out, 'model.pkl'), 'wb') as f:
         pickle.dump(model, f)
-    with open(os.path.join(out, 'encoder.pkl', 'wb')) as f:
+    with open(os.path.join(out, 'encoder.pkl'), 'wb') as f:
         pickle.dump(encoder, f)
 
     return model, encoder
