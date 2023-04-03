@@ -9,6 +9,7 @@ import os
 import ir_datasets
 import pandas as pd
 import fire
+from scipy.special import softmax
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -22,7 +23,7 @@ def score_bert(model, tokenizer, text):
     global device
     toks = tokenizer(text, return_tensors='pt', truncation=True).to(device)
     with torch.no_grad():
-        pred = torch.flatten(model(**toks).logits).cpu().detach().numpy()
+        pred = softmax(torch.flatten(model(**toks).logits).cpu().detach().numpy())
     print(pred)
     return pred[1]
 
