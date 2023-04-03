@@ -48,7 +48,7 @@ def main(model_name : str,
     with open(os.path.join(model_params['out_dir'], f'{model_name}.{epochs}.eval.tsv'), 'w') as f:
         f.write(f'{eval["accuracy"]}\t{eval["f1"]}\t{eval["precision"]}\t{eval["recall"]}\n')
     
-    return f"Training of {model} Completed!"
+    return f"Training of {model_name} Completed!"
 
 
 if __name__=='__main__':
