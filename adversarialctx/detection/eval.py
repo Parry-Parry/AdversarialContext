@@ -74,6 +74,8 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
             encoder = pickle.load(f)
         score_func = score_regression
     
+    encoded = encoder.transform(['Will this work'])
+    print(model.predict_proba(encoded))
     ### END LOOKUPS AND MODELS INIT ###
   
     frames = []
