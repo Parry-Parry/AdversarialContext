@@ -10,6 +10,7 @@ import ir_datasets
 import pandas as pd
 import fire
 from scipy.special import softmax
+from nltk.corpus import stopwords
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -17,7 +18,9 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 
 def score_regression(model, encoder, text):
     x = encoder.transform(text)
-    return model.predict_proba(x)[-1]
+    res = model.predict_proba(x)
+    print(res)
+    return res[-1]
 
 def score_bert(model, tokenizer, text):
     global device
