@@ -24,7 +24,6 @@ def score_bert(model, tokenizer, text):
     toks = tokenizer(text, return_tensors='pt', truncation=True).to(device)
     with torch.no_grad():
         pred = softmax(torch.flatten(model(**toks).logits).cpu().detach().numpy())
-    print(pred)
     return pred[1]
 
 def build_from_df(frame):
