@@ -17,7 +17,7 @@ def score_regression(model, encoder, text):
     return model.predict_proba(x)[-1]
 
 def score_bert(model, tokenizer, text):
-    toks = tokenizer(text, truncate=True)
+    toks = tokenizer(text, truncation=True)
     with torch.no_grad():
         pred = torch.flatten(model(**toks.input_ids).logits).cpu().detach().numpy()
     return pred[1]
