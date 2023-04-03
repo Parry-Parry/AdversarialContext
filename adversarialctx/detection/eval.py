@@ -30,7 +30,7 @@ def build_from_df(frame):
 ### END CONVIENIENCE FUNCTIONS ###
 
 
-def main(modelpath, advpath : str, originalpath : str, out : str, type : str, dataset : str = None, context : bool = False):
+def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : str, type : str, dataset : str = None, context : bool = False):
 
     ### BEGIN LOOKUPS AND MODELS INIT ###
     ds = ir_datasets.load(dataset)
@@ -51,7 +51,7 @@ def main(modelpath, advpath : str, originalpath : str, out : str, type : str, da
 
     texts = pd.DataFrame.from_dict({r : v for r, v in zip(cols, vals)})
 
-    if type == 'bert':
+    if modeltype == 'bert':
         device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         model = AutoModelForSequenceClassification.from_pretrained(modelpath)
         model.to(device)
