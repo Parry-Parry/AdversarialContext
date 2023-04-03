@@ -10,6 +10,8 @@ import ir_datasets
 import pandas as pd
 import fire
 
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
 ### BEGIN CONVIENIENCE FUNCTIONS ###
 
 def score_regression(model, encoder, text):
@@ -19,7 +21,7 @@ def score_regression(model, encoder, text):
 def score_bert(model, tokenizer, text):
     toks = tokenizer(text, truncation=True)
     with torch.no_grad():
-        pred = torch.flatten(model(**toks.input_ids).logits).cpu().detach().numpy()
+        pred = torch.flatten(model(**toks).logits).cpu().detach().numpy()
     return pred[1]
 
 def build_from_df(frame):
@@ -52,7 +54,6 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
     texts = pd.DataFrame.from_dict({r : v for r, v in zip(cols, vals)})
 
     if modeltype == 'bert':
-        device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         model = AutoModelForSequenceClassification.from_pretrained(modelpath)
         model.to(device)
         encoder = AutoTokenizer.from_pretrained(modelpath)
