@@ -18,6 +18,9 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 ### BEGIN CONVIENIENCE FUNCTIONS ###
 
 def score_regression(model, encoder, text):
+    print(text)
+    print(model)
+    print(encoder)
     x = encoder.transform(text)
     res = model.predict_proba(x)
     return res
@@ -71,8 +74,6 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
             encoder = pickle.load(f)
         score_func = score_regression
     
-    print(model)
-    print(encoder)
     ### END LOOKUPS AND MODELS INIT ###
   
     frames = []
@@ -95,8 +96,8 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
                 adv = build_from_df(subsubsubset)
                 position = subsubsubset.pos.tolist()[0]
                 salience = subsubsubset.salience.tolist()[0]
+                print(position)
                 res = []
-                print(len(lookup))
                 for key, item in lookup.items():
                     for doc, text in item.items():
                         original_score = score_func(model, encoder, text)
