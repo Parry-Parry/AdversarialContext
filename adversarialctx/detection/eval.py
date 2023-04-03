@@ -19,9 +19,7 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 def score_regression(model, encoder, text):
     print('Got here')
     x = encoder.transform(text)
-    print(f'Encoded: {x}')
     res = model.predict_proba(x)
-    print(res)
     return res[-1]
 
 def score_bert(model, tokenizer, text):
@@ -71,6 +69,8 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
             model = pickle.load(f)
         with open(os.path.join(modelpath, 'encoder.pkl'), 'rb') as f:
             encoder = pickle.load(f)
+        
+        print(encoder)
         score_func = score_regression
     
     ### END LOOKUPS AND MODELS INIT ###
