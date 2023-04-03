@@ -96,6 +96,7 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
                 res = []
                 for key, item in lookup.items():
                     for doc, text in item.items():
+                        print(text)
                         original_score = score_func(model, encoder, text)
                         score = score_func(model, encoder, adv[key][doc])
                         res.append({'qid' : key, 'docno' : doc, 'context' : ctx, 'pos' : position, 'salience' : salience, 'orginal_score' : original_score, 'new_score' : score})
