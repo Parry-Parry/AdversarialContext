@@ -7,9 +7,7 @@ import torch
 import pickle
 import os
 import ir_datasets
-import re
 import pandas as pd
-import numpy as np
 import fire
 
 ### BEGIN CONVIENIENCE FUNCTIONS ###
@@ -54,10 +52,13 @@ def main(modelpath, advpath : str, originalpath : str, out : str, type : str, da
     texts = pd.DataFrame.from_dict({r : v for r, v in zip(cols, vals)})
 
     if type == 'bert':
+        device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         model = AutoModelForSequenceClassification.from_pretrained(modelpath)
+        model.to(device)
         encoder = AutoTokenizer.from_pretrained(modelpath)
         score_func = score_bert
     else: 
+        device = None
         with open(os.path.join(modelpath, model.pkl), 'rb') as f:
             model = pickle.load(f)
         with open(os.path.join(modelpath, encoder.pkl), 'rb') as f:
