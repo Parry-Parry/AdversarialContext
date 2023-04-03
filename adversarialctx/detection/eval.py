@@ -19,7 +19,8 @@ def score_regression(model, encoder, text):
     return model.predict_proba(x)[-1]
 
 def score_bert(model, tokenizer, text):
-    toks = tokenizer(text, truncation=True)
+    global device
+    toks = tokenizer(text, truncation=True).to(device)
     with torch.no_grad():
         pred = torch.flatten(model(**toks).logits).cpu().detach().numpy()
     return pred[1]
@@ -33,7 +34,7 @@ def build_from_df(frame):
 
 
 def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : str, type : str, dataset : str = None, context : bool = False):
-
+    global device
     ### BEGIN LOOKUPS AND MODELS INIT ###
     ds = ir_datasets.load(dataset)
     docs = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
