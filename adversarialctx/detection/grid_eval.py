@@ -10,7 +10,7 @@ salience = ['sentence', 't5']
 injections = ['static', 'context'] 
 
 
-def main(script_name : str, model_path : str, inject_store : str, rank_store : str, out_dir : str):
+def main(script_name : str, model_path : str, inject_store : str, rank_store : str, out_dir : str, window_size : int = 0):
     propmodels = ['regression', 'bert']
     njobs = len(injections) * 3 * len(propmodels)
     pbar = tqdm(total=njobs)
@@ -18,13 +18,13 @@ def main(script_name : str, model_path : str, inject_store : str, rank_store : s
         for type in types:
             if type=='salience':
                 for sal in salience:
-      
                     for pmodel in propmodels:
                         args = ['python', script_name, '--modelpath', model_path, '--originalpath', rank_store, '--dataset', 'msmarco-passage']
                         args.extend(['--advpath', os.path.join(inject_store, f'{injection}.{sal}.tsv')])
                         args.extend(['--modeltype', pmodel])
                         args.extend(['--type', type])
                         args.extend(['--out', os.path.join(out_dir, f'{injection}.{sal}.{pmodel}.csv')])
+                        args.extend(['--window_size', str(window_size)])
                         if injection == 'context': args.append('--context')
                         logging.info(f'Now running: {" ".join(args)}')
                         sp.run(args)
@@ -36,6 +36,7 @@ def main(script_name : str, model_path : str, inject_store : str, rank_store : s
                     args.extend(['--modeltype', pmodel])
                     args.extend(['--type', type])
                     args.extend(['--out', os.path.join(out_dir, f'{injection}.{type}.{pmodel}.csv')])
+                    args.extend(['--window_size', str(window_size)])
                     if injection == 'context': args.append('--context')
                     logging.info(f'Now running: {" ".join(args)}')
                     sp.run(args)
