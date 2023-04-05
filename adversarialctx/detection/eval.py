@@ -102,8 +102,10 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
             if type == 'salience':
                 for sal in ['salient', 'nonsalient']:
                     tmp = subset[subset.salience==sal]
+                    logging.info(f'{sal} : {len(tmp)}')
                     for pos in ['before', 'after']:
                         tmptmp = tmp[tmp.pos==pos]
+                        logging.info(f'{pos} : {len(tmptmp)}')
                         sets.append(tmptmp.copy())
             else:
                 for pos in ['before', 'middle', 'after']:
