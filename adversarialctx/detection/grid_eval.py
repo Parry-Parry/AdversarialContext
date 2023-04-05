@@ -4,11 +4,15 @@ import subprocess as sp
 import os 
 from tqdm.auto import tqdm
 
-
+'''
 types = ['salience', 'position']
 salience = ['sentence', 't5']
 injections = ['static', 'context'] 
+'''
 
+types = ['salience']
+salience = ['sentence', 't5']
+injections = ['context'] 
 
 def main(script_name : str, model_path : str, inject_store : str, rank_store : str, out_dir : str, window_size : int = 0):
     propmodels = ['regression', 'bert']
