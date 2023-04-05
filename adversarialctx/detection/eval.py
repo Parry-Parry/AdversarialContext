@@ -49,6 +49,7 @@ def init_slide(model, window_size=5):
     def inner_func(model, encoder, text):
         slide = window(text, window_size)
         vals = [score_func(model, encoder, s) for s in slide]
+        if len(vals) < 2: return score_func(model, encoder, text)
         return np.amax(vals)
     return inner_func
 
