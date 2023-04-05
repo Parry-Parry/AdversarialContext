@@ -42,7 +42,7 @@ def window(seq, window_size=5):
     for i in range(len(split_seq) - window_size + 1):
         yield ' '.join(split_seq[i:i+window_size])
 
-def init_slide(model, window_size=5):
+def init_slide(model, window_size=5, max=True):
     if model == 'bert': score_func = score_bert
     else: score_func = score_regression
         
@@ -50,13 +50,14 @@ def init_slide(model, window_size=5):
         slide = window(text, window_size)
         vals = [score_func(model, encoder, s) for s in slide]
         if len(vals) < 2: return score_func(model, encoder, text)
-        return np.amax(vals)
+        if max: return np.amax(vals)
+        else: return np.mean(vals)
     return inner_func
 
 ### END CONVIENIENCE FUNCTIONS ###
 
 
-def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : str, type : str, dataset : str = None, context : bool = False, window_size : int = 0):
+def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : str, type : str, dataset : str = None, context : bool = False, window_size : int = 0, max : bool = True):
     global device
     ### BEGIN LOOKUPS AND MODELS INIT ###
     ds = ir_datasets.load(dataset)
@@ -90,7 +91,7 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
             encoder = pickle.load(f)
         score_func = score_regression 
     
-    score_func = score_func if window_size == 0 else init_slide(modeltype, window_size)
+    score_func = score_func if window_size == 0 else init_slide(modeltype, window_size, max)
     
     ### END LOOKUPS AND MODELS INIT ###
   
