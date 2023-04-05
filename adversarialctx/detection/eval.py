@@ -95,35 +95,33 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
   
     frames = []
 
-    try:
-        for ctx in texts.context.unique().tolist():
-            subset = texts[texts.context==ctx]
-            sets = []
-            if type == 'salience':
-                for sal in ['salient', 'nonsalient']:
-                    tmp = subset[subset.salience==sal]
-                    logging.info(f'{sal} : {len(tmp)}')
-                    for pos in ['before', 'after']:
-                        tmptmp = tmp[tmp.pos==pos]
-                        logging.info(f'{pos} : {len(tmptmp)}')
-                        sets.append(tmptmp.copy())
-            else:
-                for pos in ['before', 'middle', 'after']:
-                    tmp = subset[subset.pos==pos]
-                    sets.append(tmp.copy())
-            for subsubsubset in sets:
-                adv = build_from_df(subsubsubset)
-                position = subsubsubset.pos.tolist()[0]
-                salience = subsubsubset.salience.tolist()[0]
-                res = []
-                for key, item in lookup.items():
-                    for doc, text in item.items():
-                        original_score = score_func(model, encoder, text)
-                        score = score_func(model, encoder, adv[key][doc])
-                        res.append({'qid' : key, 'docno' : doc, 'context' : ctx, 'pos' : position, 'salience' : salience, 'orginal_score' : original_score, 'new_score' : score})
-                frames.append(pd.DataFrame.from_records(res))
-    except ValueError:
-        pass
+    for ctx in texts.context.unique().tolist():
+        subset = texts[texts.context==ctx]
+        sets = []
+        if type == 'salience':
+            for sal in ['salient', 'nonsalient']:
+                tmp = subset[subset.salience==sal]
+                for pos in ['before', 'after']:
+                    tmptmp = tmp[tmp.pos==pos]
+                    sets.append(tmptmp.copy())
+        else:
+            for pos in ['before', 'middle', 'after']:
+                tmp = subset[subset.pos==pos]
+                sets.append(tmp.copy())
+        for subsubsubset in sets:
+            adv = build_from_df(subsubsubset)
+            position = subsubsubset.pos.tolist()[0]
+            salience = subsubsubset.salience.tolist()[0]
+            res = []
+            for key, item in lookup.items():
+                logging.info(key)
+                for doc, text in item.items():
+                    original_score = score_func(model, encoder, text)
+                    score = score_func(model, encoder, adv[key][doc])
+                    logging.info(score)
+                    res.append({'qid' : key, 'docno' : doc, 'context' : ctx, 'pos' : position, 'salience' : salience, 'orginal_score' : original_score, 'new_score' : score})
+            frames.append(pd.DataFrame.from_records(res))
+  
                 
     pd.concat(frames).to_csv(out)
 
