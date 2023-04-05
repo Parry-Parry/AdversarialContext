@@ -115,11 +115,9 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
             salience = subsubsubset.salience.tolist()[0]
             res = []
             for key, item in lookup.items():
-                logging.info(key)
                 for doc, text in item.items():
                     original_score = score_func(model, encoder, text)
                     score = score_func(model, encoder, adv[key][doc])
-                    logging.info(score)
                     res.append({'qid' : key, 'docno' : doc, 'context' : ctx, 'pos' : position, 'salience' : salience, 'orginal_score' : original_score, 'new_score' : score})
             frames.append(pd.DataFrame.from_records(res))
   
