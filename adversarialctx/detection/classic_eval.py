@@ -24,21 +24,21 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 def score_regression(model, encoder, text):
     x = encoder.transform([text])
     res = model.predict_proba(x)[0]
-    return np.array([res[0], res[1]])
+    return 0 if res[0] > res[1] else 1
 
 def score_bert(model, tokenizer, text):
     global device
     toks = tokenizer(text, return_tensors='pt', truncation=True).to(device)
     with torch.no_grad():
         pred = softmax(torch.flatten(model(**toks).logits).cpu().detach().numpy())
-    return pred
+    return 0 if pred[0] > pred[1] else 1
 
 def build_from_df(frame):
     x = []
     y = []
     for row in frame.itertuples(): 
         x.append(row.adversary)
-        y.append(np.array([0., 1.]))
+        y.append(1)
     return x, y
 
 def window(seq, window_size=5):
@@ -92,7 +92,7 @@ def main(modelpath,
     orig_y = []
     for item in items: 
         orig_x.append(docs[item[1]])
-        orig_y.append(np.array([1., 0.]))
+        orig_y.append(0)
 
     cols = ['qid', 'docno', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
     if context: cols = ['qid', 'docno', 'adversary', 'sentence', 'rel', 'pos', 'salience', 'salience_type', 'context']
@@ -142,7 +142,7 @@ def main(modelpath,
 
         scores = np.array([score_func(model, encoder, x) for x in test_x])
         print(scores.shape)
-        frame.append({'position' : position, 'salience' : salience, 'accuracy' : accuracy_score(test_y.argmax(axis=1), scores.argmax(axis=1)), 'f1' : f1_score(test_y.argmax(axis=1), scores.argmax(axis=1)), 'precision' : precision_score(test_y.argmax(axis=1), scores.argmax(axis=1)), 'recall' : recall_score(test_y.argmax(axis=1), scores.argmax(axis=1))})
+        frame.append({'position' : position, 'salience' : salience, 'accuracy' : accuracy_score(test_y, scores), 'f1' : f1_score(test_y, scores), 'precision' : precision_score(test_y, scores), 'recall' : recall_score(test_y, scores)})
             
         pd.DataFrame.from_records(frame).to_csv(os.path.join(out, f'{nature}.{injection_type}.{modeltype}.{position}.{salience}.csv'))
 
