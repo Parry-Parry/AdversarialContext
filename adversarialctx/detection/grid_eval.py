@@ -10,11 +10,11 @@ salience = ['sentence', 't5']
 injections = ['static', 'context'] 
 '''
 
-types = ['salience']
+types = ['salience', 'position']
 salience = ['sentence', 't5']
-injections = ['context'] 
+injections = ['context', 'static'] 
 
-def main(script_name : str, model_path : str, inject_store : str, rank_store : str, out_dir : str, window_size : int = 0):
+def main(script_name : str, model_path : str, inject_store : str, rank_store : str, out_dir : str, window_size : int = 0, sentence : bool = False):
     propmodels = ['regression', 'bert']
     njobs = len(injections) * 3 * len(propmodels)
     pbar = tqdm(total=njobs)
@@ -27,9 +27,14 @@ def main(script_name : str, model_path : str, inject_store : str, rank_store : s
                         args.extend(['--advpath', os.path.join(inject_store, f'{injection}.{sal}.tsv')])
                         args.extend(['--modeltype', pmodel])
                         args.extend(['--type', type])
-                        args.extend(['--out', os.path.join(out_dir, f'{injection}.{sal}.{pmodel}.csv')])
+                        args.extend(['--out', out_dir])
                         args.extend(['--window_size', str(window_size)])
+                        if sentence: args.append('--sentence')
                         if injection == 'context': args.append('--context')
+                        args.extend([
+                            '--injection_type', injection,
+                            '--nature', sal
+                        ])
                         logging.info(f'Now running: {" ".join(args)}')
                         sp.run(args)
                         pbar.update(1)
@@ -39,9 +44,14 @@ def main(script_name : str, model_path : str, inject_store : str, rank_store : s
                     args.extend(['--advpath', os.path.join(inject_store, f'{injection}.{type}.tsv')])
                     args.extend(['--modeltype', pmodel])
                     args.extend(['--type', type])
-                    args.extend(['--out', os.path.join(out_dir, f'{injection}.{type}.{pmodel}.csv')])
+                    args.extend(['--out', out_dir])
                     args.extend(['--window_size', str(window_size)])
                     if injection == 'context': args.append('--context')
+                    if sentence: args.append('--sentence')
+                    args.extend([
+                            '--injection_type', injection,
+                            '--nature', 'position'
+                        ])
                     logging.info(f'Now running: {" ".join(args)}')
                     sp.run(args)
                     pbar.update(1)

@@ -14,6 +14,7 @@ from scipy.special import softmax
 from nltk import word_tokenize
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import TfidfVectorizer
+from nltk import sent_tokenize
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -42,12 +43,17 @@ def window(seq, window_size=5):
     for i in range(len(split_seq) - window_size + 1):
         yield ' '.join(split_seq[i:i+window_size])
 
-def init_slide(model, window_size=5, max=True):
+def sentence_window(seq):
+    splits = sent_tokenize(seq)
+    for s in splits:
+        yield s
+
+def init_slide(model, window_size=5, max=True, sentence=False):
     if model == 'bert': score_func = score_bert
     else: score_func = score_regression
         
     def inner_func(model, encoder, text):
-        slide = window(text, window_size)
+        slide = window(text, window_size) if not sentence else sentence_window(text)
         vals = [score_func(model, encoder, s) for s in slide]
         if len(vals) < 2: return score_func(model, encoder, text)
         if max: return np.amax(vals)
@@ -57,7 +63,19 @@ def init_slide(model, window_size=5, max=True):
 ### END CONVIENIENCE FUNCTIONS ###
 
 
-def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : str, type : str, dataset : str = None, context : bool = False, window_size : int = 0, max : bool = True):
+def main(modelpath, 
+         advpath : str, 
+         originalpath : str, 
+         out : str, 
+         modeltype : str, 
+         type : str, 
+         dataset : str = None, 
+         context : bool = False, 
+         window_size : int = 0, 
+         max : bool = True, 
+         sentence = False, 
+         injection_type : str = "", 
+         nature : str = ""):
     global device
     ### BEGIN LOOKUPS AND MODELS INIT ###
     ds = ir_datasets.load(dataset)
@@ -91,26 +109,25 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
             encoder = pickle.load(f)
         score_func = score_regression 
     
-    score_func = score_func if window_size == 0 else init_slide(modeltype, window_size, max)
+    score_func = score_func if window_size == 0 and not sentence else init_slide(modeltype, window_size, max, sentence)
     
     ### END LOOKUPS AND MODELS INIT ###
-  
-    frames = []
-
-    for ctx in texts.context.unique().tolist():
-        subset = texts[texts.context==ctx]
-        sets = []
-        if type == 'salience':
-            for sal in ['salient', 'nonsalient']:
-                tmp = subset[subset.salience==sal]
-                for pos in ['before', 'after']:
-                    tmptmp = tmp[tmp.pos==pos]
-                    sets.append(tmptmp.copy())
-        else:
-            for pos in ['before', 'middle', 'after']:
-                tmp = subset[subset.pos==pos]
-                sets.append(tmp.copy())
-        for subsubsubset in sets:
+    
+    sets = []
+    if type == 'salience':
+        for sal in ['salient', 'nonsalient']:
+            tmp = texts[texts.salience==sal]
+            for pos in ['before', 'after']:
+                tmptmp = tmp[tmp.pos==pos]
+                sets.append(tmptmp.copy())
+    else:
+        for pos in ['before', 'middle', 'after']:
+            tmp = texts[texts.pos==pos]
+            sets.append(tmp.copy())
+    for subsubset in sets:
+        frames = []
+        for ctx in texts.context.unique().tolist():
+            subsubsubset = subsubset[subsubset.context==ctx]
             adv = build_from_df(subsubsubset)
             position = subsubsubset.pos.tolist()[0]
             salience = subsubsubset.salience.tolist()[0]
@@ -121,9 +138,7 @@ def main(modelpath, advpath : str, originalpath : str, out : str, modeltype : st
                     score = score_func(model, encoder, adv[key][doc])
                     res.append({'qid' : key, 'docno' : doc, 'context' : ctx, 'pos' : position, 'salience' : salience, 'orginal_score' : original_score, 'new_score' : score})
             frames.append(pd.DataFrame.from_records(res))
-  
-                
-    pd.concat(frames).to_csv(out)
+        pd.concat(frames).to_csv(os.path.join(out, f'{nature}.{injection_type}.{modeltype}.{position}.{salience}.csv'))
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)

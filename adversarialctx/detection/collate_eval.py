@@ -16,13 +16,10 @@ def main(dir : str, out : str):
     for file in files:
         parts = file.split('.')
         tmp = pd.read_csv(os.path.join(dir, file))
-        tmp['model'] = parts[0]
-        tmp['injection'] = parts[1]
-        tmp['type'] = parts[2]
-        tmp['eval'] = parts[3]
+        tmp['injection'] = parts[0]
+        tmp['type'] = parts[1]
+        tmp['eval'] = parts[2]
         frame.append(tmp)
-
-    
 
     frame = pd.concat(frame)
 
