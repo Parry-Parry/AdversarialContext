@@ -24,6 +24,7 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 def score_regression(model, encoder, text):
     x = encoder.transform([text])
     res = model.predict_proba(x)
+    print(res)
     return res[0]
 
 def score_bert(model, tokenizer, text):
