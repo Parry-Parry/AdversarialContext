@@ -24,7 +24,6 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 def score_regression(model, encoder, text):
     x = encoder.transform([text])
     res = model.predict_proba(x)[0]
-    print(res[0])
     return np.array([res[0], res[1]])
 
 def score_bert(model, tokenizer, text):
@@ -138,7 +137,6 @@ def main(modelpath,
         test_x.extend(orig_x)
         test_y.extend(orig_y)
         test_y = np.array(test_y)
-        print(test_y.shape)
         position = subsubset.pos.tolist()[0]
         salience = subsubset.salience.tolist()[0]
 
