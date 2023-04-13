@@ -68,8 +68,8 @@ def init_slide(model, window_size=5, max=True, sentence=False):
 
 
 def main(modelpath, 
-         originalpath : str,
-         advpath : str, 
+         advpath : str,
+         originalpath : str, 
          out : str, 
          modeltype : str, 
          type : str, 
@@ -137,10 +137,12 @@ def main(modelpath,
         test_x.extend(orig_x)
         test_y.extend(orig_y)
         test_y = np.array(test_y)
+        print(test_y.shape)
         position = subsubset.pos.tolist()[0]
         salience = subsubset.salience.tolist()[0]
 
         scores = np.array([score_func(model, encoder, x) for x in test_x])
+        print(scores.shape)
         frame.append({'position' : position, 'salience' : salience, 'accuracy' : accuracy_score(test_y.argmax(axis=1), scores.argmax(axis=1)), 'f1' : f1_score(test_y.argmax(axis=1), scores.argmax(axis=1)), 'precision' : precision_score(test_y.argmax(axis=1), scores.argmax(axis=1)), 'recall' : recall_score(test_y.argmax(axis=1), scores.argmax(axis=1))})
             
         pd.DataFrame.from_records(frame).to_csv(os.path.join(out, f'{nature}.{injection_type}.{modeltype}.{position}.{salience}.csv'))
