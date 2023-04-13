@@ -14,6 +14,7 @@ from scipy.special import softmax
 from nltk import word_tokenize
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from nltk import sent_tokenize
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
@@ -30,12 +31,15 @@ def score_bert(model, tokenizer, text):
     toks = tokenizer(text, return_tensors='pt', truncation=True).to(device)
     with torch.no_grad():
         pred = softmax(torch.flatten(model(**toks).logits).cpu().detach().numpy())
-    return pred[1]
+    return pred
 
 def build_from_df(frame):
-    lookup = defaultdict(dict)
-    for row in frame.itertuples(): lookup[row.qid][row.docno] = row.adversary
-    return lookup
+    x = []
+    y = []
+    for row in frame.itertuples(): 
+        x.append(row.adversary)
+        y.append(np.array([0., 1.]))
+    return x, y
 
 def window(seq, window_size=5):
     split_seq = word_tokenize(seq)
@@ -64,7 +68,8 @@ def init_slide(model, window_size=5, max=True, sentence=False):
 
 
 def main(modelpath, 
-         datapath : str, 
+         originalpath : str,
+         advpath : str, 
          out : str, 
          modeltype : str, 
          type : str, 
@@ -80,9 +85,18 @@ def main(modelpath,
     ds = ir_datasets.load(dataset)
     docs = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
 
+    with open(originalpath, 'r') as f:
+        items = map(lambda x : x.strip().split('\t'), f.readlines())
+    
+    orig_x = []
+    orig_y = []
+    for item in items: 
+        orig_x.append(docs[item[1]])
+        orig_y.append(np.array([1., 0.]))
+
     cols = ['qid', 'docno', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
     if context: cols = ['qid', 'docno', 'adversary', 'sentence', 'rel', 'pos', 'salience', 'salience_type', 'context']
-    with open(datapath, 'r') as f:
+    with open(advpath, 'r') as f:
         text_items = map(lambda x : [y.strip('\n') for y in x.split('\t')], f.readlines())
 
     vals = list(map(list, zip(*text_items)))
@@ -118,13 +132,18 @@ def main(modelpath,
             tmp = texts[texts.pos==pos]
             sets.append(tmp.copy())
     for subsubset in sets:
-        frames = []
-        for ctx in texts.context.unique().tolist():
-            subsubsubset = subsubset[subsubset.context==ctx]
-            position = subsubsubset.pos.tolist()[0]
-            salience = subsubsubset.salience.tolist()[0]
+        frame = []
+        test_x, test_y = build_from_df(subsubset)
+        test_x.extend(orig_x)
+        test_y.extend(orig_y)
+        test_y = np.array(test_y)
+        position = subsubset.pos.tolist()[0]
+        salience = subsubset.salience.tolist()[0]
+
+        scores = np.array([score_func(model, encoder, x) for x in test_x])
+        frame.append({'position' : position, 'salience' : salience, 'accuracy' : accuracy_score(test_y.argmax(axis=1), scores.argmax(axis=1)), 'f1' : f1_score(test_y.argmax(axis=1), scores.argmax(axis=1)), 'precision' : precision_score(test_y.argmax(axis=1), scores.argmax(axis=1)), 'recall' : recall_score(test_y.argmax(axis=1), scores.argmax(axis=1))})
             
-        pd.concat(frames).to_csv(os.path.join(out, f'{nature}.{injection_type}.{modeltype}.{position}.{salience}.csv'))
+        pd.DataFrame.from_records(frame).to_csv(os.path.join(out, f'{nature}.{injection_type}.{modeltype}.{position}.{salience}.csv'))
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
