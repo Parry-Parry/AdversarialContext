@@ -11,10 +11,9 @@ import pandas as pd
 import fire
 import numpy as np
 from scipy.special import softmax
-from nltk import word_tokenize
+from nltk import word_tokenize, sent_tokenize
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import TfidfVectorizer
-from nltk import sent_tokenize
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
