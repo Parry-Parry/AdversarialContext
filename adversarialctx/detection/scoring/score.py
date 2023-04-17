@@ -46,7 +46,7 @@ def main(
     with open(datasetpath, 'r') as f:
         items = map(lambda x : x.rstrip().split('\t'), f.readlines())
         if standard:
-            data = list(map(lambda x : Item(x[0], x[1], docs[x[2]]), items))
+            texts = list(map(lambda x : Item(x[0], x[1], docs[x[2]]), items))
         else:
             cols = ['qid', 'docno', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
             if context: cols = ['qid', 'docno', 'adversary', 'sentence', 'rel', 'pos', 'salience', 'salience_type', 'context']
@@ -56,12 +56,20 @@ def main(
     score_func = score_func if window_size == 0 and not sentence else init_slide(modeltype, window_size, max, sentence)
 
     out = []
-    for item in texts.itertuples(): # item composed of qid, docno and text
-        score = score_func(item.adversary, model, encoder)
-        out.append((item.qid, item.docno, score, item.context, item.pos, item.salience))
+    if standard:
+        for item in texts:
+            score = score_func(item.adversary, model, encoder)
+            out.append((item.qid, item.docno, score))
+        
+        with open(outpath, 'w') as f:
+            for item in out: f.write(f'{item[0]}\t{item[1]}\t{item[2]}\n')
+    else:
+        for item in texts.itertuples(): # item composed of qid, docno and text
+            score = score_func(item.adversary, model, encoder)
+            out.append((item.qid, item.docno, score, item.context, item.pos, item.salience))
 
-    with open(outpath, 'w') as f:
-        for item in out: f.write(f'{item[0]}\t{item[1]}\t{item[2]}\t{item[3]}\t{item[4]}\t{item[5]}\n')
+        with open(outpath, 'w') as f:
+            for item in out: f.write(f'{item[0]}\t{item[1]}\t{item[2]}\t{item[3]}\t{item[4]}\t{item[5]}\n')
     
 if __name__ == '__main__':
     fire.Fire(main)

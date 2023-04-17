@@ -5,6 +5,8 @@ from nltk import word_tokenize, sent_tokenize
 
 from dataclasses import dataclass
 
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
 def interp_fusion(rel : float, prop : float, alpha : float = 0.9, pi : int = 60, linear : bool = False) -> float:
     rel = (rel + 1) / 2  # normalise cosine similarity with theoretical max & min
     if linear: return alpha * rel + (1 - alpha) * prop # Perform linear fusion
