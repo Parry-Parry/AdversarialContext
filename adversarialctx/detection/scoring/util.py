@@ -69,3 +69,7 @@ def build_generic_apply_pipe(model, score_func, fusion_func):
         return df
 
     return model >> pt.apply.generic(fuse_scores)
+
+def build_threshold_pipe(model, score_func, t=0.5):
+    import pyterrier as pt 
+    return model >> pt.apply.generic(lambda x : score_func(x['text']) < t)
