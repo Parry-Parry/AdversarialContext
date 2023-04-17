@@ -55,7 +55,7 @@ def init_slide(model, window_size=5, max=True, sentence=False):
         
     def inner_func(model, encoder, text):
         slide = window(text, window_size) if not sentence else sentence_window(text)
-        vals = [score_func(model, encoder, s) for s in slide]
+        vals = [score_func(s, model, encoder) for s in slide]
         if len(vals) < 2: return score_func(text, model, encoder)
         if max: return np.amax(vals)
         else: return np.mean(vals)
