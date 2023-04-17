@@ -14,9 +14,9 @@ def main(script_name : str, model_path : str, inject_store : str, out_dir : str,
     for f in files:
         for pmodel in propmodels:
             args = ['python', script_name, '--modelpath', model_path, '--dataset', 'msmarco-passage']
-            args.extend(['--datasetpath', os.path.join(inject_store, f'{pmodel}.{f}')])
+            args.extend(['--datasetpath', os.path.join(inject_store, f)])
             args.extend(['--modeltype', pmodel])
-            args.extend(['--outpath', os.path.join(out_dir, f)])
+            args.extend(['--outpath', os.path.join(out_dir, f'{pmodel}.{f}')])
             args.extend(['--window_size', str(0)])
             if sentence: args.append('--sentence')
             if standard: args.append('--standard')
