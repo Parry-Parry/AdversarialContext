@@ -46,7 +46,7 @@ def main(
     with open(datasetpath, 'r') as f:
         items = map(lambda x : x.rstrip().split('\t'), f.readlines())
         if standard:
-            texts = list(map(lambda x : Item(x[0], x[1], docs[x[2]]), items))
+            texts = list(map(lambda x : Item(x[0], x[1], docs[x[1]]), items))
         else:
             cols = ['qid', 'docno', 'adversary', 'rel', 'pos', 'salience', 'salience_type', 'sentence', 'context']
             if context: cols = ['qid', 'docno', 'adversary', 'sentence', 'rel', 'pos', 'salience', 'salience_type', 'context']
