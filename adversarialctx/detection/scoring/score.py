@@ -58,7 +58,7 @@ def main(
     out = []
     if standard:
         for item in texts:
-            score = score_func(item.adversary, model, encoder)
+            score = score_func(item.text, model, encoder)
             out.append((item.qid, item.docno, score))
         
         with open(outpath, 'w') as f:
