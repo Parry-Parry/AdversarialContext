@@ -52,13 +52,12 @@ def main(
             if context: cols = ['qid', 'docno', 'adversary', 'sentence', 'rel', 'pos', 'salience', 'salience_type', 'context']
             vals = list(map(list, zip(*items)))
             texts = pd.DataFrame.from_dict({r : v for r, v in zip(cols, vals)})
-            data = list(map(lambda x : Item(x.qid, x.docno, x.adversary), texts.itertuples()))
         
     score_func = score_func if window_size == 0 and not sentence else init_slide(modeltype, window_size, max, sentence)
 
     out = []
-    for item in data: # item composed of qid, docno and text
-        score = score_func(item.text, model, encoder)
+    for item in texts.itertuples: # item composed of qid, docno and text
+        score = score_func(item.adversary, model, encoder)
         out.append((item.qid, item.docno, score, item.context, item.pos, item.salience))
 
     with open(outpath, 'w') as f:
