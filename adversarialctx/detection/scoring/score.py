@@ -1,7 +1,6 @@
 import pickle
 import fire 
 import os
-
 import pandas as pd
 import torch 
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
@@ -11,7 +10,8 @@ import ir_datasets
 
 from util import Item, score_regression, score_bert, init_slide
 
-def main(modelpath : str, 
+def main(
+         modelpath : str, 
          modeltype : str, 
          datasetpath : str, 
          outpath : str, 
@@ -58,12 +58,11 @@ def main(modelpath : str,
 
     out = []
     for item in data: # item composed of qid, docno and text
-        score = score_func(model, encoder, item.text)
-        out.append((item.qid, item.docno, score))
+        score = score_func(item.text, model, encoder)
+        out.append((item.qid, item.docno, score, item.context, item.pos, item.salience))
 
     with open(outpath, 'w') as f:
-        for item in out: f.write(f'{item[0]}\t{item[1]}\t{item[2]}\n')
+        for item in out: f.write(f'{item[0]}\t{item[1]}\t{item[2]}\t{item[3]}\t{item[4]}\t{item[5]}\n')
     
-
 if __name__ == '__main__':
-    fire.Fire(main) 
+    fire.Fire(main)

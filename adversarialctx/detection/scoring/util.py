@@ -14,11 +14,9 @@ def rrfusion(rel : float, prop : float, alpha : float = 0.9, relpi : int = 4, pr
     rel = (rel + 1) / 2  # normalise cosine similarity with theoretical max & min
     return 1 / (relpi + alpha * rel) + 1 / (proppi + (1 - alpha) * prop) # Perform reciprocal rank fusion
 
-def alphafusion(rel : float, prop : float, alpha : float = 0.9):
-    return (rel + 1) / 2 + alpha * prop
-
-def priorityfusion(rel : float, prop : float, alpha : float = 0.9):
-    pass 
+def priorityfusion(rel : float, prop : float, alpha : float = 0.9, norm=False):
+    if norm: rel = (rel + 1) / 2 
+    return rel + alpha * prop
 
 @dataclass
 class Item:
@@ -26,12 +24,12 @@ class Item:
     docno: str
     text: str
 
-def score_regression(model, encoder, text):
+def score_regression(text, model=None, encoder=None):
     x = encoder.transform([text])
     res = model.predict_proba(x)
     return res[0][-1]
 
-def score_bert(model, tokenizer, text):
+def score_bert(text, model=None, tokenizer=None):
     global device
     toks = tokenizer(text, return_tensors='pt', truncation=True).to(device)
     with torch.no_grad():
@@ -61,5 +59,11 @@ def init_slide(model, window_size=5, max=True, sentence=False):
         else: return np.mean(vals)
     return inner_func
 
-def build_generic_apply(model, score_func, fusion_func):
-    pass
+
+def build_generic_apply_pipe(model, score_func, fusion_func):
+    import pyterrier as pt 
+    def fuse_scores(df):
+        df['score'] = df.apply(lambda x : fusion_func(x['score'], score_func(x['text'])), axis=1)
+        return df
+
+    return model >> pt.apply.generic(fuse_scores)
