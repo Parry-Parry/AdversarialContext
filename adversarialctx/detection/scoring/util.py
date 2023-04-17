@@ -53,7 +53,7 @@ def init_slide(model, window_size=5, max=True, sentence=False):
     if model == 'bert': score_func = score_bert
     else: score_func = score_regression
         
-    def inner_func(model, encoder, text):
+    def inner_func(text, model, encoder):
         slide = window(text, window_size) if not sentence else sentence_window(text)
         vals = [score_func(s, model, encoder) for s in slide]
         if len(vals) < 2: return score_func(text, model, encoder)
