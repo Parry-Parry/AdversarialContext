@@ -20,7 +20,6 @@ def main(script_name : str, model_path : str, inject_store : str, out_dir : str,
                         args = ['python', script_name, '--modelpath', model_path, '--dataset', 'msmarco-passage']
                         args.extend(['--datasetpath', os.path.join(inject_store, f'{injection}.{sal}.tsv')])
                         args.extend(['--modeltype', pmodel])
-                        args.extend(['--type', type])
                         args.extend(['--outpath', os.path.join(out_dir, f'{injection}.{sal}.{pmodel}.tsv')])
                         args.extend(['--window_size', str(0)])
                         if sentence: args.append('--sentence')
@@ -34,7 +33,6 @@ def main(script_name : str, model_path : str, inject_store : str, out_dir : str,
                     args = ['python', script_name, '--modelpath', model_path, '--dataset', 'msmarco-passage']
                     args.extend(['--datasetpath', os.path.join(inject_store, f'{injection}.{type}.tsv')])
                     args.extend(['--modeltype', pmodel])
-                    args.extend(['--type', type])
                     args.extend(['--outpath', os.path.join(out_dir, f'{injection}.position.{pmodel}.tsv')])
                     args.extend(['--window_size', str(0)])
                     if injection == 'context': args.append('--context')
