@@ -27,6 +27,7 @@ def main(injectionpath : str,
     ### READ ###
     cols = ['query_id', 'doc_id', 'score', 'context', 'pos', 'salience']
     injscores = read_tsv(injectionpath, cols)
+    print('pre-filter:', len(injscores))
 
 
     cols = ['index', 'query_id', 'doc_id', 'context', 'pos', 'salience', 'rel_score', 'signal', 'rank_change']
