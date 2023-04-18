@@ -54,6 +54,7 @@ def main(injectionpath : str,
     # check that injections are present in top 10 
     # if not, remove them from the dataset
     injscores = injscores[injscores.apply(lambda x : (x.query_id, x.doc_id) in zip(queries, docs), axis=1).values.tolist()]
+
     ### MERGE ###
 
     rankscores = rankscores.merge(rankrels, on=['query_id', 'doc_id'], how='left')
@@ -65,7 +66,7 @@ def main(injectionpath : str,
         new_doc_ids[(row.doc_id, row.context, row.pos, row.salience)] = max_doc_id + i 
 
     injscores['doc_id'] = injscores.apply(lambda x : new_doc_ids[(x.doc_id, x.context, x.pos, x.salience)], axis=1).values.tolist()
-    print(len(injscores))
+
     subsets = []
     if salient:
         for s in ['salient', 'nonsalient']:
@@ -82,11 +83,11 @@ def main(injectionpath : str,
         if alpha > 0: subscores['score'] = subscores['rel_score'] + alpha * subscores['score'] # Additive
         else: subscores['score'] = subscores['rel_score']
 
+        check_nan(subscores)
+
         subscores = subscores.drop(['rel_score'], axis=1)
         ### EVAL ###
 
-        print(subscores.shape)
-        print(subscores.head())
 
         score = eval.calc_aggregate(subscores)
         score['retriever'] = retriever
