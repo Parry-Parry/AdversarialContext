@@ -10,8 +10,8 @@ eval = ir_measures.evaluator(metrics, qrels)
 
 def read_tsv(path, sep='\t', header=False):
     with open(path, 'r') as f:
-        items = f.readlines()[1:] if header else f.readlines()
-        data = map(lambda x : x.strip('\n').split(sep), items)
+        if header: data = map(lambda x : x.strip('\n').split(sep), f.readlines[1:])
+        else: data = map(lambda x : x.strip('\n').split(sep), f.readlines())
     return list(map(list, zip(*data)))
 
 def main(injectionpath : str, 
