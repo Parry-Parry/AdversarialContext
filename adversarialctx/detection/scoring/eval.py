@@ -60,7 +60,7 @@ def main(injectionpath : str,
         new_doc_ids[(row.doc_id, row.context, row.pos, row.salience)] = max_doc_id + i 
 
     injscores['doc_id'] = injscores.apply(lambda x : new_doc_ids[(x.doc_id, x.context, x.pos, x.salience)], axis=1).values.tolist()
-
+    print(len(injscores))
     subsets = []
     if salient:
         for s in ['salient', 'nonsalient']:
