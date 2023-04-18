@@ -8,11 +8,10 @@ metrics = [RR(rel=2), nDCG@10, nDCG@100, AP(rel=2)]
 qrels = ir_datasets.load("msmarco-passage/trec-dl-2019/judged").qrels_iter()
 eval = ir_measures.evaluator(metrics, qrels)
 
-def read_tsv(path, columns, sep='\t'):
+def read_tsv(path, sep='\t'):
     with open(path, 'r') as f:
         data = map(lambda x : x.strip('\n').split(sep), f.readlines())
-    vals = list(map(list, zip(*data)))
-    return pd.DataFrame.from_dict({r : v for r, v in zip(columns, vals)})
+    return list(map(list, zip(*data)))
 
 def main(injectionpath : str, 
          rankpath : str,
@@ -26,13 +25,20 @@ def main(injectionpath : str,
          detector : str = 'bert'):
     ### READ ###
     cols = ['query_id', 'doc_id', 'score', 'context', 'pos', 'salience']
-    injscores = read_tsv(injectionpath, cols)
+    qid, did, s, ctx, p, sal = read_tsv(injectionpath)
+    s = [float(sx) for sx in s]
+    injscores = pd.DataFrame.from_dict({'query_id' : qid, 'doc_id' : did, 'score' : s, 'context' : ctx, 'pos' : p, 'salience' : sal})
 
     cols = ['index', 'query_id', 'doc_id', 'context', 'pos', 'salience', 'rel_score', 'signal', 'rank_change']
-    injrels = read_tsv(injectionscores, cols, sep=',')
+
+    _, qid, did, ctx, p, sal, rel_score, _, _ = read_tsv(injectionscores, sep=',')
+    rel_score = [float(sx) for sx in rel_score]
+    injrels = pd.DataFrame.from_dict({'query_id' : qid, 'doc_id' : did, 'context' : ctx, 'pos' : p, 'salience' : sal, 'rel_score' : rel_score})
 
     cols = ['query_id', 'doc_id', 'score'] 
-    rankscores = read_tsv(rankpath, cols)
+    qid, did, s = read_tsv(rankpath, cols)
+    s = [float(sx) for sx in s]
+    rankscores = pd.DataFrame.from_dict({'query_id' : qid, 'doc_id' : did, 'score' : s})
 
     cols = ['query_id', 'doc_id', 'rel_score']  
     rankrels = read_tsv(rankfilter, cols)
@@ -48,7 +54,6 @@ def main(injectionpath : str,
     ### MERGE ###
 
     rankscores = rankscores.merge(rankrels, on=['query_id', 'doc_id'], how='left')
-    print(rankscores.head())
     injscores = injscores.merge(injrels, on=['query_id', 'doc_id', 'context', 'pos', 'salience'], how='left')
     max_doc_id = rankscores.doc_id.astype(int).max() + 1
     doc_id_context = injscores[['doc_id', 'context', 'pos', 'salience']].drop_duplicates()
