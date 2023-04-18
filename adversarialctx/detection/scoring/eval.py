@@ -64,7 +64,7 @@ def main(injectionpath : str,
     subsets = []
     if salient:
         for s in ['salient', 'nonsalient']:
-            for p in ['before', 'middle', 'after']:
+            for p in ['before', 'after']:
                 subsets.append((injscores[(injscores.pos == p) & (injscores.salience == s)].copy(), p, s))
     else:
         for p in ['before', 'middle', 'after']:
@@ -72,6 +72,7 @@ def main(injectionpath : str,
 
     for subset in subsets:
         subset, p, s = subset
+        print(subset.head(5))
         num_inj = len(subset)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
         subscores['score'] = subscores['rel_score'].astype(float) + alpha * subscores['score'].astype(float) # Additive
