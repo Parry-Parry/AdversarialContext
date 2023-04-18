@@ -8,9 +8,10 @@ metrics = [RR(rel=2), nDCG@10, nDCG@100, AP(rel=2)]
 qrels = ir_datasets.load("msmarco-passage/trec-dl-2019/judged").qrels_iter()
 eval = ir_measures.evaluator(metrics, qrels)
 
-def read_tsv(path, sep='\t'):
+def read_tsv(path, sep='\t', header=False):
     with open(path, 'r') as f:
-        data = map(lambda x : x.strip('\n').split(sep), f.readlines())
+        items = f.readlines()[1:] if header else f.readlines()
+        data = map(lambda x : x.strip('\n').split(sep), items)
     return list(map(list, zip(*data)))
 
 def main(injectionpath : str, 
@@ -31,7 +32,7 @@ def main(injectionpath : str,
 
     cols = ['index', 'query_id', 'doc_id', 'context', 'pos', 'salience', 'rel_score', 'signal', 'rank_change']
 
-    _, qid, did, ctx, p, sal, rel_score, _, _ = read_tsv(injectionscores, sep=',')
+    _, qid, did, ctx, p, sal, rel_score, _, _ = read_tsv(injectionscores, sep=',', header=True)
     rel_score = [float(sx) for sx in rel_score]
     injrels = pd.DataFrame.from_dict({'query_id' : qid, 'doc_id' : did, 'context' : ctx, 'pos' : p, 'salience' : sal, 'rel_score' : rel_score})
 
