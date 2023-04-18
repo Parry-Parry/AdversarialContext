@@ -79,13 +79,14 @@ def main(injectionpath : str,
     for subset in subsets:
         subset, p, s = subset
         num_inj = len(subset)
+        print(subset.dtypes)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
         if alpha > 0: subscores['score'] = subscores['rel_score'] + alpha * subscores['score'] # Additive
         else: subscores['score'] = subscores['rel_score']
 
-        check_nan(subscores)
-
         subscores = subscores.drop(['rel_score'], axis=1)
+
+        print(subscores.dtypes)
         ### EVAL ###
 
 
