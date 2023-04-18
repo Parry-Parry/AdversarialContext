@@ -48,6 +48,7 @@ def main(injectionpath : str,
     ### MERGE ###
 
     rankscores = rankscores.merge(rankrels, on=['query_id', 'doc_id'], how='left')
+    print(rankscores.head()))
     injscores = injscores.merge(injrels, on=['query_id', 'doc_id', 'context', 'pos', 'salience'], how='left')
     max_doc_id = rankscores.doc_id.astype(int).max() + 1
     doc_id_context = injscores[['doc_id', 'context', 'pos', 'salience']].drop_duplicates()
@@ -56,7 +57,6 @@ def main(injectionpath : str,
         new_doc_ids[(row.doc_id, row.context, row.pos, row.salience)] = max_doc_id + i 
 
     injscores['doc_id'] = injscores.apply(lambda x : new_doc_ids[(x.doc_id, x.context, x.pos, x.salience)], axis=1).values.tolist()
-    print(len(injscores))
     subsets = []
     if salient:
         for s in ['salient', 'nonsalient']:
@@ -71,6 +71,7 @@ def main(injectionpath : str,
         num_inj = len(subset)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
         if alpha > 0: subscores['score'] = subscores['rel_score'].astype(float) + alpha * subscores['score'].astype(float) # Additive
+        else: subscores['score'] = subscores['rel_score'].astype(float) 
         print('pre', len(subscores))
         subscores = subscores.dropna(subset=['score'])
         print('post', len(subscores))
