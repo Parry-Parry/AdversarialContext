@@ -37,12 +37,12 @@ def main(injectionpath : str,
     injrels = pd.DataFrame.from_dict({'query_id' : qid, 'doc_id' : did, 'context' : ctx, 'pos' : p, 'salience' : sal, 'rel_score' : rel_score})
 
     cols = ['query_id', 'doc_id', 'score'] 
-    qid, did, s = read_tsv(rankpath, cols)
+    qid, did, s = read_tsv(rankpath)
     s = [float(sx) for sx in s]
     rankscores = pd.DataFrame.from_dict({'query_id' : qid, 'doc_id' : did, 'score' : s})
 
     cols = ['query_id', 'doc_id', 'rel_score']  
-    rankrels = read_tsv(rankfilter, cols)
+    rankrels = read_tsv(rankfilter)
 
     with open(rankfilter, 'r') as f: # Filter to top 10
         rank = map(lambda x : x.rstrip().split('\t'),f.readlines())
