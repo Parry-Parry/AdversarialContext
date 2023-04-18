@@ -14,8 +14,8 @@ def read_tsv(path, columns, sep='\t', header=True):
     vals = list(map(list, zip(*data)))
     corrected = {r : v[1:] if header else v for r, v in zip(columns, vals)}
     corrected = {r : v if 'score' not in r else list(map(float, v)) for r, v in corrected.items()}
-    frame = pd.DataFrame(corrected)
-    return frame.astype({'query_id' : 'string', 'doc_id' : 'string'})
+    return pd.DataFrame(corrected)
+    
 
 def check_nan(df):
     print('pre-nan', df.shape)
@@ -79,13 +79,12 @@ def main(injectionpath : str,
     for subset in subsets:
         subset, p, s = subset
         num_inj = len(subset)
-        print(subset.dtypes)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
         if alpha > 0: subscores['score'] = subscores['rel_score'] + alpha * subscores['score'] # Additive
         else: subscores['score'] = subscores['rel_score']
 
         subscores = subscores.drop(['rel_score'], axis=1)
-        subscores['doc_id'] = subscores['doc_id'].astype(str)
+        subscores['doc_id'] = subscores['doc_id'].astype('string')
         
         ### EVAL ###
 
