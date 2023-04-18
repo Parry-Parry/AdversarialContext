@@ -86,6 +86,8 @@ def main(injectionpath : str,
         score['pos'] = p
         score['num_inj'] = num_inj
 
+        print(metrics)
+
         metrics.append(score)
     
     ### WRITE ###
