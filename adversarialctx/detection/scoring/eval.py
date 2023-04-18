@@ -10,9 +10,9 @@ eval = ir_measures.evaluator(metrics, qrels)
 
 def read_tsv(path, sep='\t', header=False):
     with open(path, 'r') as f:
-        if header: data = map(lambda x : x.strip('\n').split(sep), f.readlines()[1:])
-        else: data = map(lambda x : x.strip('\n').split(sep), f.readlines())
-    return list(map(list, zip(*data)))
+        data = map(lambda x : x.strip('\n').split(sep), f.readlines())
+    if header: return map(lambda x : list(x)[1:], zip(*data))
+    return map(list, zip(*data))
 
 def main(injectionpath : str, 
          rankpath : str,
@@ -32,7 +32,7 @@ def main(injectionpath : str,
 
     cols = ['index', 'query_id', 'doc_id', 'context', 'pos', 'salience', 'rel_score', 'signal', 'rank_change']
 
-    _, qid, did, ctx, p, sal, rel_score, _, _ = read_tsv(injectionscores, sep=',', header=True)
+    _, qid, did, ctx, p, sal, rel_score, _, _ = read_tsv(injectionscores, sep=',',)
     rel_score = [float(sx) for sx in rel_score]
     injrels = pd.DataFrame.from_dict({'query_id' : qid, 'doc_id' : did, 'context' : ctx, 'pos' : p, 'salience' : sal, 'rel_score' : rel_score})
 
