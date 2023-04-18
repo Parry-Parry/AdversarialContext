@@ -65,12 +65,13 @@ def main(injectionpath : str,
     if salient:
         for s in ['salient', 'nonsalient']:
             for p in ['before', 'middle', 'after']:
-                subsets.append(injscores[(injscores.pos == p) & (injscores.salience == s)].copy())
+                subsets.append((injscores[(injscores.pos == p) & (injscores.salience == s)].copy(), p, s)))
     else:
         for p in ['before', 'middle', 'after']:
-            subsets.append(injscores[injscores.pos == p].copy())
+            subsets.append((injscores[injscores.pos == p].copy(), p, 'NA'))
 
     for subset in subsets:
+        subset, p, s = subset
         num_inj = len(subset)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
         subscores['score'] = subscores['rel_score'].astype(float) + alpha * subscores['score'].astype(float) # Additive
@@ -81,8 +82,8 @@ def main(injectionpath : str,
         score['retriever'] = retriever
         score['detector'] = detector
         score['injection_type'] = 'salience' if salient else 'position'
-        score['salience'] = subscores.salience.unique()[0] if salient else 'NA'
-        score['pos'] = subscores.pos.unique()[0]
+        score['salience'] = s
+        score['pos'] = p
         score['num_inj'] = num_inj
 
         metrics.append(score)
