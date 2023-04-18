@@ -42,9 +42,8 @@ def main(injectionpath : str,
     with open(rankfilter, 'r') as f: # Filter to top 10
         rank = map(lambda x : x.rstrip().split('\t'),f.readlines())
     cols = ['query_id', 'doc_id', 'rel_score']
-    vals = list(map(list, zip(*rank)))
+    queries, docs, _  = map(list, zip(*rank))
 
-    queries, docs, _ = map(list, zip(*vals))
     # check that injections are present in top 10 
     # if not, remove them from the dataset
     injscores = injscores[injscores.apply(lambda x : (x.query_id, x.doc_id) in zip(queries, docs), axis=1).values.tolist()]
