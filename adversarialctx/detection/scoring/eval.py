@@ -48,7 +48,7 @@ def main(injectionpath : str,
     ### MERGE ###
 
     rankscores = rankscores.merge(rankrels, on=['query_id', 'doc_id'], how='left')
-    print(rankscores.head()))
+    print(rankscores.head())
     injscores = injscores.merge(injrels, on=['query_id', 'doc_id', 'context', 'pos', 'salience'], how='left')
     max_doc_id = rankscores.doc_id.astype(int).max() + 1
     doc_id_context = injscores[['doc_id', 'context', 'pos', 'salience']].drop_duplicates()
