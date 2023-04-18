@@ -59,7 +59,7 @@ def main(injectionpath : str,
     for i, row in enumerate(doc_id_context.itertuples()):
         new_doc_ids[(row.doc_id, row.context, row.pos, row.salience)] = max_doc_id + i 
 
-    injscores['doc_id'] = injscores.apply(lambda x : new_doc_ids[(x.doc_id, x.context, x.pos, x.salience)], axis=1)
+    injscores['doc_id'] = injscores.apply(lambda x : new_doc_ids[(x.doc_id, x.context, x.pos, x.salience)], axis=1).values.tolist()
 
     subsets = []
     if salient:
