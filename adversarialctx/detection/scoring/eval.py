@@ -30,16 +30,17 @@ def main(injectionpath : str,
     ### READ ###
     cols = ['query_id', 'doc_id', 'score', 'context', 'pos', 'salience']
     injscores = read_tsv(injectionpath, cols)
-
+    print(injscores.head())
     cols = ['index', 'query_id', 'doc_id', 'context', 'pos', 'salience', 'rel_score', 'signal', 'rank_change']
     injrels = read_tsv(injectionscorespath, cols, sep=',', header=True)
-
+    print(injrels.head())
     cols = ['query_id', 'doc_id', 'score'] 
     rankscores = read_tsv(rankpath, cols)
+    print(rankscores.head())
 
     cols = ['query_id', 'doc_id', 'rel_score']  
     rankrels = read_tsv(rankscorespath, cols)
-
+    print(rankrels.head())
     with open(rankfilterpath, 'r') as f: # Filter to top 10
         rank = map(lambda x : x.rstrip().split('\t'),f.readlines())
     cols = ['query_id', 'doc_id', 'rel_score']
