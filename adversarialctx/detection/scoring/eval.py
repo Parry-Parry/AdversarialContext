@@ -70,7 +70,7 @@ def main(injectionpath : str,
         subset, p, s = subset
         num_inj = len(subset)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
-        subscores['score'] = subscores['rel_score'].astype(float) + alpha * subscores['score'].astype(float) # Additive
+        if alpha > 0: subscores['score'] = subscores['rel_score'].astype(float) + alpha * subscores['score'].astype(float) # Additive
         print('pre', len(subscores))
         subscores = subscores.dropna(subset=['score'])
         print('post', len(subscores))
