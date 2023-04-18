@@ -1,0 +1,63 @@
+import fire 
+import os 
+import subprocess as sp
+import logging
+from os.path import join
+
+targets = ['t5', 'tasb', 'colbert', 'bm25', 'electra']
+detectors = ['regression', 'bert']
+alpha = [0., 0.1, 0.2, 0.3, 0.4, 0.5]
+mode = ['context', 'static']
+types = ['posiiton', 'salience']
+salience = ['sentence', 't5']
+
+def main(script_path : str, 
+         candidate_propa : str,
+         candidate_rel : str,
+         topk_p : str, 
+         rank_store : str, 
+         outpath : str,):
+    for target in targets:
+        for detector in detectors:
+            topk_propa = join(topk_p, f'{detector}.{target}.1000.tsv')
+            topk_rel = join(rank_store, f'{target}.1000.tsv')
+            filtered = join(rank_store, f'{target}.10.tsv')
+            for a in alpha:
+                for t in types:
+                    if t == 'salience':
+                        for s in salience:
+                            for m in mode:
+                                inj_propa = join(candidate_propa, f'{m}.{s}.{detector}.tsv')
+                                inj_rel = join(candidate_rel, f'{target}.{m}.{s}.csv')
+                                out = join(outpath, f'{target}.{detector}.{m}.{s}.{a}.tsv')
+                                sp.run(['python', script_path, 
+                                        '--injectionpath', inj_propa,
+                                        '--rankpath', topk_propa,
+                                        '--injectionscores', inj_rel,
+                                        '--rankscores', topk_rel,
+                                        '--rankfilter', filtered, 
+                                        '--outpath', out,
+                                        '--alpha', str(a),
+                                        '--salient',
+                                        '--retriever', target, 
+                                        '--detector', detector])
+                    else:
+                        for m in mode:
+                            inj_propa = join(candidate_propa, f'{m}.position.{detector}.tsv')
+                            inj_rel = join(candidate_rel, f'{target}.{m}.position.csv')
+                            out = join(outpath, f'{target}.{detector}.{m}.position.{a}.tsv')
+                            sp.run(['python', script_path, 
+                                    '--injectionpath', inj_propa,
+                                    '--rankpath', topk_propa,
+                                    '--injectionscores', inj_rel,
+                                    '--rankscores', topk_rel,
+                                    '--rankfilter', filtered, 
+                                    '--outpath', out,
+                                    '--alpha', str(a),
+                                    '--retriever', target, 
+                                    '--detector', detector])
+                        
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    fire.Fire(main)
