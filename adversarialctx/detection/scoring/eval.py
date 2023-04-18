@@ -17,6 +17,11 @@ def read_tsv(path, columns, sep='\t', header=True):
     
     return pd.DataFrame.from_dict(corrected)
 
+def check_nan(df):
+    print('pre-nan', df.shape)
+    df = df.dropna()
+    print('post-nan', df.shape)
+
 def main(injectionpath : str, 
          rankpath : str,
          injectionscorespath : str,
@@ -30,17 +35,17 @@ def main(injectionpath : str,
     ### READ ###
     cols = ['query_id', 'doc_id', 'score', 'context', 'pos', 'salience']
     injscores = read_tsv(injectionpath, cols)
-    print(injscores.head())
+    check_nan(injscores)
     cols = ['index', 'query_id', 'doc_id', 'context', 'pos', 'salience', 'rel_score', 'signal', 'rank_change']
     injrels = read_tsv(injectionscorespath, cols, sep=',', header=True)
-    print(injrels.head())
+    check_nan(injrels)
     cols = ['query_id', 'doc_id', 'score'] 
     rankscores = read_tsv(rankpath, cols)
-    print(rankscores.head())
+    check_nan(rankscores)
 
     cols = ['query_id', 'doc_id', 'rel_score']  
     rankrels = read_tsv(rankscorespath, cols)
-    print(rankrels.head())
+    check_nan(rankrels)
     with open(rankfilterpath, 'r') as f: # Filter to top 10
         rank = map(lambda x : x.rstrip().split('\t'),f.readlines())
     cols = ['query_id', 'doc_id', 'rel_score']
