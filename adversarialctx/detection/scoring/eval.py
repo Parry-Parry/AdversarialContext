@@ -6,7 +6,7 @@ import ir_datasets
 
 metrics = [RR(rel=2), nDCG@10, nDCG@100, AP(rel=2)]
 qrels = ir_datasets.load("msmarco-passage/trec-dl-2019/judged").qrels_iter()
-eval = ir_measures.evaluator(metrics)
+eval = ir_measures.evaluator(metrics, qrels)
 
 def read_tsv(path, columns, sep='\t'):
     with open(path, 'r') as f:
