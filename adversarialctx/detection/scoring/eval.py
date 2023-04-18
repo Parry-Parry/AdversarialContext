@@ -27,8 +27,6 @@ def main(injectionpath : str,
     ### READ ###
     cols = ['query_id', 'doc_id', 'score', 'context', 'pos', 'salience']
     injscores = read_tsv(injectionpath, cols)
-    print('pre-filter:', len(injscores))
-
 
     cols = ['index', 'query_id', 'doc_id', 'context', 'pos', 'salience', 'rel_score', 'signal', 'rank_change']
     injrels = read_tsv(injectionscores, cols, sep=',')
@@ -47,12 +45,10 @@ def main(injectionpath : str,
     # check that injections are present in top 10 
     # if not, remove them from the dataset
     injscores = injscores[injscores.apply(lambda x : (x.query_id, x.doc_id) in zip(queries, docs), axis=1).values.tolist()]
-    print('pre-merge len:', len(injscores))
     ### MERGE ###
 
     rankscores = rankscores.merge(rankrels, on=['query_id', 'doc_id'], how='left')
     injscores = injscores.merge(injrels, on=['query_id', 'doc_id', 'context', 'pos', 'salience'], how='left')
-    print('post-merge len:', len(injscores))
     max_doc_id = rankscores.doc_id.astype(int).max() + 1
     doc_id_context = injscores[['doc_id', 'context', 'pos', 'salience']].drop_duplicates()
     new_doc_ids = {}
@@ -75,7 +71,7 @@ def main(injectionpath : str,
         num_inj = len(subset)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
         subscores['score'] = subscores['rel_score'].astype(float) + alpha * subscores['score'].astype(float) # Additive
-
+        print(subscores.head(5))
         ### EVAL ###
 
         score = eval.calc_aggregate(subscores)
