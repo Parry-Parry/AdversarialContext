@@ -31,7 +31,7 @@ def main(injectionpath : str,
     injscores = read_tsv(injectionpath, cols)
 
     cols = ['index', 'query_id', 'doc_id', 'context', 'pos', 'salience', 'rel_score', 'signal', 'rank_change']
-    injrels = read_tsv(injectionscorespath, cols, sep=',')
+    injrels = read_tsv(injectionscorespath, cols, sep=',', header=True)
 
     cols = ['query_id', 'doc_id', 'score'] 
     rankscores = read_tsv(rankpath, cols)
