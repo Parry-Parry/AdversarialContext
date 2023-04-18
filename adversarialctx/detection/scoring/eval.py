@@ -83,8 +83,8 @@ def main(injectionpath : str,
         else: subscores['score'] = subscores['rel_score']
 
         subscores = subscores.drop(['rel_score'], axis=1)
+        subscores['query_id'] = subscores['query_id'].astype('string')
         subscores['doc_id'] = subscores['doc_id'].astype('string')
-        print(subscores.dtypes)
         ### EVAL ###
 
 
