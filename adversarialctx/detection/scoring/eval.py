@@ -82,6 +82,7 @@ def main(injectionpath : str,
         if alpha > 0: subscores['score'] = subscores['rel_score'] + alpha * subscores['score'] # Additive
         else: subscores['score'] = subscores['rel_score']
 
+        subscores = subscores.drop(['rel_score'], axis=1)
         ### EVAL ###
 
         print(subscores.shape)
