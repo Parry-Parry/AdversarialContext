@@ -10,7 +10,7 @@ eval = ir_measures.evaluator(metrics, qrels)
 
 def read_tsv(path, columns, sep='\t'):
     with open(path, 'r') as f:
-        data = map(lambda x : x.rstrip().split(sep), f.readlines())
+        data = map(lambda x : x.split(sep), f.readlines())
     vals = list(map(list, zip(*data)))
     return pd.DataFrame.from_dict({r : v for r, v in zip(columns, vals)})
 
@@ -72,9 +72,7 @@ def main(injectionpath : str,
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
         if alpha > 0: subscores['score'] = subscores['rel_score'].astype(float) + alpha * subscores['score'].astype(float) # Additive
         else: subscores['score'] = subscores['rel_score'].astype(float) 
-        print('pre', len(subscores))
         subscores = subscores.dropna(subset=['score'])
-        print('post', len(subscores))
         ### EVAL ###
 
         score = eval.calc_aggregate(subscores)
