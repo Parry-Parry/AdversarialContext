@@ -84,6 +84,9 @@ def main(injectionpath : str,
 
         ### EVAL ###
 
+        print(subscores.shape)
+        print(subscores.head())
+
         score = eval.calc_aggregate(subscores)
         score['retriever'] = retriever
         score['detector'] = detector
