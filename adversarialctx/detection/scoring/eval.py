@@ -14,8 +14,8 @@ def read_tsv(path, columns, sep='\t', header=True):
     vals = list(map(list, zip(*data)))
     corrected = {r : v[1:] if header else v for r, v in zip(columns, vals)}
     corrected = {r : v if 'score' not in r else list(map(float, v)) for r, v in corrected.items()}
-    
-    return pd.DataFrame.from_dict(corrected)
+    frame = pd.DataFrame(corrected)
+    return frame.astype({'query_id' : 'str', 'doc_id' : 'str'})
 
 def check_nan(df):
     print('pre-nan', df.shape)
