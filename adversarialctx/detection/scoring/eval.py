@@ -84,7 +84,7 @@ def main(injectionpath : str,
         score['injection_type'] = 'salience' if salient else 'position'
         score['salience'] = s
         score['pos'] = p
-        score['num_inj'] = num_inj
+        score['num_inj'] = str(num_inj)
 
         print(metrics)
 
