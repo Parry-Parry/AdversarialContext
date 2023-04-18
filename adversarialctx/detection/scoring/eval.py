@@ -44,10 +44,10 @@ def main(injectionpath : str,
     cols = ['query_id', 'doc_id', 'rel_score']
     vals = list(map(list, zip(*rank)))
 
-    rankfilter = [(item[0], item[1]) for item in vals]
+    queries, docs, _ = map(list, zip(*vals))
     # check that injections are present in top 10 
     # if not, remove them from the dataset
-    injscores = injscores[injscores.apply(lambda x : (x.query_id, x.doc_id) in rankfilter, axis=1)]
+    injscores = injscores[injscores.apply(lambda x : (x.query_id, x.doc_id) in zip(queries, docs), axis=1).values.tolist()]
     print('pre-merge len:', len(injscores))
     ### MERGE ###
 
