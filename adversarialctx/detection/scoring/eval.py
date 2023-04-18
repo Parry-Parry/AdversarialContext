@@ -12,8 +12,9 @@ def read_tsv(path, columns, sep='\t', header=True):
     with open(path, 'r') as f:
         data = map(lambda x : x.rstrip().split(sep), f.readlines())
     vals = list(map(list, zip(*data)))
-    corrected = {r : v if 'score' not in r else list(map(float, v)) for r, v in zip(columns, vals)}
-    if header: corrected = {r : v[1:] for r, v in corrected.items()}
+    corrected = {r : v[1:] if header else v for r, v in zip(columns, vals)}
+    corrected = {r : v if 'score' not in r else list(map(float, v)) for r, v in corrected.items()}
+    
     return pd.DataFrame.from_dict(corrected)
 
 def main(injectionpath : str, 
