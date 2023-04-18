@@ -35,7 +35,7 @@ def main(injectionpath : str,
     cols = ['query_id', 'doc_id', 'score'] 
     rankscores = read_tsv(rankpath, cols)
 
-    cols = ['query_id', 'doc_id', 'rel_score']    
+    cols = ['query_id', 'doc_id', 'rel_score']  
     rankrels = read_tsv(rankfilter, cols)
 
     with open(rankfilter, 'r') as f: # Filter to top 10
@@ -73,7 +73,7 @@ def main(injectionpath : str,
     for subset in subsets:
         num_inj = len(subset)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
-        subscores['score'] = subscores['rel_score'] + alpha * subscores['score'] # Additive
+        subscores['score'] = subscores['rel_score'].astype(float) + alpha * subscores['score'].astype(float) # Additive
 
         ### EVAL ###
 
