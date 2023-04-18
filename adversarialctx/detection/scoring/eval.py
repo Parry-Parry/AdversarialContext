@@ -65,7 +65,7 @@ def main(injectionpath : str,
     if salient:
         for s in ['salient', 'nonsalient']:
             for p in ['before', 'middle', 'after']:
-                subsets.append((injscores[(injscores.pos == p) & (injscores.salience == s)].copy(), p, s)))
+                subsets.append((injscores[(injscores.pos == p) & (injscores.salience == s)].copy(), p, s))
     else:
         for p in ['before', 'middle', 'after']:
             subsets.append((injscores[injscores.pos == p].copy(), p, 'NA'))
