@@ -8,17 +8,18 @@ metrics = [RR(rel=2), nDCG@10, nDCG@100, AP(rel=2)]
 qrels = ir_datasets.load("msmarco-passage/trec-dl-2019/judged").qrels_iter()
 eval = ir_measures.evaluator(metrics, qrels)
 
-def read_tsv(path, sep='\t', header=False):
+def read_tsv(path, columns, sep='\t'):
     with open(path, 'r') as f:
-        data = map(lambda x : x.strip('\n').split(sep), f.readlines())
-    if header: return map(lambda x : list(x)[1:], zip(*data))
-    return map(list, zip(*data))
+        data = map(lambda x : x.rstrip().split(sep), f.readlines())
+    vals = list(map(list, zip(*data)))
+    corrected = {r : v if 'score' not in r else list(map(float, v)) for r, v in zip(columns, vals)}
+    return pd.DataFrame.from_dict(corrected)
 
 def main(injectionpath : str, 
          rankpath : str,
-         injectionscores : str,
-         rankscores : str,
-         rankfilter : str,
+         injectionscorespath : str,
+         rankscorespath : str,
+         rankfilterpath : str,
          outpath : str, 
          alpha : float = 0.1,
          salient : bool = False,
@@ -26,25 +27,18 @@ def main(injectionpath : str,
          detector : str = 'bert'):
     ### READ ###
     cols = ['query_id', 'doc_id', 'score', 'context', 'pos', 'salience']
-    qid, did, s, ctx, p, sal = read_tsv(injectionpath)
-    s = [float(sx) for sx in s]
-    injscores = pd.DataFrame.from_dict({'query_id' : qid, 'doc_id' : did, 'score' : s, 'context' : ctx, 'pos' : p, 'salience' : sal})
+    injscores = read_tsv(injectionpath, cols)
 
     cols = ['index', 'query_id', 'doc_id', 'context', 'pos', 'salience', 'rel_score', 'signal', 'rank_change']
-
-    _, qid, did, ctx, p, sal, rel_score, _, _ = read_tsv(injectionscores, sep=',', header=True)
-    rel_score = [float(sx) for sx in rel_score]
-    injrels = pd.DataFrame.from_dict({'query_id' : qid, 'doc_id' : did, 'context' : ctx, 'pos' : p, 'salience' : sal, 'rel_score' : rel_score})
+    injrels = read_tsv(injectionscorespath, cols, sep=',')
 
     cols = ['query_id', 'doc_id', 'score'] 
-    qid, did, s = read_tsv(rankpath)
-    s = [float(sx) for sx in s]
-    rankscores = pd.DataFrame.from_dict({'query_id' : qid, 'doc_id' : did, 'score' : s})
+    rankscores = read_tsv(rankpath, cols)
 
     cols = ['query_id', 'doc_id', 'rel_score']  
-    rankrels = read_tsv(rankfilter)
+    rankrels = read_tsv(rankscorespath, cols)
 
-    with open(rankfilter, 'r') as f: # Filter to top 10
+    with open(rankfilterpath, 'r') as f: # Filter to top 10
         rank = map(lambda x : x.rstrip().split('\t'),f.readlines())
     cols = ['query_id', 'doc_id', 'rel_score']
     queries, docs, _  = map(list, zip(*rank))
@@ -63,6 +57,7 @@ def main(injectionpath : str,
         new_doc_ids[(row.doc_id, row.context, row.pos, row.salience)] = max_doc_id + i 
 
     injscores['doc_id'] = injscores.apply(lambda x : new_doc_ids[(x.doc_id, x.context, x.pos, x.salience)], axis=1).values.tolist()
+    print(len(injscores))
     subsets = []
     if salient:
         for s in ['salient', 'nonsalient']:
@@ -78,7 +73,9 @@ def main(injectionpath : str,
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
         if alpha > 0: subscores['score'] = subscores['rel_score'].astype(float) + alpha * subscores['score'].astype(float) # Additive
         else: subscores['score'] = subscores['rel_score'].astype(float) 
+        print('pre', len(subscores))
         subscores = subscores.dropna(subset=['score'])
+        print('post', len(subscores))
         ### EVAL ###
 
         score = eval.calc_aggregate(subscores)
