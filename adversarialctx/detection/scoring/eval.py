@@ -87,7 +87,6 @@ def main(injectionpath : str,
         subscores['doc_id'] = subscores['doc_id'].astype('string')
         ### EVAL ###
 
-
         score = eval.calc_aggregate(subscores)
         score['retriever'] = retriever
         score['detector'] = detector
