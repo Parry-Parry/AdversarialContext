@@ -10,7 +10,7 @@ eval = ir_measures.evaluator(metrics, qrels)
 
 def read_tsv(path, columns, sep='\t'):
     with open(path, 'r') as f:
-        data = map(lambda x : x.split(sep), f.readlines())
+        data = map(lambda x : x.strip('\n').split(sep), f.readlines())
     vals = list(map(list, zip(*data)))
     return pd.DataFrame.from_dict({r : v for r, v in zip(columns, vals)})
 
