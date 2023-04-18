@@ -35,17 +35,17 @@ def main(injectionpath : str,
     ### READ ###
     cols = ['query_id', 'doc_id', 'score', 'context', 'pos', 'salience']
     injscores = read_tsv(injectionpath, cols)
-    check_nan(injscores)
+    #check_nan(injscores)
     cols = ['index', 'query_id', 'doc_id', 'context', 'pos', 'salience', 'rel_score', 'signal', 'rank_change']
     injrels = read_tsv(injectionscorespath, cols, sep=',', header=True)
-    check_nan(injrels)
+    #check_nan(injrels)
     cols = ['query_id', 'doc_id', 'score'] 
     rankscores = read_tsv(rankpath, cols)
-    check_nan(rankscores)
+    #check_nan(rankscores)
 
     cols = ['query_id', 'doc_id', 'rel_score']  
     rankrels = read_tsv(rankscorespath, cols)
-    check_nan(rankrels)
+    #check_nan(rankrels)
     with open(rankfilterpath, 'r') as f: # Filter to top 10
         rank = map(lambda x : x.rstrip().split('\t'),f.readlines())
     cols = ['query_id', 'doc_id', 'rel_score']
@@ -79,11 +79,9 @@ def main(injectionpath : str,
         subset, p, s = subset
         num_inj = len(subset)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
-        if alpha > 0: subscores['score'] = subscores['rel_score'].astype(float) + alpha * subscores['score'].astype(float) # Additive
-        else: subscores['score'] = subscores['rel_score'].astype(float) 
-        print('pre', len(subscores))
-        subscores = subscores.dropna(subset=['score'])
-        print('post', len(subscores))
+        if alpha > 0: subscores['score'] = subscores['rel_score'] + alpha * subscores['score'] # Additive
+        else: subscores['score'] = subscores['rel_score']
+
         ### EVAL ###
 
         score = eval.calc_aggregate(subscores)
