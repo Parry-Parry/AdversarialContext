@@ -16,7 +16,6 @@ def read_tsv(path, columns, sep='\t', header=True):
     corrected = {r : v if 'score' not in r else list(map(float, v)) for r, v in corrected.items()}
     return pd.DataFrame(corrected)
     
-
 def check_nan(df):
     print('pre-nan', df.shape)
     df = df.dropna()
@@ -85,7 +84,7 @@ def main(injectionpath : str,
 
         subscores = subscores.drop(['rel_score'], axis=1)
         subscores['doc_id'] = subscores['doc_id'].astype('string')
-        
+        print(subscores.dtypes)
         ### EVAL ###
 
 
