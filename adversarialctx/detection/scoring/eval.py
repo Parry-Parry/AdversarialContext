@@ -47,12 +47,12 @@ def main(injectionpath : str,
     # check that injections are present in top 10 
     # if not, remove them from the dataset
     injscores = injscores[injscores.apply(lambda x : (x.query_id, x.doc_id) in rankfilter, axis=1)]
-
+    print('pre-merge len:', len(injscores))
     ### MERGE ###
 
     rankscores = rankscores.merge(rankrels, on=['query_id', 'doc_id'], how='left')
     injscores = injscores.merge(injrels, on=['query_id', 'doc_id', 'context', 'pos', 'salience'], how='left')
-
+    print('post-merge len:', len(injscores))
     max_doc_id = rankscores.doc_id.astype(int).max() + 1
     doc_id_context = injscores[['doc_id', 'context', 'pos', 'salience']].drop_duplicates()
     new_doc_ids = {}
