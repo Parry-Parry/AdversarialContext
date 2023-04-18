@@ -32,7 +32,7 @@ def main(injectionpath : str,
 
     cols = ['index', 'query_id', 'doc_id', 'context', 'pos', 'salience', 'rel_score', 'signal', 'rank_change']
 
-    _, qid, did, ctx, p, sal, rel_score, _, _ = read_tsv(injectionscores, sep=',',)
+    _, qid, did, ctx, p, sal, rel_score, _, _ = read_tsv(injectionscores, sep=',', header=True)
     rel_score = [float(sx) for sx in rel_score]
     injrels = pd.DataFrame.from_dict({'query_id' : qid, 'doc_id' : did, 'context' : ctx, 'pos' : p, 'salience' : sal, 'rel_score' : rel_score})
 
