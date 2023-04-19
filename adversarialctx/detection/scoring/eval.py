@@ -4,10 +4,6 @@ import ir_measures
 from ir_measures import *
 import ir_datasets
 
-metrics = [RR(rel=2), nDCG(cutoff=10), nDCG(cutoff=100), AP(rel=2)]
-qrels = ir_datasets.load("msmarco-passage/trec-dl-2019/judged").qrels_iter()
-eval = ir_measures.evaluator(metrics, qrels)
-
 def read_tsv(path, columns, sep='\t', header=True):
     with open(path, 'r') as f:
         data = map(lambda x : x.rstrip().split(sep), f.readlines())
@@ -91,6 +87,8 @@ def main(injectionpath : str,
         for p in ['before', 'middle', 'after']:
             subsets.append((injscores[injscores.pos == p].copy(), p, 'NA'))
 
+    qrels = ir_datasets.load("msmarco-passage/trec-dl-2019/judged").qrels_iter()
+    eval = ir_measures.evaluator([RR(rel=2), nDCG(cutoff=10), nDCG(cutoff=100), AP(rel=2)], qrels)
     for subset in subsets:
         subset, p, s = subset
         #subset['query_id'] = subset['query_id'].astype('string')
