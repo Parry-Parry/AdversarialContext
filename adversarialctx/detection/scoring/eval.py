@@ -57,6 +57,12 @@ def main(injectionpath : str,
     print('rankscores', rankscores.dtypes)
     print('rankrels', rankrels.dtypes)
 
+    # check_nan for all dataframes
+    check_nan(injscores)
+    check_nan(injrels)
+    check_nan(rankscores)
+    check_nan(rankrels)
+
     # check that injections are present in top 10 
     # if not, remove them from the dataset
     injscores = injscores[injscores.apply(lambda x : (x.query_id, x.doc_id) in zip(queries, docs), axis=1).values.tolist()]
