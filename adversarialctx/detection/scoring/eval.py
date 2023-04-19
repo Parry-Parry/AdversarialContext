@@ -14,6 +14,7 @@ def read_tsv(path, columns, sep='\t', header=True):
     vals = list(map(list, zip(*data)))
     corrected = {r : v[1:] if header else v for r, v in zip(columns, vals)}
     corrected = {r : v if 'score' not in r else list(map(float, v)) for r, v in corrected.items()}
+    corrected = {r : v if 'id' not in r else list(map(str, v)) for r, v in corrected.items()}
     return pd.DataFrame(corrected)
     
 def check_nan(df):
@@ -63,6 +64,9 @@ def main(injectionpath : str,
     ### MERGE ###
 
     rankscores = rankscores.merge(rankrels, on=['query_id', 'doc_id'], how='left')
+    rankscores['query_id'] = rankscores['query_id'].astype('string')
+    rankscores['doc_id'] = rankscores['doc_id'].astype('string')
+
     injscores = injscores.merge(injrels, on=['query_id', 'doc_id', 'context', 'pos', 'salience'], how='left')
     max_doc_id = rankscores.doc_id.astype(int).max() + 1
     doc_id_context = injscores[['doc_id', 'context', 'pos', 'salience']].drop_duplicates()
@@ -83,6 +87,8 @@ def main(injectionpath : str,
 
     for subset in subsets:
         subset, p, s = subset
+        subset['query_id'] = subset['query_id'].astype('string')
+        subset['doc_id'] = subset['doc_id'].astype('string')
         num_inj = len(subset)
         print('subset', subset.dtypes)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
