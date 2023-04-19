@@ -32,25 +32,25 @@ def main(injectionpath : str,
          salient : bool = False,
          retriever : str = 'bm25',
          detector : str = 'bert'):
-    ### READ ###
+    ### READ DATA ###
     cols = ['query_id', 'doc_id', 'score', 'context', 'pos', 'salience']
-    injscores = read_tsv(injectionpath, cols)
-    #check_nan(injscores)
+    injscores = read_tsv(injectionpath, cols) # Propaganda for Injection
+
     cols = ['index', 'query_id', 'doc_id', 'context', 'pos', 'salience', 'rel_score', 'signal', 'rank_change']
-    injrels = read_tsv(injectionscorespath, cols, sep=',', header=True)
-    #check_nan(injrels)
+    injrels = read_tsv(injectionscorespath, cols, sep=',', header=True) # Rel scores for Injection
+
     cols = ['query_id', 'doc_id', 'score'] 
-    rankscores = read_tsv(rankpath, cols)
-    #check_nan(rankscores)
+    rankscores = read_tsv(rankpath, cols) # Propaganda for Rank
 
     cols = ['query_id', 'doc_id', 'rel_score']  
-    rankrels = read_tsv(rankscorespath, cols)
-    #check_nan(rankrels)
+    rankrels = read_tsv(rankscorespath, cols) # Relevance scores for Rank
+
     with open(rankfilterpath, 'r') as f: # Filter to top 10
         rank = map(lambda x : x.rstrip().split('\t'),f.readlines())
     cols = ['query_id', 'doc_id', 'rel_score']
     queries, docs, _  = map(list, zip(*rank))
 
+    '''
     # print dtypes of each column in each dataframe
     print('injscores', injscores.dtypes)
     print('injrels', injrels.dtypes)
@@ -62,16 +62,17 @@ def main(injectionpath : str,
     check_nan(injrels)
     check_nan(rankscores)
     check_nan(rankrels)
+    '''
 
     # check that injections are present in top 10 
     # if not, remove them from the dataset
     injscores = injscores[injscores.apply(lambda x : (x.query_id, x.doc_id) in zip(queries, docs), axis=1).values.tolist()]
 
-    ### MERGE ###
+    ### MERGE & SET NEW DOCNOS ###
 
     rankscores = rankscores.merge(rankrels, on=['query_id', 'doc_id'], how='left')
-    rankscores['query_id'] = rankscores['query_id'].astype('string')
-    rankscores['doc_id'] = rankscores['doc_id'].astype('string')
+    #rankscores['query_id'] = rankscores['query_id'].astype('string')
+    #rankscores['doc_id'] = rankscores['doc_id'].astype('string')
 
     injscores = injscores.merge(injrels, on=['query_id', 'doc_id', 'context', 'pos', 'salience'], how='left')
     max_doc_id = rankscores.doc_id.astype(int).max() + 1
@@ -93,18 +94,17 @@ def main(injectionpath : str,
 
     for subset in subsets:
         subset, p, s = subset
-        subset['query_id'] = subset['query_id'].astype('string')
-        subset['doc_id'] = subset['doc_id'].astype('string')
+        #subset['query_id'] = subset['query_id'].astype('string')
+        #subset['doc_id'] = subset['doc_id'].astype('string')
         num_inj = len(subset)
-        print('subset', subset.dtypes)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
-        print('subscores', subscores.dtypes)
-        if alpha > 0: subscores['score'] = subscores['rel_score'] + alpha * subscores['score'] # Additive
+        if alpha > 0: subscores['score'] = subscores['rel_score'] + alpha * subscores['score'] # Additive fusion
         else: subscores['score'] = subscores['rel_score']
 
         subscores = subscores.drop(['rel_score'], axis=1)
-        subscores['query_id'] = subscores['query_id'].astype('string')
-        subscores['doc_id'] = subscores['doc_id'].astype('string')
+        #subscores['query_id'] = subscores['query_id'].astype('string')
+        #subscores['doc_id'] = subscores['doc_id'].astype('string')
+
         ### EVAL ###
 
         score = eval.calc_aggregate(subscores)
@@ -118,6 +118,7 @@ def main(injectionpath : str,
         metrics.append(score)
     
     ### WRITE ###
+
     pd.DataFrame.from_records(metrics).to_csv(outpath, index=False, sep='\t')
 
 if __name__ == "__main__":
