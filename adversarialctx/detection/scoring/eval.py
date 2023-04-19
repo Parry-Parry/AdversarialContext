@@ -50,7 +50,6 @@ def main(injectionpath : str,
     cols = ['query_id', 'doc_id', 'rel_score']
     queries, docs, _  = map(list, zip(*rank))
 
-
     # print dtypes of each column in each dataframe
     print('injscores', injscores.dtypes)
     print('injrels', injrels.dtypes)
@@ -99,6 +98,9 @@ def main(injectionpath : str,
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
         if alpha > 0: subscores['score'] = subscores['rel_score'] + alpha * subscores['score'] # Additive fusion
         else: subscores['score'] = subscores['rel_score']
+
+        subscores['doc_id'] = subscores['doc_id'].apply(lambda x : str(x))
+        subscores['query_id'] = subscores['query_id'].apply(lambda x : str(x))
 
         subscores = subscores.drop(['rel_score'], axis=1)
         #subscores['query_id'] = subscores['query_id'].astype('string')
