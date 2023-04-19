@@ -50,6 +50,12 @@ def main(injectionpath : str,
     cols = ['query_id', 'doc_id', 'rel_score']
     queries, docs, _  = map(list, zip(*rank))
 
+    # print dtypes of each column in each dataframe
+    print('injscores', injscores.dtypes)
+    print('injrels', injrels.dtypes)
+    print('rankscores', rankscores.dtypes)
+    print('rankrels', rankrels.dtypes)
+
     # check that injections are present in top 10 
     # if not, remove them from the dataset
     injscores = injscores[injscores.apply(lambda x : (x.query_id, x.doc_id) in zip(queries, docs), axis=1).values.tolist()]
@@ -78,7 +84,9 @@ def main(injectionpath : str,
     for subset in subsets:
         subset, p, s = subset
         num_inj = len(subset)
+        print('subset', subset.dtypes)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
+        print('subscores', subscores.dtypes)
         if alpha > 0: subscores['score'] = subscores['rel_score'] + alpha * subscores['score'] # Additive
         else: subscores['score'] = subscores['rel_score']
 
