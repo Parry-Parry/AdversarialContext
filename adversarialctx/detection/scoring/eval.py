@@ -74,10 +74,13 @@ def main(injectionpath : str,
 
     injscores = injscores.merge(injrels, on=['query_id', 'doc_id', 'context', 'pos', 'salience'], how='left')
     max_doc_id = rankscores.doc_id.astype(int).max() + 1
+    print(max_doc_id)
     doc_id_context = injscores[['doc_id', 'context', 'pos', 'salience']].drop_duplicates()
     new_doc_ids = {}
     for i, row in enumerate(doc_id_context.itertuples()):
         new_doc_ids[(row.doc_id, row.context, row.pos, row.salience)] = max_doc_id + i 
+
+    print(new_doc_ids)
 
     injscores['doc_id'] = injscores.apply(lambda x : new_doc_ids[(x.doc_id, x.context, x.pos, x.salience)], axis=1).values.tolist()
 
