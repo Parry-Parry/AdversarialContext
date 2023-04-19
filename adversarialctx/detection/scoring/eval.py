@@ -89,6 +89,8 @@ def main(injectionpath : str,
 
     qrels = ir_datasets.load("msmarco-passage/trec-dl-2019/judged").qrels_iter()
     eval = ir_measures.evaluator([RR(rel=2), nDCG(cutoff=10), nDCG(cutoff=100), AP(rel=2)], qrels)
+
+    metrics = []
     for subset in subsets:
         subset, p, s = subset
         #subset['query_id'] = subset['query_id'].astype('string')
