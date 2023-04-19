@@ -4,7 +4,7 @@ import ir_measures
 from ir_measures import *
 import ir_datasets
 
-metrics = [RR(rel=2), nDCG@10, nDCG@100, AP(rel=2)]
+metrics = [RR(rel=2), nDCG(cutoff=10), nDCG(cutoff=100), AP(rel=2)]
 qrels = ir_datasets.load("msmarco-passage/trec-dl-2019/judged").qrels_iter()
 eval = ir_measures.evaluator(metrics, qrels)
 
