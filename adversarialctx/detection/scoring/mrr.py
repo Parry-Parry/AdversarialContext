@@ -85,7 +85,7 @@ def main(injectionpath : str,
         sub = qrel_df.loc[qrel_df.doc_id == did].copy()
         for row in sub.itertuples(): new_qrels.append((row.query_id, idx, row.relevance - 1, row.iteration))
     
-    qrels = map(lambda x : ir_datasets.format.trec.TrecQrel(*x), new_qrels)
+    qrels = map(lambda x : ir_datasets.formats.trec.TrecQrel(*x), new_qrels)
     injscores['doc_id'] = injscores.apply(lambda x : new_doc_ids[(x.doc_id, x.context, x.pos, x.salience)], axis=1).values.tolist()
 
     subsets = []
