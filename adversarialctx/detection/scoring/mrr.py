@@ -83,7 +83,7 @@ def main(injectionpath : str,
     for key, idx in new_doc_ids.items():
         did, _, _, _ = key
         sub = qrel_df.loc[qrel_df.doc_id == did].copy()
-        for row in sub.itertuples: new_qrels.append((row.query_id, idx, row.relevance - 1, row.iteration))
+        for row in sub.itertuples(): new_qrels.append((row.query_id, idx, row.relevance - 1, row.iteration))
     
     qrels = map(lambda x : ir_datasets.format.trec.TrecQrel(*x), new_qrels)
     injscores['doc_id'] = injscores.apply(lambda x : new_doc_ids[(x.doc_id, x.context, x.pos, x.salience)], axis=1).values.tolist()
