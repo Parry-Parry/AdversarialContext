@@ -88,13 +88,11 @@ def main(injectionpath : str,
             subsets.append((injscores[injscores.pos == p].copy(), p, 'NA'))
 
     qrels = ir_datasets.load("msmarco-passage/trec-dl-2019/judged").qrels_iter()
-    eval = ir_measures.evaluator([RR(rel=2), nDCG(cutoff=10), nDCG(cutoff=100), AP(rel=2)], qrels)
+    eval = ir_measures.evaluator([RR(rel=2), nDCG(cutoff=10), nDCG(cutoff=1000), AP(rel=2), R(rel=2, cutoff=1000)], qrels)
 
     metrics = []
     for subset in subsets:
         subset, p, s = subset
-        #subset['query_id'] = subset['query_id'].astype('string')
-        #subset['doc_id'] = subset['doc_id'].astype('string')
         num_inj = len(subset)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
         if alpha > 0: subscores['score'] = subscores['rel_score'] + alpha * subscores['score'] # Additive fusion
@@ -104,8 +102,6 @@ def main(injectionpath : str,
         subscores['query_id'] = subscores['query_id'].apply(lambda x : str(x))
 
         subscores = subscores.drop(['rel_score'], axis=1)
-        #subscores['query_id'] = subscores['query_id'].astype('string')
-        #subscores['doc_id'] = subscores['doc_id'].astype('string')
 
         ### EVAL ###
 
