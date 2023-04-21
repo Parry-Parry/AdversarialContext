@@ -46,6 +46,7 @@ def main(injectionpath : str,
     cols = ['query_id', 'doc_id', 'rel_score']
     queries, docs, _  = map(list, zip(*rank))
 
+    '''
     # print dtypes of each column in each dataframe
     print('injscores', injscores.dtypes)
     print('injrels', injrels.dtypes)
@@ -57,7 +58,7 @@ def main(injectionpath : str,
     check_nan(injrels)
     check_nan(rankscores)
     check_nan(rankrels)
-
+    '''
     # check that injections are present in top 10 
     # if not, remove them from the dataset
     injscores = injscores[injscores.apply(lambda x : (x.query_id, x.doc_id) in zip(queries, docs), axis=1).values.tolist()]
@@ -65,8 +66,6 @@ def main(injectionpath : str,
     ### MERGE & SET NEW DOCNOS ###
 
     rankscores = rankscores.merge(rankrels, on=['query_id', 'doc_id'], how='left')
-    #rankscores['query_id'] = rankscores['query_id'].astype('string')
-    #rankscores['doc_id'] = rankscores['doc_id'].astype('string')
 
     injscores = injscores.merge(injrels, on=['query_id', 'doc_id', 'context', 'pos', 'salience'], how='left')
     max_doc_id = rankscores.doc_id.astype(int).max() + 1

@@ -3,6 +3,7 @@ import os
 import subprocess as sp
 import logging
 from os.path import join
+from tqdm.auto import tqdm
 
 targets = ['t5', 'tasb', 'colbert', 'bm25', 'electra']
 detectors = ['regression', 'bert']
@@ -17,6 +18,8 @@ def main(script_path : str,
          topk_p : str, 
          rank_store : str, 
          outpath : str,):
+    njobs = len(targets) * len(detectors) * len(alpha) * len(mode) * 3
+    pbar = tqdm(total=njobs)
     for target in targets:
         for detector in detectors:
             topk_propa = join(topk_p, f'{detector}.{target}.1000.tsv')
@@ -41,6 +44,7 @@ def main(script_path : str,
                                         '--salient',
                                         '--retriever', target, 
                                         '--detector', detector])
+                                pbar.update(1)
                     else:
                         for m in mode:
                             inj_propa = join(candidate_propa, f'{m}.position.{detector}.tsv')
@@ -56,6 +60,7 @@ def main(script_path : str,
                                     '--alpha', str(a),
                                     '--retriever', target, 
                                     '--detector', detector])
+                            pbar.update(1)
                         
 
 if __name__ == '__main__':
