@@ -65,8 +65,6 @@ def main(injectionpath : str,
     ### MERGE & SET NEW DOCNOS ###
 
     rankscores = rankscores.merge(rankrels, on=['query_id', 'doc_id'], how='left')
-    #rankscores['query_id'] = rankscores['query_id'].astype('string')
-    #rankscores['doc_id'] = rankscores['doc_id'].astype('string')
 
     injscores = injscores.merge(injrels, on=['query_id', 'doc_id', 'context', 'pos', 'salience'], how='left')
     max_doc_id = rankscores.doc_id.astype(int).max() + 1
@@ -95,7 +93,7 @@ def main(injectionpath : str,
         subset, p, s = subset
         num_inj = len(subset)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
-        if alpha > 0: subscores['score'] = subscores['rel_score'] + alpha * subscores['score'] # Additive fusion
+        if alpha > 0: subscores['score'] = subscores['rel_score'] + alpha * (1 - subscores['score']) # Additive fusion
         else: subscores['score'] = subscores['rel_score']
 
         subscores['doc_id'] = subscores['doc_id'].apply(lambda x : str(x))
