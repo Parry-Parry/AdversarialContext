@@ -3,6 +3,7 @@ import pandas as pd
 import ir_measures
 from ir_measures import *
 import ir_datasets
+from util import priorityfusion
 
 def read_tsv(path, columns, sep='\t', header=True):
     with open(path, 'r') as f:
@@ -93,7 +94,7 @@ def main(injectionpath : str,
         subset, p, s = subset
         num_inj = len(subset)
         subscores = pd.concat([rankscores, subset[['query_id', 'doc_id', 'score', 'rel_score']]], ignore_index=True)
-        if alpha > 0: subscores['score'] = subscores['rel_score'] + alpha * (1 - subscores['score']) # Additive fusion
+        if alpha > 0: subscores['score'] = priorityfusion(subscores['rel_score'], subscores['score'], alpha)  # Additive fusion
         else: subscores['score'] = subscores['rel_score']
 
         subscores['doc_id'] = subscores['doc_id'].apply(lambda x : str(x))

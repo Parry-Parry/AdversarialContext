@@ -16,9 +16,9 @@ def rrfusion(rel : float, prop : float, alpha : float = 0.9, relpi : int = 4, pr
     rel = (rel + 1) / 2  # normalise cosine similarity with theoretical max & min
     return 1 / (relpi + alpha * rel) + 1 / (proppi + (1 - alpha) * prop) # Perform reciprocal rank fusion
 
-def priorityfusion(rel : float, prop : float, alpha : float = 0.9, norm=False):
-    if norm: rel = (rel + 1) / 2 
-    return rel + alpha * (1 - prop)
+def priorityfusion(rel, prop, alpha : float = 0.9):
+    rel = (rel + 1) / 2 
+    return (1 - alpha) * rel + alpha * (1 - prop)
 
 @dataclass
 class Item:
