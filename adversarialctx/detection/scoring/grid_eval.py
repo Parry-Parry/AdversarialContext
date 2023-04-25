@@ -7,7 +7,7 @@ from tqdm.auto import tqdm
 
 targets = ['t5', 'tasb', 'colbert', 'bm25', 'electra']
 detectors = ['regression', 'bert']
-alpha = [0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
+alpha = [0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 mode = ['context', 'static']
 types = ['posiiton', 'salience']
 salience = ['sentence', 't5']
