@@ -12,8 +12,7 @@ def read(dir : str, file : str, alpha : float = None) -> pd.DataFrame:
     df['type'] = components[2]
     df['injection_type'] = components[3]
     df['alpha'] = '.'.join(components[4:6])
-    if alpha is not None:
-        df = df[df['alpha'].astype(float) == alpha].copy()
+    if alpha is not None: df = df[df['alpha'].astype(float) <= alpha].copy()
     return df
 
 def main(dir : str, outpath : str, alpha : float = None) -> str:
