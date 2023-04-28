@@ -87,7 +87,6 @@ def main(injectionpath : str,
             subsets.append((injscores[injscores.pos == p].copy(), p, 'NA'))
 
     qrels = ir_datasets.load("msmarco-passage/trec-dl-2019/judged").qrels_iter()
-    eval = ir_measures.evaluator(, qrels)
 
     metrics = []
     for subset in subsets:
