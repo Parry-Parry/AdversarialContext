@@ -31,7 +31,7 @@ class Encoder:
         d2_enc = self.embedding(d2)
 
         dist = pairwise_distances(q_enc.reshape(1, -1), np.stack([d1_enc, d2_enc], axis=0), metric='cosine')[0]
-        return dist[0] - dist[1]
+        return dist[0] - dist[1], dist[0], dist[1]
 
 def clean_text(text):
     text = re.sub(r'[^A-Za-z0-9 ]+', '', text)
@@ -114,11 +114,11 @@ def main(args):
                 for key, item in ctxlookup.items():
                     for doc, _ in item.items():
                         try:
-                            diff = get_diff(key, ctxlookup[key][doc], staticlookup[key][doc])
+                            diff, d1, d2 = get_diff(key, ctxlookup[key][doc], staticlookup[key][doc])
                         except KeyError:
                             logging.info('Failed to find {key}:{doc} in static')
                             continue
-                        res.append({'qid' : key, 'docno' : doc, 'context' : ctx, 'pos' : position, 'salience' : salience, 'semantic_difference' : diff})
+                        res.append({'qid' : key, 'docno' : doc, 'context' : ctx, 'pos' : position, 'salience' : salience, 'semantic_difference' : diff, 'context_score' : d1, 'static_score' : d2})
                 
                 frames.append(pd.DataFrame.from_records(res))
     pd.concat(frames).to_csv(args.sink)
