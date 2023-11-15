@@ -25,10 +25,10 @@ def gpt_generate(config: str):
 
     documents = pd.read_csv(document_file, sep='\t', index_col=False)
     docids = [d.doc_id for d in documents.itertuples()]
-    docs = pd.DataFrame(irds.load(ir_dataset).docs_iter()).set_index('doc_id').text.to_dict()
-    documents = [docs[d.doc_id] for d in documents.itertuples()]
+    doc_lookup = pd.DataFrame(irds.load(ir_dataset).docs_iter()).set_index('doc_id').text.to_dict()
+    documents = [doc_lookup[d.doc_id] for d in documents.itertuples()]
 
-    del docs
+    del doc_lookup
 
     df = []
     for item in items:
