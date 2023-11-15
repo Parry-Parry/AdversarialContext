@@ -2,6 +2,7 @@ from fire import Fire
 import pandas as pd
 from parryutils import yaml_load
 import ir_datasets as irds
+from os.path import join
  
 from . import SalientSyringe, AbsoluteSyringe
 
@@ -29,6 +30,7 @@ def do_span(config : str):
 
     df = []
     if items:
+        df = []
         for item in items:
             span_subset = spans[spans.item == item].set_index('docno').span.to_dict()
             for row in documents:
@@ -38,6 +40,7 @@ def do_span(config : str):
                 span = span_subset[docno]
                 text = syringe(text, span, qid=qid, docno=docno)
                 df.append({'qid' : qid, 'docno' : docno, 'text' : text, 'item' : item})
+        df = pd.DataFrame.from_records(df).to_csv(join(out_file, 'item.tsv.gz'), sep='\t', index=False)
     else:
         span_subset = spans.set_index(['qid', 'docno']).span.to_dict()
         for row in documents:
@@ -48,7 +51,7 @@ def do_span(config : str):
             text = syringe(text, span, qid=qid, docno=docno)
             df.append({'qid' : qid, 'docno' : docno, 'text' : text, 'item' : item})
     
-    df = pd.DataFrame.from_records(df).to_csv(out_file, sep='\t', index=False)
+        df = pd.DataFrame.from_records(df).to_csv(out_file, sep='\t', index=False)
     return "Done!"
 
 if __name__ == '__main__':

@@ -5,7 +5,7 @@ from parryutils import yaml_load
 from lightchain import Prompt
 import ir_datasets as irds
 
-from contextgen import batch_iter, parse_span
+from contextgen import parse_span
 
 def gpt_generate(config: str):
     config = yaml_load(config)
@@ -13,10 +13,9 @@ def gpt_generate(config: str):
     out_file = config['out_file']
     item_file = config['item_file']
     document_file = config['document_file']
-    model_id = config['model_id']
+    model_id = config.get('model_id', "gpt-3.5-turbo")
     openai_api_key = config['openai_api_key']
     generation_config = config.pop('generation_config', {})
-    batch_size = config.pop('batch_size', 1)
     ir_dataset = config.pop('ir_dataset', None)
 
     openai.api_key = openai_api_key
@@ -34,14 +33,16 @@ def gpt_generate(config: str):
     for item in items:
         item_spans = []
         prompts = prompt([{'doc': d, 'context': item} for d in documents])
-        for batch in batch_iter(prompts, batch_size):
-            responses = openai.Completion.create(
-                engine=model_id,
-                prompt=batch,
+        for p in prompts:
+            response = openai.ChatCompletion.create(
+                model=model_id,
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": p}
+                ]
                 **generation_config
             )
-            generated_text = [response['choices'][0]['text'] for response in responses['choices']]
-            item_spans.extend(*map(parse_span, generated_text))
+            item_spans.append(parse_span(response))
 
         docid_span = {'docno': docids, 'span': item_spans}
         tmp_df = pd.DataFrame(docid_span)
