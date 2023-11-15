@@ -10,7 +10,7 @@ def init_out(path : str):
                 os.mkdir(join(path, 'logs')) 
                 os.mkdir(join(path, 'models')) 
             return 0
-        else: return 0
+        else: return 1
     else:
         os.mkdir(path)
         os.mkdir(join(path, 'logs')) 
