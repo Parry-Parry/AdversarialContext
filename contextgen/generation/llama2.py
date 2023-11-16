@@ -37,7 +37,7 @@ def llama_generate(config: str):
         for p in prompts:
             logging.info(p)
             response = request(end_point, p, params=generation_config)
-            item_spans.append(parse_span(response))
+            item_spans.append(parse_span(response[0]))
 
         docid_span = {'docno': docids, 'span': item_spans}
         tmp_df = pd.DataFrame(docid_span)
