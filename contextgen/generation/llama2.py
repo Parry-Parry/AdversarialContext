@@ -1,6 +1,6 @@
 from fire import Fire
 import pandas as pd
-from parryutil import yaml_load, request
+from parryutil import load_yaml, request
 from lightchain import Prompt
 import ir_datasets as irds
 import pyterrier as pt 
@@ -11,7 +11,7 @@ from pyterrier.io import read_results
 from contextgen import parse_span
 
 def llama_generate(config: str):
-    config = yaml_load(config)
+    config = load_yaml(config)
     prompt = Prompt.from_string(config['prompt'])
     out_file = config['out_file']
     item_file = config['item_file']

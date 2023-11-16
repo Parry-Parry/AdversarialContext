@@ -1,12 +1,12 @@
 from fire import Fire
 import pandas as pd
-from parryutil import yaml_load
+from parryutil import load_yaml
 import ir_datasets as irds
  
 from . import SalientSyringe, AbsoluteSyringe
 
 def do_span(config : str):
-    config = yaml_load(config)
+    config = load_yaml(config)
     document_file = config['document_file']
     salience_file = config.get('salience_file', None)
     item_file = config.get('item_file', None)

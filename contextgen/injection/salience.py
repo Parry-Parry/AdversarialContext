@@ -2,12 +2,12 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 from fire import Fire
-from parryutil import yaml_load
+from parryutil import load_yaml
 import ir_datasets as irds
 from nltk.tokenize import sent_tokenize
 
 def get_salience(config):
-    config = yaml_load(config)
+    config = load_yaml(config)
     model_id = config['model_id']
     document_file = config['document_file']
     out_file = config['out_file']

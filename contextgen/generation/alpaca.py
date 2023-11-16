@@ -3,14 +3,14 @@ import pandas as pd
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 from lightchain import Prompt
-from parryutil import yaml_load
+from parryutil import load_yaml
 import ir_datasets as irds
 
 from . import DTYPES
 from contextgen import batch_iter, parse_span
 
 def alpaca_generate(config : str):
-    config = yaml_load(config)
+    config = load_yaml(config)
     rank = config['rank']
     prompt = Prompt.from_string(config['prompt'])
     out_file = config['out_file']

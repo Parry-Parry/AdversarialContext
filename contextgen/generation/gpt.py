@@ -1,14 +1,14 @@
 from fire import Fire
 import pandas as pd
 import openai
-from parryutil import yaml_load
+from parryutil import load_yaml
 from lightchain import Prompt
 import ir_datasets as irds
 
 from contextgen import parse_span
 
 def gpt_generate(config: str):
-    config = yaml_load(config)
+    config = load_yaml(config)
     prompt = Prompt.from_string(config['prompt'])
     out_file = config['out_file']
     item_file = config['item_file']

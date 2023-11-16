@@ -1,13 +1,13 @@
 from fire import Fire
 import pandas as pd
-from parryutil import load_config
+from parryutil import load_yaml
 from pyterrier.io import write_results
 import ir_datasets as irds
 from . import load_model
 
 
 def score(config : str):
-    config = load_config(config)
+    config = load_yaml(config)
     model_config = config['model_config']
     out_file = config['out_file']
     ir_dataset = config['ir_dataset']

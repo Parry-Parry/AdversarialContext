@@ -1,4 +1,4 @@
-from parryutil import yaml_load
+from parryutil import load_yaml
 from . import ABNIRML, build_rank_lookup, MRC
 from fire import Fire
 import pandas as pd
@@ -8,7 +8,7 @@ if not pt.started():
 from pyterrier.io import read_results
 
 def pairwise(config : str): 
-    config = yaml_load(config)
+    config = load_yaml(config)
     original_file = config['original_file']
     adversarial_file = config['adversarial_file']
     out_file = config['out_file']
