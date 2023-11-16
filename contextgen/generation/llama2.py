@@ -36,7 +36,7 @@ def llama_generate(config: str):
         prompts = [prompt({'doc': d, 'context': item}) for d in documents]
         for p in prompts:
             logging.info(p)
-            response = request(end_point, {'prompt': p}, params=generation_config)
+            response = request(end_point, {'prompt': str(p)}, params=generation_config)
             item_spans.append(parse_span(response['text']))
 
         docid_span = {'docno': docids, 'span': item_spans}
