@@ -1,4 +1,4 @@
-from parryutils import yaml_load
+from parryutil import yaml_load
 from . import ABNIRML, build_rank_lookup, MRC
 from fire import Fire
 import pandas as pd

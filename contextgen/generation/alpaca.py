@@ -3,7 +3,7 @@ import pandas as pd
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 from lightchain import Prompt
-from parryutils import yaml_load
+from parryutil import yaml_load
 import ir_datasets as irds
 
 from . import DTYPES

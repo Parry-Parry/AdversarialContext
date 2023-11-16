@@ -1,7 +1,7 @@
 from fire import Fire
 import pandas as pd
 import openai
-from parryutils import yaml_load
+from parryutil import yaml_load
 from lightchain import Prompt
 import ir_datasets as irds
 

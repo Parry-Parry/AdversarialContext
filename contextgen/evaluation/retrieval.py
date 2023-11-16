@@ -1,5 +1,5 @@
 from fire import Fire 
-from parryutils import yaml_load 
+from parryutil import yaml_load 
 import pandas as pd 
 from pyterrier.io import read_results
 import ir_datasets as irds

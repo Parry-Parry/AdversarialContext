@@ -1,6 +1,6 @@
 from fire import Fire
 import pandas as pd
-from parryutils import load_config
+from parryutil import load_config
 from pyterrier.io import write_results
 import ir_datasets as irds
 from . import load_model

@@ -2,7 +2,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 from fire import Fire
-from parryutils import yaml_load
+from parryutil import yaml_load
 import ir_datasets as irds
 from nltk.tokenize import sent_tokenize
 
