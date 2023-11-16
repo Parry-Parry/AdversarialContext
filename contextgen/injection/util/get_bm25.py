@@ -21,5 +21,3 @@ def get_bm25(index : str, dataset : str, out_file : str, cutoff : int = 100):
 
 if __name__ == '__main__':
     Fire(get_bm25)
-
-

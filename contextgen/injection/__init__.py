@@ -1,7 +1,7 @@
 from typing import Any
 import pandas as pd
 from nltk.tokenize import sent_tokenize
-import np.random as random
+import numpy.random as random
 
 random.seed(42)
 
