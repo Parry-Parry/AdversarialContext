@@ -7,6 +7,7 @@ import pyterrier as pt
 if not pt.started():
     pt.init()
 from pyterrier.io import read_results
+import logging
 
 from contextgen import parse_span
 
@@ -32,8 +33,9 @@ def llama_generate(config: str):
     df = []
     for item in items:
         item_spans = []
-        prompts = prompt([{'doc': d, 'context': item} for d in documents])
+        prompts = [prompt({'doc': d, 'context': item}) for d in documents]
         for p in prompts:
+            logging.info(p)
             response = request(end_point, {'prompt': p}, params=generation_config)
             item_spans.append(parse_span(response['text']))
 
@@ -47,4 +49,5 @@ def llama_generate(config: str):
     return "Done!"
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     Fire(llama_generate)
