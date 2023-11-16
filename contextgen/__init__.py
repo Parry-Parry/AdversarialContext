@@ -1,3 +1,4 @@
+from nltk.tokenize import sent_tokenize
 
 def batch_iter(items, batch_size):
     i = 0
@@ -6,6 +7,6 @@ def batch_iter(items, batch_size):
         yield items[i*batch_size:min((i+1)*batch_size, len(items))]
 
 def parse_span(text):
-    spans = text.split('\n')
+    spans = sent_tokenize(text)
     if len(spans) == 1: return text
     else: return spans[0]
