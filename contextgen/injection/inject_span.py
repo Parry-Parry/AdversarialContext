@@ -2,7 +2,6 @@ from fire import Fire
 import pandas as pd
 from parryutils import yaml_load
 import ir_datasets as irds
-from os.path import join
  
 from . import SalientSyringe, AbsoluteSyringe
 

@@ -3,10 +3,14 @@ import pandas as pd
 from parryutils import yaml_load, request
 from lightchain import Prompt
 import ir_datasets as irds
+import pyterrier as pt 
+if not pt.started():
+    pt.init()
+from pyterrier.io import read_results
 
 from contextgen import parse_span
 
-def gpt_generate(config: str):
+def llama_generate(config: str):
     config = yaml_load(config)
     prompt = Prompt.from_string(config['prompt'])
     out_file = config['out_file']
@@ -18,7 +22,7 @@ def gpt_generate(config: str):
 
     with open(item_file, 'r') as f: items = [*map(lambda x: x.strip(), f.readlines())]
 
-    documents = pd.read_csv(document_file, sep='\t', index_col=False)
+    documents = read_results(document_file)
     docids = [d.doc_id for d in documents.itertuples()]
     doc_lookup = pd.DataFrame(irds.load(ir_dataset).docs_iter()).set_index('doc_id').text.to_dict()
     documents = [doc_lookup[d.doc_id] for d in documents.itertuples()]
@@ -30,7 +34,7 @@ def gpt_generate(config: str):
         item_spans = []
         prompts = prompt([{'doc': d, 'context': item} for d in documents])
         for p in prompts:
-            response = request(end_point, {'prompt': p, **generation_config})
+            response = request(end_point, {'prompt': p}, params=generation_config)
             item_spans.append(parse_span(response['text']))
 
         docid_span = {'docno': docids, 'span': item_spans}
@@ -43,4 +47,4 @@ def gpt_generate(config: str):
     return "Done!"
 
 if __name__ == '__main__':
-    Fire(gpt_generate)
+    Fire(llama_generate)
