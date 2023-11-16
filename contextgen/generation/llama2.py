@@ -23,9 +23,9 @@ def llama_generate(config: str):
     with open(item_file, 'r') as f: items = [*map(lambda x: x.strip(), f.readlines())]
 
     documents = read_results(document_file)
-    docids = [d.doc_id for d in documents.itertuples()]
+    docids = [d.docno for d in documents.itertuples()]
     doc_lookup = pd.DataFrame(irds.load(ir_dataset).docs_iter()).set_index('doc_id').text.to_dict()
-    documents = [doc_lookup[d.doc_id] for d in documents.itertuples()]
+    documents = [doc_lookup[d.docno] for d in documents.itertuples()]
 
     del doc_lookup
 

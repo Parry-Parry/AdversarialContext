@@ -5,6 +5,10 @@ import torch
 from lightchain import Prompt
 from parryutil import load_yaml
 import ir_datasets as irds
+import pyterrier as pt
+if not pt.started():
+    pt.init()
+from pyterrier.io import read_results
 
 from . import DTYPES
 from contextgen import batch_iter, parse_span
@@ -28,10 +32,10 @@ def alpaca_generate(config : str):
 
     with open(item_file, 'r') as f: items = [*map(lambda x : x.strip(), f.readlines())]
     
-    documents = pd.read_csv(document_file, sep='\t', index_col=False)
-    docids = [d.doc_id for d in documents.itertuples()]
+    documents = read_results(document_file)
+    docids = [d.docno for d in documents.itertuples()]
     doc_lookup = pd.DataFrame(irds.load(ir_dataset).docs_iter()).set_index('doc_id').text.to_dict()
-    documents = [doc_lookup[d.doc_id] for d in documents.itertuples()]
+    documents = [doc_lookup[d.docno] for d in documents.itertuples()]
 
     del doc_lookup
 
