@@ -40,7 +40,7 @@ def do_span(config : str):
                 span = span_subset[docno]
                 text = syringe(text, span, qid=qid, docno=docno)
                 df.append({'qid' : qid, 'docno' : docno, 'text' : text, 'item' : item})
-        df = pd.DataFrame.from_records(df).to_csv(join(out_file, 'item.tsv.gz'), sep='\t', index=False)
+        pd.DataFrame.from_records(df).to_csv(f'{out_file}.{item}.tsv.gz', sep='\t', index=False)
     else:
         span_subset = spans.set_index(['qid', 'docno']).span.to_dict()
         for row in documents:
@@ -49,9 +49,8 @@ def do_span(config : str):
             text = docs[docno]
             span = span_subset[(qid, docno)]
             text = syringe(text, span, qid=qid, docno=docno)
-            df.append({'qid' : qid, 'docno' : docno, 'text' : text, 'item' : item})
-    
-        df = pd.DataFrame.from_records(df).to_csv(out_file, sep='\t', index=False)
+            df.append({'qid' : qid, 'docno' : docno, 'text' : text, 'item' : 'NA'})
+        pd.DataFrame.from_records(df).to_csv(out_file, sep='\t', index=False)
     return "Done!"
 
 if __name__ == '__main__':

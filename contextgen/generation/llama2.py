@@ -1,7 +1,6 @@
 from fire import Fire
 import pandas as pd
-import openai
-from parryutils import yaml_load
+from parryutils import yaml_load, request
 from lightchain import Prompt
 import ir_datasets as irds
 
@@ -13,12 +12,9 @@ def gpt_generate(config: str):
     out_file = config['out_file']
     item_file = config['item_file']
     document_file = config['document_file']
-    model_id = config.get('model_id', "gpt-3.5-turbo")
-    openai_api_key = config['openai_api_key']
+    end_point = config['end_point']
     generation_config = config.pop('generation_config', {})
     ir_dataset = config.pop('ir_dataset', None)
-
-    openai.api_key = openai_api_key
 
     with open(item_file, 'r') as f: items = [*map(lambda x: x.strip(), f.readlines())]
 
@@ -34,15 +30,8 @@ def gpt_generate(config: str):
         item_spans = []
         prompts = prompt([{'doc': d, 'context': item} for d in documents])
         for p in prompts:
-            response = openai.ChatCompletion.create(
-                model=model_id,
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": p}
-                ]
-                **generation_config
-            )
-            item_spans.append(parse_span(response['choices'][0]['text']))
+            response = request(end_point, {'prompt': p, **generation_config})
+            item_spans.append(parse_span(response['text']))
 
         docid_span = {'docno': docids, 'span': item_spans}
         tmp_df = pd.DataFrame(docid_span)
