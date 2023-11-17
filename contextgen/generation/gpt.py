@@ -1,6 +1,6 @@
 from fire import Fire
 import pandas as pd
-import openai
+from openai import OpenAI
 from parryutil import load_yaml
 from lightchain import Prompt
 import ir_datasets as irds
@@ -23,7 +23,10 @@ def gpt_generate(config: str):
     generation_config = config.pop('generation_config', {})
     ir_dataset = config.pop('ir_dataset', None)
 
-    openai.api_key = openai_api_key
+    client = OpenAI(
+    # defaults to os.environ.get("OPENAI_API_KEY")
+    api_key="openai_api_key",
+)
 
     with open(item_file, 'r') as f: items = [*map(lambda x: x.strip(), f.readlines())]
 
@@ -39,7 +42,7 @@ def gpt_generate(config: str):
         item_spans = []
         prompts = prompt([{'doc': d, 'context': item} for d in documents])
         for i, p in enumerate(prompts):
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model=model_id,
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant."},
@@ -47,8 +50,8 @@ def gpt_generate(config: str):
                 ]
                 **generation_config
             )
-            if i==0: logging.info(f"Item: {item}, Span: {response['choices'][0]['text']}")
-            item_spans.append(response['choices'][0]['text'])
+            if i==0: logging.info(f"Item: {item}, Span: {response.choices[0].message.content}")
+            item_spans.append(response.choices[0].message.content)
 
         docid_span = {'docno': docids, 'span': item_spans}
         tmp_df = pd.DataFrame(docid_span)
