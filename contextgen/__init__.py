@@ -9,4 +9,5 @@ def batch_iter(items, batch_size):
 def parse_span(text):
     spans = sent_tokenize(text)
     if len(spans) == 1: return text
+    elif len(spans) == 0: return text
     else: return spans[0]
