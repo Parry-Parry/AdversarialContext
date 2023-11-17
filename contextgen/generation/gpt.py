@@ -25,7 +25,7 @@ def gpt_generate(config: str):
 
     client = OpenAI(
     # defaults to os.environ.get("OPENAI_API_KEY")
-    api_key="openai_api_key",
+    api_key=openai_api_key,
 )
 
     with open(item_file, 'r') as f: items = [*map(lambda x: x.strip(), f.readlines())]
