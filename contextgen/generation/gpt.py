@@ -47,7 +47,7 @@ def gpt_generate(config: str):
                 ]
                 **generation_config
             )
-            if i==0: logging.info(f"Item: {item}, Span: {response}")
+            if i==0: logging.info(f"Item: {item}, Span: {response['choices'][0]['text']}")
             item_spans.append(response['choices'][0]['text'])
 
         docid_span = {'docno': docids, 'span': item_spans}
