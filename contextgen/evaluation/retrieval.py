@@ -1,5 +1,5 @@
 from fire import Fire 
-from parryutil import yaml_load 
+from parryutil import load_yaml 
 import pandas as pd 
 from pyterrier.io import read_results
 import ir_datasets as irds
@@ -10,7 +10,7 @@ from . import add_new_ids
 METRICS = [RR(rel=2), AP(rel=2), P(rel=2)@10, NDCG@10]
 
 def retrieval(config : str):
-    config = yaml_load(config)
+    config = load_yaml(config)
     original_file = config['original_file']
     injection_file = config['injection_file']
     out_file = config['out_file']
