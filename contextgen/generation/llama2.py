@@ -34,10 +34,11 @@ def llama_generate(config: str):
     for item in items:
         item_spans = []
         prompts = [prompt({'doc': d, 'context': item}) for d in documents]
-        for p in prompts:
-            logging.info(p)
+        for i, p in enumerate(prompts):
             response = request(end_point, p, params=generation_config)
-            item_spans.append(parse_span(response[0]))
+            span = parse_span(response[0])
+            if i==0: logging.info(f"Item: {item}, Span: {span}")
+            item_spans.append(span)
 
         docid_span = {'docno': docids, 'span': item_spans}
         tmp_df = pd.DataFrame(docid_span)
