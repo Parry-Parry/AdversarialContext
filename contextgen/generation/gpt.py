@@ -8,6 +8,7 @@ import pyterrier as pt
 if not pt.started():
     pt.init()
 from pyterrier.io import read_results
+import logging
 
 from contextgen import parse_span
 
@@ -37,7 +38,7 @@ def gpt_generate(config: str):
     for item in items:
         item_spans = []
         prompts = prompt([{'doc': d, 'context': item} for d in documents])
-        for p in prompts:
+        for i, p in enumerate(prompts):
             response = openai.ChatCompletion.create(
                 model=model_id,
                 messages=[
@@ -46,7 +47,8 @@ def gpt_generate(config: str):
                 ]
                 **generation_config
             )
-            item_spans.append(parse_span(response['choices'][0]['text']))
+            if i==0: logging.info(f"Item: {item}, Span: {response}")
+            item_spans.append(response['choices'][0]['text'])
 
         docid_span = {'docno': docids, 'span': item_spans}
         tmp_df = pd.DataFrame(docid_span)
@@ -58,4 +60,5 @@ def gpt_generate(config: str):
     return "Done!"
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     Fire(gpt_generate)
