@@ -47,7 +47,7 @@ def gpt_generate(config: str):
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": p}
-                ]
+                ],
                 **generation_config
             )
             if i==0: logging.info(f"Item: {item}, Span: {response.choices[0].message.content}")
