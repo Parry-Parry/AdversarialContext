@@ -9,8 +9,11 @@ if not pt.started():
     pt.init()
 from pyterrier.io import read_results
 import logging
+import time
 
 from contextgen import parse_span
+
+MAX_RETRIES = 5
 
 def gpt_generate(config: str):
     config = load_yaml(config)
@@ -37,27 +40,47 @@ def gpt_generate(config: str):
 
     del doc_lookup
 
+    failures = []
+
+    def send_prompt(docno, p):
+        retries = MAX_RETRIES
+        while retries > 0:
+            try:
+                response = client.chat.completions.create(
+                    model=model_id,
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": p}
+                    ],
+                    **generation_config
+                )
+                return response.choices[0].message.content
+            except Exception as e:
+                retries -= 1
+                logging.warning(f"Error: {e}, retrying in 5 seconds...")
+                time.sleep(5)
+        failures.append({'docno' : docno, 'text' : 'failed'})
+        return None
+
     df = []
     for item in items:
         item_spans = []
         prompts = prompt([{'doc': d, 'context': item} for d in documents])
         for i, p in enumerate(prompts):
-            response = client.chat.completions.create(
-                model=model_id,
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": p}
-                ],
-                **generation_config
-            )
-            if i==0: logging.info(f"Item: {item}, Span: {response.choices[0].message.content}")
-            item_spans.append(response.choices[0].message.content)
+            response = send_prompt(docids[i], p)
+            if response is not None:
+                if i==0: logging.info(f"Item: {item}, Span: {response}")
+                item_spans.append({'docno': docids[i], 'span': response})
 
-        docid_span = {'docno': docids, 'span': item_spans}
-        tmp_df = pd.DataFrame(docid_span)
+        tmp_df = pd.DataFrame.from_records(item_spans)
         tmp_df['item'] = item
 
         df.append(tmp_df)
+
+    if len(failures) > 0:
+        logging.warning(f"Failed to generate {len(failures)} prompts")
+        fail_name = out_file.replace('.tsv', '').replace('.csv', '').replace('.gz', '')
+        pd.DataFrame.from_records(failures).to_csv(f"{fail_name}.failures.tsv.gz", sep='\t', index=False)
 
     df = pd.concat(df).to_csv(out_file, sep='\t', index=False)
     return "Done!"
