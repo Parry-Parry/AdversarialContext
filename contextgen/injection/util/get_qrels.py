@@ -3,6 +3,10 @@ import pandas as pd
 import ir_datasets as irds
 from nltk.tokenize import sent_tokenize
 import numpy.random as random
+if not pt.started():
+    pt.init()
+from pyterrier.io import read_results
+
 
 random.seed(42)
 
@@ -15,7 +19,7 @@ def get_qrels(document_file : str,
               eval_set : str, 
               out_file : str, 
               rel : str = 'relevant'):
-    documents = pd.read_csv(document_file, sep='\t', index_col=False)
+    documents = read_results(document_file)
     ir_dataset = irds.load(eval_set)
     docs = pd.DataFrame(ir_dataset.docs_iter()).set_index('doc_id').text.to_dict()
     qrels = pd.DataFrame(ir_dataset.qrels_iter())

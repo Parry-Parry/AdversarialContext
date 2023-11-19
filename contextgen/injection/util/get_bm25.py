@@ -7,7 +7,10 @@ from pyterrier_pisa import PisaIndex
 import pandas as pd
 import ir_datasets as irds
 
-def get_bm25(index : str, dataset : str, out_file : str, cutoff : int = 100):
+def get_bm25(index : str, 
+             dataset : str, 
+             out_file : str, 
+             cutoff : int = 100):
     index = PisaIndex.from_dataset(index, threads=4)
     bm25 = index.bm25(num_results = cutoff)
 
