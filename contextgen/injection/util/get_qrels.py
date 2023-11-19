@@ -30,6 +30,7 @@ def get_qrels(document_file : str,
     else:
         qrels = qrels[qrels.relevance > 0]
 
+    print(qrels.head())
     df = []
 
     for row in documents.itertuples():
@@ -41,7 +42,7 @@ def get_qrels(document_file : str,
             qrel_docs = [d for doc in qrel_docs for d in doc]
         else:
             qrel_docs = qrels[qid]
-        random_doc = random.choice(qrel_docs)
+        random_doc = str(random.choice(qrel_docs))
         random_span = random.choice(sent_tokenize(docs[random_doc]))
 
         df.append({'qid' : qid, 'docno' : docno, 'span' : random_span})
