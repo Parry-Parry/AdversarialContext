@@ -30,7 +30,7 @@ def get_qrels(document_file : str,
     else:
         qrels = qrels[qrels.relevance > 0]
 
-    print(qrels.head())
+    print(qrels.items()[:5])
     df = []
 
     for row in documents.itertuples():
