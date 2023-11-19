@@ -26,11 +26,11 @@ def get_qrels(document_file : str,
     qrels = pd.DataFrame(ir_dataset.qrels_iter())
     if rel != 'irrelevant':
         qrels = qrels[qrels.relevance.isin(rel_lookup[rel])]
-        qrels = qrels.groupby('query_id').doc_id.apply(list).to_dict()
     else:
         qrels = qrels[qrels.relevance > 0]
-
-    print(qrels.items()[:5])
+    
+    print(qrels.head())
+    qrels = qrels.groupby('query_id').doc_id.apply(list).to_dict()   
     df = []
 
     for row in documents.itertuples():
