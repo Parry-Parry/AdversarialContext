@@ -29,8 +29,8 @@ def get_qrels(document_file : str,
     else:
         qrels = qrels[qrels.relevance > 0]
     
-    print(qrels.head())
     qrels = qrels.groupby('query_id').doc_id.apply(list).to_dict()   
+    print(qrels)
     df = []
 
     for row in documents.itertuples():
