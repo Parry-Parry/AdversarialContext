@@ -5,6 +5,7 @@ from fire import Fire
 from parryutil import load_yaml
 import ir_datasets as irds
 from nltk.tokenize import sent_tokenize
+from tqdm import tqdm
 
 def get_salience(config):
     config = load_yaml(config)
