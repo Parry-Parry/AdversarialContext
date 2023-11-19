@@ -33,8 +33,8 @@ def get_qrels(document_file : str,
     df = []
 
     for row in documents.itertuples():
-        docno = row.docno
-        qid = row.qid
+        docno = str(row.docno)
+        qid = str(row.qid)
         
         if rel == 'irrelevant':
             qrel_docs = [d for q, d in qrels.items() if q != qid]
