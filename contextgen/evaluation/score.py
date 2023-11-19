@@ -11,7 +11,7 @@ def score(config : str):
     model_config = config['model_config']
     out_file = config['out_file']
     ir_dataset = config['ir_dataset']
-    scorer = load_model(model_config)
+    scorer = load_model(**model_config)
 
     ds = irds.load(ir_dataset)
     queries = pd.DataFrame(ds.queries_iter()).set_index('qid').text.to_dict()
