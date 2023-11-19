@@ -3,6 +3,7 @@ import pandas as pd
 import ir_datasets as irds
 from nltk.tokenize import sent_tokenize
 import numpy.random as random
+import pyterrier as pt
 if not pt.started():
     pt.init()
 from pyterrier.io import read_results
