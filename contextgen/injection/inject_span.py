@@ -30,6 +30,7 @@ def do_span(config : str):
     df = []
     if items:
         df = []
+        out_file = out_file.replace('.tsv.gz', '')
         for item in items:
             span_subset = spans[spans.item == item].set_index('docno').span.to_dict()
             for row in documents:
