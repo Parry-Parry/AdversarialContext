@@ -36,7 +36,7 @@ def do_span(document_file : str, span_file : str, out_file : str, type : str, ir
                 qid = row.qid
                 text = docs[docno]
                 span = span_subset[docno]
-                text = syringe(text, span, qid=qid, docno=docno)
+                text = syringe(text, span, qid=str(qid), docno=str(docno))
                 df.append({'qid' : qid, 'docno' : docno, 'text' : text, 'item' : item})
         pd.DataFrame.from_records(df).to_csv(f'{out_file}.{item}.tsv.gz', sep='\t', index=False)
     else:
