@@ -14,13 +14,13 @@ def construct(item_file : str, document_file : str, out_file : str):
 
     df = []
 
-    for item, span in item_spans:
+    for pair in item_spans:
         for row in documents.itertuples():
             df.append({
                 'qid' : row.qid,
                 'docno' : row.docno,
-                'span' : span,
-                'item' : item
+                'span' : pair[1],
+                'item' : pair[0]
             })
     
     pd.DataFrame.from_records(df).to_csv(out_file, sep='\t', index=False)
