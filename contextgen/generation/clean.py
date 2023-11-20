@@ -6,9 +6,10 @@ from contextgen import parse_span
 def clean(file : str, out_file : str, cutoff : int = None):
 
     def clean_func(text): 
-        text = parse_span(text)
-        if cutoff: text = text[:cutoff]
-        return text
+        parsed = parse_span(text)
+        if len(parsed) < 3: return text
+        if cutoff: parsed = parsed[:cutoff]
+        return parsed
 
     df = pd.read_csv(file, sep='\t', index_col=False)
     df['span'] = df['span'].apply(clean_func)
