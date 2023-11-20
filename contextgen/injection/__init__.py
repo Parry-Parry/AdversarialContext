@@ -11,7 +11,8 @@ class SalientSyringe(object):
         elif pos == 'after': self.inject = self.after
         else: raise ValueError(f"Invalid position {pos}")
 
-        salience = pd.read_csv(salience_file, sep='\t', index_col=False, dtype={'qid' : str, 'doc_id' : str, 'span' : int})
+        salience = pd.read_csv(salience_file, sep='\t', index_col=False, dtype={'query_id' : str, 'doc_id' : str, 'span' : int})
+        print(salience.head())
         self.salience = salience.set_index(['query_id', 'doc_id']).span.to_dict()
 
     def before(self, spans, span, i) -> str:
