@@ -12,7 +12,7 @@ class SalientSyringe(object):
         else: raise ValueError(f"Invalid position {pos}")
 
         salience = pd.read_csv(salience_file, sep='\t', index_col=False)
-        self.salience = salience.set_index(['qid', 'docno']).id.to_dict()
+        self.salience = salience.set_index(['query_id', 'doc_id']).span.to_dict()
 
     def before(self, spans, span, i) -> str:
         if i == 0: return ' '.join([span, *spans])
