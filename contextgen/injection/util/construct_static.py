@@ -8,7 +8,7 @@ from pyterrier.io import read_results
 def construct(item_file : str, document_file : str, out_file : str):
     with open(item_file, 'r') as f: 
         lines = [*map(lambda x : x.strip(), f.readlines())]
-        item_spans = [*map(lambda x : x.split('\t'), lines)]
+        item_spans = [*map(lambda x : x.split('_'), lines)]
     
     documents = read_results(document_file)
 
