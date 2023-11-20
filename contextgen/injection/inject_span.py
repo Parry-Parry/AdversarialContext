@@ -38,7 +38,8 @@ def do_span(document_file : str, span_file : str, out_file : str, type : str, ir
                 span = span_subset[docno]
                 text = syringe(text, span, qid=str(qid), docno=str(docno))
                 df.append({'qid' : qid, 'docno' : docno, 'text' : text, 'item' : item})
-        pd.DataFrame.from_records(df).to_csv(f'{out_file}.{item}.tsv.gz', sep='\t', index=False)
+            item_name = item.replace(' ', '_').lower()
+            pd.DataFrame.from_records(df).to_csv(f'{out_file}.{item_name}.tsv.gz', sep='\t', index=False)
     else:
         span_subset = spans.set_index(['qid', 'docno']).span.to_dict()
         for row in documents.itertuples():
