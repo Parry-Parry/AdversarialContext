@@ -21,14 +21,13 @@ def get_salience(config):
     docs = pd.DataFrame(ir_ds.docs_iter()).set_index('doc_id').text.to_dict()
     queries = pd.DataFrame(ir_ds.queries_iter()).set_index('query_id').text.to_dict()
 
-    queries = {qid : model.encode(q) for qid, q in queries.items()}
-    documents = {docid : model.encode(sent_tokenize(doc)) for docid, doc in docs.items()}
-
     df = []
-    for qid, q in queries.items():
-        for docid, doc in documents.items():
-            sim = cosine_similarity([q], doc)
-            df.append({'query_id' : qid, 'doc_id' : docid, 'span' : sim.argmax()})
+    for row in documents.itertuples():
+        q = queries[row.qid]
+        doc = docs[row.docid]
+        spans = sent_tokenize(doc)
+        sim = cosine_similarity([model.encode(q)], model.encode(spans))
+        df.append({'query_id' : row.qid, 'doc_id' : row.docno, 'span' : sim.argmax()})
     
     df = pd.DataFrame.from_records(df).to_csv(out_file, sep='\t', index=False)
     return "Done!"
