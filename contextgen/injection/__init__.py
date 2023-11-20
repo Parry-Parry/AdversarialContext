@@ -11,19 +11,20 @@ class SalientSyringe(object):
         elif pos == 'after': self.inject = self.after
         else: raise ValueError(f"Invalid position {pos}")
 
-        salience = pd.read_csv(salience_file, sep='\t', index_col=False, dtype={'qid' : str, 'doc_id' : str, 'span' : str})
+        salience = pd.read_csv(salience_file, sep='\t', index_col=False, dtype={'qid' : str, 'doc_id' : str, 'span' : int})
         self.salience = salience.set_index(['query_id', 'doc_id']).span.to_dict()
 
     def before(self, spans, span, i) -> str:
         if i == 0: return ' '.join([span, *spans])
         return ' '.join([*spans[:i], span, *spans[i:]])
+    
     def after(self, spans, span, i) -> str:
         if i == len(spans) - 1: return ' '.join([*spans, span])
         return ' '.join([*spans[:i+1], span, *spans[i+1:]])
 
     def __call__(self, text, span, docno=None, qid=None) -> str:
         spans = sent_tokenize(text)
-        salience = self.salience[(qid, docno)]
+        salience = self.salience[(str(qid), str(docno))]
         return self.inject(spans, span, salience)
 
 class AbsoluteSyringe(object):
