@@ -20,7 +20,10 @@ def do_span(document_file : str, span_file : str, out_file : str, type : str, ir
     ir_ds = irds.load(ir_dataset)
     docs = pd.DataFrame(ir_ds.docs_iter()).set_index('doc_id').text.to_dict()
 
-    with open(item_file, 'r') as f: items = [*map(lambda x : x.strip(), f.readlines())]
+    if item_file:
+        with open(item_file, 'r') as f: items = [*map(lambda x : x.strip(), f.readlines())]
+    else: 
+        items = None
 
     df = []
     if items:
