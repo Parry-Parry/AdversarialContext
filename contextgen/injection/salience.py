@@ -5,7 +5,10 @@ from fire import Fire
 from parryutil import load_yaml
 import ir_datasets as irds
 from nltk.tokenize import sent_tokenize
-from tqdm import tqdm
+import pyterrier as pt 
+if not pt.started():
+    pt.init()
+from pyterrier.io import read_results
 
 def get_salience(config):
     config = load_yaml(config)
@@ -15,7 +18,7 @@ def get_salience(config):
     ir_dataset = config['ir_dataset']
 
     model = SentenceTransformer(model_id)
-    documents = pd.read_csv(document_file, sep='\t', index_col=False)
+    documents = read_results(document_file)
 
     ir_ds = irds.load(ir_dataset)
     docs = pd.DataFrame(ir_ds.docs_iter()).set_index('doc_id').text.to_dict()
