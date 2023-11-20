@@ -5,20 +5,12 @@ import ir_datasets as irds
  
 from . import SalientSyringe, AbsoluteSyringe
 
-def do_span(config : str):
-    config = load_yaml(config)
-    document_file = config['document_file']
-    salience_file = config.get('salience_file', None)
-    item_file = config.get('item_file', None)
-    span_file = config['span_file']
-    out_file = config['out_file']
-    type = config['type']
+def do_span(document_file : str, span_file : str, out_file : str, type : str, ir_dataset : str, salience_file : str = None, item_file : str = None):
     pos = type.split('_')[1]
 
     if 'absolute' in type: syringe = AbsoluteSyringe(pos=pos)
     else: syringe = SalientSyringe(pos=pos, salience_file=salience_file)
 
-    ir_dataset = config['ir_dataset']
     documents = pd.read_csv(document_file, sep='\t', index_col=False)
     spans = pd.read_csv(span_file, sep='\t', index_col=False)
 
