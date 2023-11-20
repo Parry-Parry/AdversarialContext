@@ -26,8 +26,8 @@ def get_salience(config):
 
     df = []
     for row in documents.itertuples():
-        q = queries[row.qid]
-        doc = docs[row.docid]
+        q = queries[str(row.qid)]
+        doc = docs[str(row.docno)]
         spans = sent_tokenize(doc)
         sim = cosine_similarity([model.encode(q)], model.encode(spans))
         df.append({'query_id' : row.qid, 'doc_id' : row.docno, 'span' : sim.argmax()})
