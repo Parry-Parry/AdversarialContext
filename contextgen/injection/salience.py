@@ -20,6 +20,8 @@ def get_salience(config):
     model = SentenceTransformer(model_id)
     documents = read_results(document_file)
 
+    print(documents.head())
+
     ir_ds = irds.load(ir_dataset)
     docs = pd.DataFrame(ir_ds.docs_iter()).set_index('doc_id').text.to_dict()
     queries = pd.DataFrame(ir_ds.queries_iter()).set_index('query_id').text.to_dict()
