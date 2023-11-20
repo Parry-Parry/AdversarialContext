@@ -1,7 +1,10 @@
 from fire import Fire
 import pandas as pd
-from parryutil import load_yaml
 import ir_datasets as irds
+import pyterrier as pt 
+if not pt.started():
+    pt.init()
+from pyterrier.io import read_results
  
 from . import SalientSyringe, AbsoluteSyringe
 
@@ -11,7 +14,7 @@ def do_span(document_file : str, span_file : str, out_file : str, type : str, ir
     if 'absolute' in type: syringe = AbsoluteSyringe(pos=pos)
     else: syringe = SalientSyringe(pos=pos, salience_file=salience_file)
 
-    documents = pd.read_csv(document_file, sep='\t', index_col=False)
+    documents = read_results(document_file)
     spans = pd.read_csv(span_file, sep='\t', index_col=False)
 
     ir_ds = irds.load(ir_dataset)
