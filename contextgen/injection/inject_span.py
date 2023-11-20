@@ -31,7 +31,7 @@ def do_span(document_file : str, span_file : str, out_file : str, type : str, ir
         out_file = out_file.replace('.tsv.gz', '')
         for item in items:
             span_subset = spans[spans.item == item].set_index('docno').span.to_dict()
-            for row in documents:
+            for row in documents.itertuples():
                 docno = row.docno
                 qid = row.qid
                 text = docs[docno]
@@ -41,7 +41,7 @@ def do_span(document_file : str, span_file : str, out_file : str, type : str, ir
         pd.DataFrame.from_records(df).to_csv(f'{out_file}.{item}.tsv.gz', sep='\t', index=False)
     else:
         span_subset = spans.set_index(['qid', 'docno']).span.to_dict()
-        for row in documents:
+        for row in documents.itertuples():
             docno = row.docno
             qid = row.qid
             text = docs[docno]
