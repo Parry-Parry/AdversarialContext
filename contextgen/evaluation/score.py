@@ -1,3 +1,4 @@
+from typing import Union
 from fire import Fire
 import pandas as pd
 from parryutil import load_yaml
@@ -5,9 +6,8 @@ from pyterrier.io import write_results
 import ir_datasets as irds
 from . import load_model
 
-
-def score(config : str):
-    config = load_yaml(config)
+def model_score(config : Union[str, dict]):
+    config = load_yaml(config) if isinstance(config, str) else config
     model_config = config['model_config']
     out_file = config['out_file']
     ir_dataset = config['ir_dataset']
@@ -25,7 +25,7 @@ def score(config : str):
     return "Done!"
 
 if __name__ == "__main__":
-    Fire(score)
+    Fire(model_score)
 
 
 

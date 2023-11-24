@@ -1,5 +1,4 @@
 from fire import Fire 
-from parryutil import load_yaml 
 import pandas as pd 
 from pyterrier.io import read_results
 import ir_datasets as irds
@@ -9,13 +8,7 @@ from . import add_new_ids
 
 METRICS = [RR(rel=2), AP(rel=2), P(rel=2)@10, NDCG@10]
 
-def retrieval(config : str):
-    config = load_yaml(config)
-    original_file = config['original_file']
-    injection_file = config['injection_file']
-    out_file = config['out_file']
-    qrels = config['qrels']
-
+def retrieval_score(original_file : str, injection_file : str, out_file : str, qrels : str):
     ds = irds.load(qrels)
     qrel_df = pd.DataFrame.from_records(ds.qrels_iter())
 
@@ -49,5 +42,5 @@ def retrieval(config : str):
     return "Done!"
 
 if __name__ == '__main__':
-    Fire(retrieval)
+    Fire(retrieval_score)
 

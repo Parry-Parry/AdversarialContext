@@ -16,7 +16,7 @@ def clean(df):
 
 def load_colbert(**kwargs):
     checkpoint = kwargs['checkpoint']
-    device = kwargs['device']
+    device = kwargs.get('device', None)
     from pyterrier_colbert.ranking import ColBERTModelOnlyFactory
     pytcolbert = ColBERTModelOnlyFactory(checkpoint, gpu=device)
     preprocess = lambda x : x
@@ -24,12 +24,12 @@ def load_colbert(**kwargs):
 
 def load_tasb(**kwargs):
     checkpoint = kwargs['checkpoint']
-    device = kwargs['device']
-    from pyterrier_dr import TasB
-    return TasB(checkpoint, device=device) 
+    device =  kwargs.get('device', None)
+    from pyterrier_dr import TasB, BiScorer
+    return BiScorer(TasB(checkpoint, device=device))
 
 def load_t5(**kwargs):
-    device = kwargs['device']
+    device = kwargs.get('device', None)
     from pyterrier_t5 import MonoT5ReRanker
     return MonoT5ReRanker(device=device)
 
@@ -37,7 +37,7 @@ def load_bm25(**kwargs):
     dataset = kwargs['dataset']
     variant = kwargs.get('variant', 'terrier_stemmed')
     ds = pt.get_dataset(dataset)
-    indx = pt.IndexFactory.of(ds.get_index(variant=variant))
+    indx = pt.IndexFactory.of(ds.get_index(variant=variant), memory=True)
     scorer = pt.apply_generic(lambda x : clean(x)) >> pt.batchretrieve.TextScorer(body_attr='text', wmodel='BM25', background_index=indx, properties={"termpipelines" : "Stopwords,PorterStemmer"})
     return scorer
 

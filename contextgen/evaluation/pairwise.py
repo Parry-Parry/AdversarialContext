@@ -1,18 +1,11 @@
-from parryutil import load_yaml
 from . import ABNIRML, build_rank_lookup, MRC
 from fire import Fire
-import pandas as pd
 import pyterrier as pt 
 if not pt.started():
     pt.init()
 from pyterrier.io import read_results
 
-def pairwise(config : str): 
-    config = load_yaml(config)
-    original_file = config['original_file']
-    adversarial_file = config['adversarial_file']
-    out_file = config['out_file']
-
+def pairwise_score(original_file : str, adversarial_file : str, out_file : str): 
     original = read_results(original_file)
     adversarial = read_results(adversarial_file)
 
@@ -33,4 +26,4 @@ def pairwise(config : str):
     return "Done!"
 
 if __name__ == '__main__':
-    Fire(pairwise)
+    Fire(pairwise_score)
