@@ -14,7 +14,7 @@ def model_score(config : Union[str, dict]):
     scorer = load_model(**model_config)
 
     ds = irds.load(ir_dataset)
-    queries = pd.DataFrame(ds.queries_iter()).set_index('qid').text.to_dict()
+    queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
 
     run_file = pd.read_csv(config['run_file'], sep='\t', index_col=False)
     run_file['query'] = run_file['qid'].apply(lambda x : queries[x])

@@ -16,7 +16,7 @@ def clean(df):
 
 def load_colbert(**kwargs):
     checkpoint = kwargs['checkpoint']
-    device = kwargs.get('device', None)
+    device = kwargs.get('device', True)
     from pyterrier_colbert.ranking import ColBERTModelOnlyFactory
     pytcolbert = ColBERTModelOnlyFactory(checkpoint, gpu=device)
     preprocess = lambda x : x
