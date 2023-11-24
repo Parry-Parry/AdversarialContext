@@ -8,6 +8,7 @@ from contextgen.evaluation.score import model_score
 
 def main(config : Union[str, dict], file : str = None):
     config = load_yaml(config) if isinstance(config, str) else config
+    print(config)
 
     dir = config['dir']
     out_dir = config['out_dir']
