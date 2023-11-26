@@ -23,14 +23,12 @@ def load_colbert(**kwargs):
 
 def load_tasb(**kwargs):
     checkpoint = kwargs['checkpoint']
-    device =  kwargs.get('device', None)
     from pyterrier_dr import TasB, BiScorer
-    return BiScorer(TasB(checkpoint, device=device))
+    return BiScorer(TasB(checkpoint))
 
 def load_t5(**kwargs):
-    device = kwargs.get('device', None)
     from pyterrier_t5 import MonoT5ReRanker
-    return MonoT5ReRanker(device=device)
+    return MonoT5ReRanker()
 
 def load_bm25(**kwargs):
     dataset = kwargs['dataset']
