@@ -19,8 +19,7 @@ def load_colbert(**kwargs):
     device = kwargs.get('device', True)
     from pyterrier_colbert.ranking import ColBERTModelOnlyFactory
     pytcolbert = ColBERTModelOnlyFactory(checkpoint, gpu=device)
-    preprocess = lambda x : x
-    return pytcolbert.text_scorer(), preprocess
+    return pytcolbert.text_scorer()
 
 def load_tasb(**kwargs):
     checkpoint = kwargs['checkpoint']
