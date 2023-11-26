@@ -38,7 +38,7 @@ def load_bm25(**kwargs):
     variant = kwargs.get('variant', 'terrier_stemmed')
     ds = pt.get_dataset(dataset)
     indx = pt.IndexFactory.of(ds.get_index(variant=variant), memory=True)
-    scorer = pt.apply_generic(lambda x : clean(x)) >> pt.batchretrieve.TextScorer(body_attr='text', wmodel='BM25', background_index=indx, properties={"termpipelines" : "Stopwords,PorterStemmer"})
+    scorer = pt.apply.generic(lambda x : clean(x)) >> pt.batchretrieve.TextScorer(body_attr='text', wmodel='BM25', background_index=indx, properties={"termpipelines" : "Stopwords,PorterStemmer"})
     return scorer
 
 def load_model(**kwargs):
