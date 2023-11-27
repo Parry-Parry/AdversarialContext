@@ -5,9 +5,9 @@ if not pt.started():
     pt.init()
 from pyterrier.io import read_results
 
-def pairwise_score(original_file : str, adversarial_file : str, out_file : str): 
+def pairwise_score(original_file : str, injection_file : str, out_file : str): 
     original = read_results(original_file)
-    adversarial = read_results(adversarial_file)
+    adversarial = read_results(injection_file)
 
     original = original.sort_values(by=['qid', 'score'], ascending=[True, False])
     adversarial = adversarial.sort_values(by=['qid', 'score'], ascending=[True, False])
