@@ -6,12 +6,10 @@ from os import listdir
 
 from contextgen.evaluation.score import model_score
 
-def main(config : Union[str, dict], file : str = None):
+def main(config : Union[str, dict], file : str = None, dir : str = None, out_dir : str = None):
     config = load_yaml(config) if isinstance(config, str) else config
-    print(config)
-
-    dir = config['dir']
-    out_dir = config['out_dir']
+    dir = config['dir'] if not dir else dir
+    out_dir = config['out_dir'] if not out_dir else out_dir
     model_config = config['model_config']
     model_name = model_config['model']
     files = listdir(dir) if file is None else [file]

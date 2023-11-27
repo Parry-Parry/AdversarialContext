@@ -7,11 +7,11 @@ from typing import Union
 
 from contextgen.evaluation.retrieval import retrieval_score
 
-def main(config : Union[str, dict]):
+def main(config : Union[str, dict], dir : str = None, out_dir : str = None):
     config = load_yaml(config) if isinstance(config, str) else config
 
-    dir = config['dir']
-    out_dir = config['out_dir']
+    dir = config['dir'] if not dir else dir
+    out_dir = config['out_dir'] if not out_dir else out_dir
     model_config = config['model_config']
     original_file = config['original_file']
     files = listdir(dir)
