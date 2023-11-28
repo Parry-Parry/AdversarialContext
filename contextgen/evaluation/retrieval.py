@@ -5,10 +5,12 @@ import ir_datasets as irds
 from ir_measures import *
 from ir_measures import evaluator
 from . import add_new_ids
+import os
 
 METRICS = [RR(rel=2), AP(rel=2), P(rel=2)@10, NDCG@10]
 
 def retrieval_score(original_file : str, injection_file : str, out_file : str, qrels : str):
+    if os.path.exists(out_file): return "Already done!"
     ds = irds.load(qrels)
     qrel_df = pd.DataFrame.from_records(ds.qrels_iter())
 

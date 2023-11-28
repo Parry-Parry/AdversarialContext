@@ -5,11 +5,13 @@ from parryutil import load_yaml
 from pyterrier.io import write_results, read_results
 import ir_datasets as irds
 from . import load_model
+import os 
 
 def model_score(config : Union[str, dict]):
     config = load_yaml(config) if isinstance(config, str) else config
     model_config = config['model_config']
     out_file = config['out_file']
+    if os.path.exists(out_file): return "Already done!"
     ir_dataset = config['ir_dataset']
     scorer = load_model(**model_config)
 

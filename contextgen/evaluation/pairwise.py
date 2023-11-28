@@ -4,8 +4,10 @@ import pyterrier as pt
 if not pt.started():
     pt.init()
 from pyterrier.io import read_results
+import os 
 
 def pairwise_score(original_file : str, injection_file : str, out_file : str): 
+    if os.path.exists(out_file): return "Already done!"
     original = read_results(original_file)
     adversarial = read_results(injection_file)
 
