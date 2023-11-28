@@ -13,9 +13,8 @@ def main(config : Union[str, dict], file : str = None, dir : str = None, out_dir
     ir_dataset = main_config.pop('ir_dataset')
     files = listdir(dir) if file is None else [file]
 
-    for _, config in main_config.items():
+    for _, model_config in main_config.items():
         for file in files:
-            model_config = config['model_config']
             model_name = model_config['model']
             injection_file = os.path.join(dir, file)
             out_file = os.path.join(out_dir, f'{model_name}.{file}')
