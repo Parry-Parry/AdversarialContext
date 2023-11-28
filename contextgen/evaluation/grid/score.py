@@ -12,7 +12,7 @@ def main(config : Union[str, dict], file : str = None, dir : str = None, out_dir
     out_dir = main_config.pop('out_dir') if not out_dir else out_dir
     ir_dataset = main_config.pop('ir_dataset')
     files = listdir(dir) if file is None else [file]
-
+    print(main_config.values())
     for _, model_config in main_config.items():
         print(model_config)
         for file in files:
