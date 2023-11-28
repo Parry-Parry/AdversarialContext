@@ -12,9 +12,7 @@ def main(config : Union[str, dict], file : str = None, dir : str = None, out_dir
     out_dir = main_config.pop('out_dir') if not out_dir else out_dir
     ir_dataset = main_config.pop('ir_dataset')
     files = listdir(dir) if file is None else [file]
-    print(main_config.values())
-    for _, model_config in main_config.items():
-        print(model_config)
+    for model_config in main_config.values():
         for file in files:
             model_name = model_config['model']
             injection_file = os.path.join(dir, file)
@@ -29,7 +27,7 @@ def main(config : Union[str, dict], file : str = None, dir : str = None, out_dir
                     'trec' : trec
                 }
             )
-        return "Done!"
+    return "Done!"
 
 if __name__ == "__main__":
     Fire(main)
