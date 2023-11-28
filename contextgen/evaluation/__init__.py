@@ -12,6 +12,7 @@ def clean_text(text):
 
 def clean(df):
     df['text'] = df['text'].apply(lambda x : clean_text(x))
+    df['query'] = df['query'].apply(lambda x : clean_text(x))
     return df
 
 def load_colbert(**kwargs):
