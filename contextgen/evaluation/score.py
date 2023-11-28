@@ -20,9 +20,12 @@ def model_score(config : Union[str, dict]):
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
     docs = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
 
-    run_file = read_results(config['run_file']) if trec else pd.read_csv(config['run_file'], sep='\t', index_col=False, dtype={'qid' : str, 'docno' : str, 'text' : str, 'query' : str})
-    run_file['query'] = run_file['qid'].apply(lambda x : queries[x])
-    run_file['text'] = run_file['docno'].apply(lambda x : docs[x])
+    if trec:
+        run_file = read_results(config['run_file']) 
+        run_file['query'] = run_file['qid'].apply(lambda x : queries[x])
+        run_file['text'] = run_file['docno'].apply(lambda x : docs[x])
+    else:
+        pd.read_csv(config['run_file'], sep='\t', index_col=False, dtype={'qid' : str, 'docno' : str, 'text' : str, 'query' : str})
 
     new_res = scorer.transform(run_file)
     write_results(new_res, out_file)
