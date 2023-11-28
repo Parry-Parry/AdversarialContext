@@ -13,13 +13,14 @@ def model_score(config : Union[str, dict]):
     out_file = config['out_file']
     if os.path.exists(out_file): return "Already done!"
     ir_dataset = config['ir_dataset']
+    trec = config['trec']
     scorer = load_model(**model_config)
 
     ds = irds.load(ir_dataset)
     queries = pd.DataFrame(ds.queries_iter()).set_index('query_id').text.to_dict()
     docs = pd.DataFrame(ds.docs_iter()).set_index('doc_id').text.to_dict()
 
-    run_file = read_results(config['run_file'])
+    run_file = read_results(config['run_file']) if trec else pd.read_csv(config['run_file'], sep='\t', index_col=False)
     run_file['query'] = run_file['qid'].apply(lambda x : queries[x])
     run_file['text'] = run_file['docno'].apply(lambda x : docs[x])
 

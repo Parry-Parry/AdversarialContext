@@ -6,7 +6,7 @@ from os import listdir
 
 from contextgen.evaluation.score import model_score
 
-def main(config : Union[str, dict], file : str = None, dir : str = None, out_dir : str = None):
+def main(config : Union[str, dict], file : str = None, dir : str = None, out_dir : str = None, trec : bool = False):
     main_config = load_yaml(config) if isinstance(config, str) else config
     dir = main_config.pop('dir') if not dir else dir
     out_dir = main_config.pop('out_dir') if not out_dir else out_dir
@@ -24,7 +24,8 @@ def main(config : Union[str, dict], file : str = None, dir : str = None, out_dir
                     'model_config': model_config,
                     'out_file': out_file,
                     'ir_dataset': ir_dataset,
-                    'run_file': injection_file
+                    'run_file': injection_file,
+                    'trec' : trec
                 }
             )
         return "Done!"
