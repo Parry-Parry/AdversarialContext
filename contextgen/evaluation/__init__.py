@@ -77,7 +77,7 @@ def add_new_ids(df, max_id, qrels):
     new_ids = {}
     for i, row in enumerate(df.itertuples()):
         print(row)
-        sub = qrels.loc[qrels.doc_id == row.docno].copy()
+        sub = qrels.loc[qrels.doc_id == row.doc_id].copy()
         docid = str(max_id + i)
         new_ids[row.docno] = docid
         for subrow in sub.itertuples():
