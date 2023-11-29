@@ -1,4 +1,4 @@
-from . import ABNIRML, build_rank_lookup, MRC
+from . import ABNIRML, build_rank_lookup, MRC, get_ranks
 from fire import Fire
 import pyterrier as pt 
 if not pt.started():
@@ -20,8 +20,14 @@ def pairwise_score(original_file : str, injection_file : str, out_file : str):
     original.drop(columns=['score'], inplace=True)
 
     adversarial = adversarial.merge(original, on=['qid', 'docno'], how='left')
+
+    adversarial['ranks'] = adversarial.apply(lambda x : get_ranks(x['qid'], x['score'], original_lookup), axis=1)
+    adversarial['old_rank'] = adversarial['ranks'].apply(lambda x : x[0])
+    adversarial['new_rank'] = adversarial['ranks'].apply(lambda x : x[1])
+    adversarial.drop(columns=['ranks'], inplace=True)
+
     adversarial['ABNIRML'] = adversarial.apply(lambda x : ABNIRML(x['score'], x['original_score']), axis=1)
-    adversarial['MRR'] = adversarial.apply(lambda x : MRC(x['docno'], x['score'], original_lookup[x['qid']]), axis=1)
+    adversarial['MRC'] = adversarial.apply(lambda x : MRC(x['docno'], x['score'], original_lookup[x['qid']]), axis=1)
 
     adversarial.to_csv(out_file, sep='\t', index=False)
 

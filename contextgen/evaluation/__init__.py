@@ -62,6 +62,15 @@ def ABNIRML(score, adv_score):
     elif diff > 0: return 1
     return 0
 
+def get_ranks(docno, score, lookup):
+    old_ranks = [(k, v) for k, v in lookup]
+    old_ranks.sort(key=lambda x : x[1], reverse=True)
+    old_rank = [i for i, item in enumerate(old_ranks) if item[0]==docno]
+    new_ranks = [item for item in old_ranks if item[0] != docno]
+    new_ranks.append((docno, score))
+    new_ranks.sort(reverse=True, key=lambda x : x[1])
+    return old_rank[0], [i for i, item in enumerate(new_ranks) if item[0]==docno][0]
+
 def MRC(docno, score, lookup):
     old_ranks = [(k, v) for k, v in lookup]
     old_ranks.sort(key=lambda x : x[1], reverse=True)
