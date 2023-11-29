@@ -39,14 +39,18 @@ def retrieval_score(original_file : str, injection_file : str, out_file : str, q
     combined_scores = original_evaluator.calc_aggregate(combined)
     combined_scores['run'] = 'augmented'
     combined_MRPR = injection_evaluator.calc_aggregate(combined)
-    print(combined_MRPR)
-    MRPR = combined_MRPR['RR(rel=2)']
-    combined_scores.update({'MRPR' : MRPR})
+    combined_scores.update({'MRPR' : combined_MRPR.values[0]})
     original_scores.update({'MRPR' : 0.})
 
     ### SIGNIFICANCE TESTS ### 
     original_records = [{'query_id' : metric.query_id, 'metric' : str(metric.measure), 'value' : metric.value} for metric in original_evaluator.iter_calc(original)]
     combined_records = [{'query_id' : metric.query_id, 'metric' : str(metric.measure), 'value' : metric.value} for metric in original_evaluator.iter_calc(combined)]
+
+    original_mrpr = [{'query_id' : metric.query_id, 'metric' : 'MRPR', 'value' : metric.value} for metric in injection_evaluator.iter_calc(original)]
+    combined_mrpr = [{'query_id' : metric.query_id, 'metric' : 'MRPR', 'value' : metric.value} for metric in injection_evaluator.iter_calc(combined)]
+
+    original_records.extend(original_mrpr)
+    combined_records.extend(combined_mrpr)
 
     original_df = pd.DataFrame.from_records(original_records)
     combined_df = pd.DataFrame.from_records(combined_records)
@@ -57,6 +61,7 @@ def retrieval_score(original_file : str, injection_file : str, out_file : str, q
     combined_df = combined_df.merge(original_df, on=['query_id', 'metric'], how='left')
     # t test test on each unique metric
     for metric in combined_df.metric.unique():
+        if metric == 'MRPR': continue
         sub = combined_df[combined_df.metric==metric]
         original_values = sub.old_value.tolist()
         combined_values = sub.value.tolist()
