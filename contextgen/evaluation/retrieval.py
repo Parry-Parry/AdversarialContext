@@ -39,6 +39,7 @@ def retrieval_score(original_file : str, injection_file : str, out_file : str, q
     combined_scores = original_evaluator.calc_aggregate(combined)
     combined_scores['run'] = 'augmented'
     combined_MRPR = injection_evaluator.calc_aggregate(combined)
+    print(combined_MRPR)
     MRPR = combined_MRPR['RR(rel=2)']
     combined_scores.update({'MRPR' : MRPR})
     original_scores.update({'MRPR' : 0.})
