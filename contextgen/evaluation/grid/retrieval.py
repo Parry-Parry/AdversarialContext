@@ -10,20 +10,24 @@ def main(config : Union[str, dict], dir : str = None, out_dir : str = None):
     main_config = load_yaml(config) if isinstance(config, str) else config
 
     dir = main_config.pop('original_dir') if not dir else dir
-    injection_dir = main_config.pop('injection_dir')
     out_dir = main_config.pop('out_dir') if not out_dir else out_dir
     qrels = main_config.pop('qrels')
-
-    files = os.listdir(dir)
-
-    for _, config in main_config.items():
+    
+    dir = main_config.pop('dir') if not dir else dir
+    out_dir = main_config.pop('out_dir') if not out_dir else out_dir
+    original_dir = main_config.pop('original_dir')
+    
+    for config in main_config.values():
         original_file = config['original_file']
+        original_file = os.path.join(original_dir, original_file)
         model = config['model']
-        _files 
-        injection_file = os.path.join(injection_dir, original_file)
-        out_file = os.path.join(out_dir, injection_file)
-        print(f"Running {injection_file}")
-        retrieval_score(original_file, injection_file, out_file, qrels)
+        files = [f for f in os.listdir(dir) if model in f]
+        for injection_file in files:
+            out_file = os.path.join(out_dir, injection_file)
+            injection_file = os.path.join(dir, injection_file)
+            print(f"Running {injection_file}")
+            retrieval_score(original_file, injection_file, out_file, qrels)
+
     return "Done!"
 
 if __name__ == "__main__":
