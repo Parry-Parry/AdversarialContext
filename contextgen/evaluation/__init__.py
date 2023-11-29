@@ -78,7 +78,7 @@ def MRC(docno, score, lookup):
     new_ranks = [item for item in old_ranks if item[0] != docno]
     new_ranks.append((docno, score))
     new_ranks.sort(reverse=True, key=lambda x : x[1])
-    rank_change = old_rank[0] - [i for i, item in enumerate(new_ranks) if item[0]==docno][0]
+    rank_change = [i for i, item in enumerate(new_ranks) if item[0]==docno][0] - old_rank[0]
     return rank_change
 
 def add_new_ids(df, max_id, qrels):
