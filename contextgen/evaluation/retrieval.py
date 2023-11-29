@@ -14,6 +14,7 @@ def retrieval_score(original_file : str, injection_file : str, out_file : str, q
     if os.path.exists(out_file): return "Already done!"
     ds = irds.load(qrels)
     qrel_df = pd.DataFrame(ds.qrels_iter())
+    print(qrel_df.head())
 
     original = read_results(original_file)
     injection = read_results(injection_file)
