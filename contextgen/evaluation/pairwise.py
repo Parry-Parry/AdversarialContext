@@ -21,7 +21,7 @@ def pairwise_score(original_file : str, injection_file : str, out_file : str):
 
     adversarial = adversarial.merge(original, on=['qid', 'docno'], how='left')
 
-    adversarial['ranks'] = adversarial.apply(lambda x : get_ranks(x['qid'], x['score'], original_lookup), axis=1)
+    adversarial['ranks'] = adversarial.apply(lambda x : get_ranks(x['qid'], x['score'], original_lookup[x['qid']]), axis=1)
     adversarial['old_rank'] = adversarial['ranks'].apply(lambda x : x[0])
     adversarial['new_rank'] = adversarial['ranks'].apply(lambda x : x[1])
     adversarial.drop(columns=['ranks'], inplace=True)
