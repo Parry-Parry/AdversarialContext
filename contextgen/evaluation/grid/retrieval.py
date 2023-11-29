@@ -9,7 +9,7 @@ from contextgen.evaluation.retrieval import retrieval_score
 def main(config : Union[str, dict], dir : str = None, out_dir : str = None):
     main_config = load_yaml(config) if isinstance(config, str) else config
 
-    dir = main_config.pop('original_dir') if not dir else dir
+    dir = main_config.pop('dir') if not dir else dir
     out_dir = main_config.pop('out_dir') if not out_dir else out_dir
     qrels = main_config.pop('qrels')
     
