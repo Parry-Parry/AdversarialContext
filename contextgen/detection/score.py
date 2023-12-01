@@ -6,11 +6,11 @@ import ir_datasets as irds
 import pyterrier as pt
 if not pt.started():
     pt.init()
-from pyterrier.io import read_results
+from pyterrier.io import read_results, write_results
 
 from . import Scorer
 
-def main(model_id : str, 
+def bert_score(model_id : str, 
          in_file : str, 
          out_file : str, 
          window_size : int = 0,
@@ -37,11 +37,10 @@ def main(model_id : str,
     df['query'] = df['query'].apply(lambda x : queries[x])
     df['score'] = scorer(df['text'].tolist())
 
-    df.to_csv(out_file, sep='\t', index=False, header=False)
-
+    write_results(df, out_file)
     return "Done!"
 
 if __name__ == '__main__':
-    Fire(main)
+    Fire(bert_score)
 
 
