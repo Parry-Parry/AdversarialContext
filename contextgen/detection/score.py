@@ -36,11 +36,10 @@ def bert_score(model_id : str,
         df = pd.read_csv(in_file, sep='\t', header=None, names=['qid', 'docno', 'text'], dtype={'qid' : str, 'docno' : str, 'text' : str})
     df['query'] = df['query'].apply(lambda x : queries[x])
     df['score'] = scorer(df['text'].tolist())
+    df['score'] = 1 - df['score']
 
     write_results(df, out_file)
     return "Done!"
 
 if __name__ == '__main__':
     Fire(bert_score)
-
-

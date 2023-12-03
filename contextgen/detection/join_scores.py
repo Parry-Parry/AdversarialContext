@@ -28,5 +28,3 @@ def interpolated_scores(rel_file : str, score_file : str, out_file : str, alpha 
 
 if __name__ == '__main__':
     Fire(interpolated_scores)
-
-    
