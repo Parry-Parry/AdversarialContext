@@ -56,7 +56,7 @@ def classify(model_id : str,
     model = AutoModelForSequenceClassification.from_pretrained(model_id).to(device)
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     
-    scorer = Scorer(model, tokenizer, window_size, batch_size)
+    scorer = Scorer(model, tokenizer, window_size, batch_size, classifier=True)
 
     ### set up dataset
 
