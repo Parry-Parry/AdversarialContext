@@ -22,7 +22,7 @@ class Scorer(object):
             logits = outputs.logits
             if self.classifier:
                 pred = torch.argmax(logits, dim=1)
-                scores.extend(pred[:, 0].tolist())
+                scores.extend(pred.tolist())
             else:
                 pred = torch.softmax(logits, dim=1)
                 scores.extend(pred[:, 1].tolist())
