@@ -37,6 +37,7 @@ def read_injection(file : str):
     df['generator'] = attrs['generator']
     df['position'] = attrs['position']
     df['item'] = attrs['item']
+    df['position_type'] = attrs['position_type']
 
     return df
 
@@ -90,14 +91,14 @@ def classify(model_id : str,
                 current = pd.concat([baseline_examples[['text', 'label']], position_examples])
                 current = current.sample(frac=1).reset_index(drop=True)
 
-                current['pred'] = current['text'].apply(lambda x : scorer(x))
+                current['pred'] = scorer(current['text'].tolist())
 
                 # get accuracy f1, precision, recall for label and pred
 
-                acc = accuracy_score(current['label'], current['pred'])
-                f1 = f1_score(current['label'], current['pred'])
-                precision = precision_score(current['label'], current['pred'])
-                recall = recall_score(current['label'], current['pred'])
+                acc = accuracy_score(current['label'].to_list(), current['pred'].to_list())
+                f1 = f1_score(current['label'].to_list(), current['pred'].to_list())
+                precision = precision_score(current['label'].to_list(), current['pred'].to_list())
+                recall = recall_score(current['label'].to_list(), current['pred'].to_list())
 
                 out = {
                     'generator' : generator,
