@@ -4,7 +4,7 @@ import torch
 from nltk.tokenize import sent_tokenize
 
 class Scorer(object):
-    def __init__(self, model : Any, tokenizer : Any, window_size : int = 0, batch_size : int = 128) -> None:
+    def __init__(self, model : Any, tokenizer : Any, window_size : int = 0, batch_size : int = 128, classifier=False) -> None:
         self.model = model
         self.tokenizer = tokenizer
         self.window_size = window_size
@@ -12,14 +12,20 @@ class Scorer(object):
 
         self.score = self.score_window if window_size != 0 else self.score_std
 
+        self.classifier = classifier
+
     def score_std(self, texts : List[str]) -> List[float]:
         scores = []
         for batch in chunked(texts, self.batch_size):
             inputs = self.tokenizer(batch, padding=True, truncation=True, return_tensors="pt").to(self.model.device)
             outputs = self.model(**inputs)
             logits = outputs.logits
-            pred = torch.softmax(logits, dim=1)
-            scores.extend(pred[:, 1].tolist())
+            if self.classifier:
+                pred = torch.argmax(logits, dim=1)
+                scores.extend(pred[:, 0].tolist())
+            else:
+                pred = torch.softmax(logits, dim=1)
+                scores.extend(pred[:, 1].tolist())
         return scores
     
     def window(self, text : str) -> List[str]:
@@ -33,8 +39,12 @@ class Scorer(object):
             inputs = self.tokenizer(chunks, padding=True, truncation=True, return_tensors="pt").to(self.model.device)
             outputs = self.model(**inputs)
             logits = outputs.logits
-            pred = torch.softmax(logits, dim=1)
-            scores.append(max(pred[:, 1].tolist()))
+            if self.classifier:
+                pred = torch.argmax(logits, dim=1)
+                scores.extend(pred[:, 0].tolist())
+            else:
+                pred = torch.softmax(logits, dim=1)
+                scores.append(max(pred[:, 1].tolist()))
         return scores
     
     def __call__(self, texts : List[str]) -> Any:
