@@ -97,9 +97,9 @@ def classify(model_id : str,
                 # get accuracy f1, precision, recall for label and pred
 
                 acc = accuracy_score(current['label'].to_list(), current['pred'].to_list())
-                f1 = f1_score(current['label'].to_list(), current['pred'].to_list(), average='macro')
-                precision = precision_score(current['label'].to_list(), current['pred'].to_list(), average='macro')
-                recall = recall_score(current['label'].to_list(), current['pred'].to_list(), average='macro')
+                f1 = f1_score(current['label'].to_list(), current['pred'].to_list(), average='binary')
+                precision = precision_score(current['label'].to_list(), current['pred'].to_list(), average='binary')
+                recall = recall_score(current['label'].to_list(), current['pred'].to_list(), average='binary')
 
                 out = {
                     'generator' : generator,
