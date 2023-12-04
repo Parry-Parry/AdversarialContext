@@ -14,7 +14,7 @@ def bert_score(model_id : str,
          in_file : str, 
          out_file : str, 
          window_size : int = 0,
-         batch_size : int = 128, 
+         batch_size : int = 64, 
          trec : bool = False, 
          ir_dataset : str = 'msmarco-passage/trec-dl-2019/judged'):
     
