@@ -33,7 +33,7 @@ def bert_score(model_id : str,
         df = read_results(in_file)
         df['text'] = df['docno'].apply(lambda x : docs[x])
     else:
-        df = pd.read_csv(in_file, sep='\t', header=None, names=['qid', 'docno', 'text'], dtype={'qid' : str, 'docno' : str, 'text' : str})
+        df = pd.read_csv(in_file, sep='\t', dtype={'qid' : str, 'docno' : str, 'text' : str, 'item' : str})
     df['query'] = df['qid'].apply(lambda x : queries[x])
     df['score'] = scorer(df['text'].tolist())
     df['score'] = 1 - df['score']
