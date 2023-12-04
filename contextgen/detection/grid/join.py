@@ -1,9 +1,10 @@
 from fire import Fire 
 import os 
 from ..join_scores import interpolated_scores
+import numpy as np
 
 def grid_join(score_dir : str, rel_dir : str, out_dir : str, max_alpha : float):
-    for alpha in range(0, max_alpha + 0.1, 0.1):
+    for alpha in np.arange(0, max_alpha + 0.1, 0.1):
         alpha_name = str(alpha).replace('.', '_')
         out = os.path.join(out_dir, alpha_name)
         os.mkdirs(out, exist_ok=True)
