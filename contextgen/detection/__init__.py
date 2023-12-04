@@ -42,7 +42,9 @@ class Scorer(object):
             if self.classifier:
                 # for each sub sequence apply softmax and find maximum value across all, if it is in index 1 return 1 else 0
                 pred = torch.softmax(logits, dim=1)
+                print(pred)
                 _, max_index = torch.max(pred, dim=0)
+                print(max_index)
                 scores.append(max_index[1].item())
             else:
                 pred = torch.softmax(logits, dim=1)
