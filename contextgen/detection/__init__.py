@@ -40,8 +40,8 @@ class Scorer(object):
             outputs = self.model(**inputs)
             logits = outputs.logits
             if self.classifier:
-                pred = torch.argmax(logits, dim=1)
-                scores.append(pred)
+                pred = torch.softmax(logits, dim=1)[:, 1]
+                scores.append(torch.argmax(pred).item())
             else:
                 pred = torch.softmax(logits, dim=1)
                 scores.append(max(pred[:, 1].tolist()))
