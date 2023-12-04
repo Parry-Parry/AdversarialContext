@@ -93,6 +93,8 @@ def classify(model_id : str,
 
                 current['pred'] = scorer(current['text'].tolist())
 
+                print(current.head())
+
                 # get accuracy f1, precision, recall for label and pred
 
                 acc = accuracy_score(current['label'].to_list(), current['pred'].to_list())
