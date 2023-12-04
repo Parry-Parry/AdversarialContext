@@ -40,8 +40,10 @@ class Scorer(object):
             outputs = self.model(**inputs)
             logits = outputs.logits
             if self.classifier:
-                pred = torch.softmax(logits, dim=1)[:, 1]
-                scores.append(torch.argmax(pred).item())
+                # for each sub sequence apply softmax and find maximum value across all, if it is in index 1 return 1 else 0
+                pred = torch.softmax(logits, dim=1)
+                _, max_index = torch.max(pred, dim=0)
+                scores.append(max_index[1].item())
             else:
                 pred = torch.softmax(logits, dim=1)
                 scores.append(max(pred[:, 1].tolist()))
