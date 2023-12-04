@@ -2,6 +2,7 @@ import pyterrier as pt
 if not pt.started():
     pt.init()
 from pyterrier.io import read_results, write_results
+from pyterrier.model import add_ranks
 from fire import Fire
 
 def interpolated_scores(rel_file : str, score_file : str, out_file : str, alpha : float = 1.0):
@@ -22,7 +23,7 @@ def interpolated_scores(rel_file : str, score_file : str, out_file : str, alpha 
     rel.merge(score, on=['qid', 'docno'], how='left')
     rel['score'] = rel['score'] + rel['promo']
 
-    write_results(rel, out_file)
+    write_results(add_ranks(rel), out_file)
 
     return "Done!"
 

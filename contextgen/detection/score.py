@@ -7,6 +7,7 @@ import pyterrier as pt
 if not pt.started():
     pt.init()
 from pyterrier.io import read_results, write_results
+from pyterrier.model import add_ranks
 
 from . import Scorer
 
@@ -38,7 +39,7 @@ def bert_score(model_id : str,
     df['score'] = scorer(df['text'].tolist())
     df['score'] = 1 - df['score']
 
-    write_results(df, out_file)
+    write_results(add_ranks(df), out_file)
     return "Done!"
 
 if __name__ == '__main__':
