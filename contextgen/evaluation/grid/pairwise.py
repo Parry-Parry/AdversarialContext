@@ -1,5 +1,5 @@
 from fire import Fire
-from parryutil import load_yaml
+from contextgen import load_yaml
 from typing import Union
 import os
 from contextgen.evaluation.pairwise import pairwise_score

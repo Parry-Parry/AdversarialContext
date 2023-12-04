@@ -1,7 +1,7 @@
 from fire import Fire
 import pandas as pd
 from openai import OpenAI
-from parryutil import load_yaml
+from contextgen import load_yaml
 from lightchain import Prompt
 import ir_datasets as irds
 import pyterrier as pt
@@ -10,8 +10,6 @@ if not pt.started():
 from pyterrier.io import read_results
 import logging
 import time
-
-from contextgen import parse_span
 
 MAX_RETRIES = 5
 

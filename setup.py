@@ -1,12 +1,10 @@
 import setuptools
-
 setuptools.setup(
     name='contextgen',
     version='0.0.1',
-    author='Andrew Parry',
+    author='Anonymous',
     author_email='a.parry.1@research.gla.ac.uk',
-    description="Probing Dense Retrieval models",
-    url='https://github.com/Parry-Parry/AdversarialContext',
+    description="Anonymous",
     packages=setuptools.find_packages(),
     python_requires='>=3.6',
 )

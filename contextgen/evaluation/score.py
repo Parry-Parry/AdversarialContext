@@ -1,7 +1,7 @@
 from typing import Union
 from fire import Fire
 import pandas as pd
-from parryutil import load_yaml
+from contextgen import load_yaml
 from pyterrier.io import write_results, read_results
 import ir_datasets as irds
 from . import load_model

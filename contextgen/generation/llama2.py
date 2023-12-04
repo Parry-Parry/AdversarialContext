@@ -1,6 +1,6 @@
 from fire import Fire
 import pandas as pd
-from parryutil import load_yaml, request
+from contextgen import load_yaml, request
 from lightchain import Prompt
 import ir_datasets as irds
 import pyterrier as pt 

@@ -1,4 +1,4 @@
-from . import ABNIRML, build_rank_lookup, MRC, get_ranks
+from . import ABNIRML, build_rank_lookup, MRC
 from fire import Fire
 import pyterrier as pt 
 if not pt.started():
