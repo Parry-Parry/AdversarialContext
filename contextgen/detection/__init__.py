@@ -41,7 +41,7 @@ class Scorer(object):
             logits = outputs.logits
             if self.classifier:
                 pred = torch.argmax(logits, dim=1)
-                scores.extend(pred[:, 0].tolist())
+                scores.append(pred)
             else:
                 pred = torch.softmax(logits, dim=1)
                 scores.append(max(pred[:, 1].tolist()))

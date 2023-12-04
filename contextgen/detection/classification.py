@@ -85,6 +85,7 @@ def classify(model_id : str,
         for position_type in injection_examples.position_type.unique():
             type_examples = generator_examples[generator_examples.position_type == position_type]
             for position in type_examples.position.unique():
+                if os.path.exists(os.path.join(out_dir, f'{generator}.{position_type}.{position}.json')): continue 
                 position_examples = type_examples[type_examples.position == position]
                 position_examples = position_examples[['text', 'label']].sample(n=TOTAL_BASELINE, replace=True)
 
