@@ -8,7 +8,7 @@ def grid_join(score_dir : str, rel_dir : str, out_dir : str, max_alpha : float):
         alpha_name = str(alpha).replace('.', '_')
         out = os.path.join(out_dir, alpha_name)
         os.makedirs(out, exist_ok=True)
-        model = os.path.dirname(rel_dir)
+        model = rel_dir.split('/')[-1]
         
         for file in os.listdir(score_dir):
             score_file = os.path.join(score_dir, file)
