@@ -5,10 +5,9 @@ import numpy as np
 
 def grid_join(score_dir : str, rel_dir : str, out_dir : str, max_alpha : float):
     for alpha in np.arange(0, max_alpha + 0.1, 0.1):
-        alpha_name = str(alpha).replace('.', '_')
+        alpha_name = str(round(alpha, 1)).replace('.', '_')
         out = os.path.join(out_dir, alpha_name)
         os.makedirs(out, exist_ok=True)
-        model = rel_dir.split('/')[-1]
         
         for file in os.listdir(score_dir):
             score_file = os.path.join(score_dir, file)
