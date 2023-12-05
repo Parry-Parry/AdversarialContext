@@ -23,7 +23,7 @@ def main(config : Union[str, dict], dir : str = None, out_dir : str = None):
             original_file = config['original_file']
             original_file = os.path.join(original_dir, original_file)
             model = config['model']
-            files = [f for f in os.listdir(_dir) if model in f]
+            files = [f for f in os.listdir(os.path.join(dir, _dir)) if model in f]
             for injection_file in files:
                 out_file = os.path.join(out_dir, f'{_dir}.{injection_file}')
                 injection_file = os.path.join(dir, _dir, injection_file)
