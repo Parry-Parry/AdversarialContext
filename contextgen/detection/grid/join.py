@@ -12,7 +12,7 @@ def grid_join(score_dir : str, rel_dir : str, out_dir : str, max_alpha : float):
         
         for file in os.listdir(score_dir):
             score_file = os.path.join(score_dir, file)
-            rel_file = '.'.join([model, *file.split('.')[1:]])
+            rel_file = '.'.join([*file.split('.')[1:]])
             rel_file = os.path.join(rel_dir, rel_file)
             out_file = os.path.join(out, file)
             interpolated_scores(rel_file, score_file, out_file, alpha)
