@@ -21,6 +21,7 @@ def interpolated_scores(rel_file : str, score_file : str, out_file : str, alpha 
     score.drop(columns=['score'], inplace=True)
 
     rel.merge(score, on=['qid', 'docno'], how='left')
+    print(score.head())
     rel['score'] = rel['score'] + rel['promo']
 
     write_results(add_ranks(rel), out_file)
