@@ -70,8 +70,6 @@ def classify(model_id : str,
     baseline_examples['text'] = baseline_examples['docno'].apply(lambda x : docs[x])
     baseline_examples['label'] = 0
 
-    TOTAL_BASELINE = len(baseline_examples)
-
     ### set up injections
 
     injection_dirs = [f for f in os.listdir(injection_dir) if f != 'qrel']
@@ -86,7 +84,7 @@ def classify(model_id : str,
             type_examples = generator_examples[generator_examples.position_type == position_type]
             for position in type_examples.position.unique():
                 position_examples = type_examples[type_examples.position == position]
-                position_examples = position_examples[['text', 'label']].sample(n=TOTAL_BASELINE, replace=True)
+                position_examples = position_examples[['text', 'label']].copy()
 
                 current = pd.concat([baseline_examples[['text', 'label']], position_examples])
                 current = current.sample(frac=1).reset_index(drop=True)
