@@ -4,7 +4,7 @@ from typing import Union
 import os
 from typing import Union
 
-from contextgen.evaluation.retrieval import retrieval_score
+from contextgen.evaluation.nosig_retrieval import retrieval_score
 
 def main(config : Union[str, dict], dir : str = None, out_dir : str = None):
     main_config = load_yaml(config) if isinstance(config, str) else config
