@@ -20,10 +20,10 @@ def main(config : Union[str, dict], dir : str = None, out_dir : str = None):
     all_dirs = os.listdir(dir)
     for _dir in all_dirs:
         for config in main_config.values():
-            original_file = config['original_file']
             model = config['model']
             files = [f for f in os.listdir(os.path.join(dir, _dir)) if model in f]
             for injection_file in files:
+                original_file = config['original_file']
                 original_file = os.path.join(original_dir, _dir, original_file)
                 out_file = os.path.join(out_dir, f'{_dir}.{injection_file}')
                 injection_file = os.path.join(dir, _dir, injection_file)
