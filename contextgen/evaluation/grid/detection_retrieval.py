@@ -3,6 +3,7 @@ from contextgen import load_yaml
 from typing import Union
 import os
 from typing import Union
+from tqdm import tqdm
 
 from contextgen.evaluation.nosig_retrieval import retrieval_score
 
@@ -18,7 +19,7 @@ def main(config : Union[str, dict], dir : str = None, out_dir : str = None):
     original_dir = main_config.pop('original_dir')
 
     all_dirs = os.listdir(dir)
-    for _dir in all_dirs:
+    for _dir in tqdm(all_dirs):
         for config in main_config.values():
             model = config['model']
             files = [f for f in os.listdir(os.path.join(dir, _dir)) if model in f]
