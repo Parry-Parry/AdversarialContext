@@ -5,7 +5,7 @@ from pyterrier.io import read_results, write_results
 from pyterrier.model import add_ranks
 from fire import Fire
 
-def interpolated_scores(rel_file : str, score_file : str, out_file : str, alpha : float = 1.0):
+def interpolated_scores(score_file : str, rel_file : str, out_file : str, alpha : float = 1.0):
 
     # Load
     rel = read_results(rel_file)
