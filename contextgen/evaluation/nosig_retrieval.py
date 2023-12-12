@@ -6,9 +6,8 @@ from ir_measures import *
 from ir_measures import evaluator
 from . import add_new_ids
 import os
-import scipy.stats
 
-METRICS = [RR(rel=2), AP(rel=2), P(rel=2)@10, NDCG@10]
+METRICS = [RR(rel=2), NDCG@10]
 
 def retrieval_score(original_file : str, injection_file : str, out_file : str, qrels : str):
     if os.path.exists(out_file): return "Already done!"
@@ -28,9 +27,6 @@ def retrieval_score(original_file : str, injection_file : str, out_file : str, q
     injection_evaluator = evaluator([RR(rel=2)], new_qrels)
 
     ### AGGREGATE ###
-
-    original_scores = original_evaluator.calc_aggregate(original)
-    original_scores['run'] = 'original'
 
     injection['doc_id'] = injection['doc_id'].apply(lambda x : new_ids[x])
     
