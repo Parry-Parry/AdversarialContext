@@ -19,7 +19,7 @@ def bert_score(model_id : str,
          trec : bool = False, 
          ir_dataset : str = 'msmarco-passage/trec-dl-2019/judged'):
     
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = 'cuda'
     model = AutoModelForSequenceClassification.from_pretrained(model_id).to(device)
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     
