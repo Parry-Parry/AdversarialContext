@@ -39,11 +39,16 @@ def load_bm25(**kwargs):
     scorer = pt.apply.generic(lambda x : clean(x)) >> pt.batchretrieve.TextScorer(body_attr='text', wmodel='BM25', background_index=indx, properties={"termpipelines" : "Stopwords,PorterStemmer"})
     return scorer
 
+def load_contriever(**kwargs):
+    from contextgen.evaluation.contriever import ContrieverModel
+    return ContrieverModel(**kwargs)
+
 def load_model(**kwargs):
     if kwargs['model'] == 'bm25': return load_bm25(**kwargs)
     if kwargs['model'] == 'tasb': return load_tasb(**kwargs)
     if kwargs['model'] == 't5': return load_t5(**kwargs)
     if kwargs['model'] == 'colbert': return load_colbert(**kwargs)
+    if kwargs['model'] == 'contriever': return load_contriever(**kwargs)
     raise ValueError(f"Unknown model {kwargs['model']}")
 
 ### METRICS ###
