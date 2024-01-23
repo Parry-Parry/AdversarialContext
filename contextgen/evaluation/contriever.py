@@ -76,6 +76,7 @@ class BiEncoder(pt.Transformer):
 class ContrieverModel(BiEncoder):
     def __init__(model_name="facebook/contriever-msmarco", batch_size : int = 32, **kwargs):
         from src.contriever import Contriever
+        print(model_name)
         model = Contriever.from_pretrained(model_name)
         super().__init__(model, tokenizer=model_name, batch_size=batch_size)
 
