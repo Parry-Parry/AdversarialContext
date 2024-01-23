@@ -12,6 +12,7 @@ def grid_score(injection_dir : str,
     
     for file in os.listdir(injection_dir):
         injection_file = os.path.join(injection_dir, file)
+        print(f"Running {injection_file}")
         out_file = os.path.join(out_dir, file)
         if os.path.exists(out_file): 
             print(f"Already done {injection_file}")
