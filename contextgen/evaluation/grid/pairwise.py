@@ -19,6 +19,9 @@ def main(config : Union[str, dict], dir : str = None, out_dir : str = None):
         for injection_file in files:
             out_file = os.path.join(out_dir, injection_file)
             injection_file = os.path.join(dir, injection_file)
+            if os.path.exists(out_file): 
+                print(f"Already done {injection_file}")
+                continue
             print(f"Running {injection_file}")
             pairwise_score(original_file, injection_file, out_file)
     return "Done!"

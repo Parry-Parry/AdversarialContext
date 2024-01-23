@@ -85,6 +85,10 @@ def classify(model_id : str,
         for position_type in injection_examples.position_type.unique():
             type_examples = generator_examples[generator_examples.position_type == position_type]
             for position in type_examples.position.unique():
+                json_file = os.path.join(out_dir, f'{generator}.{position_type}.{position}.json')
+                if os.path.exists(json_file): 
+                    print(f"Already done {generator}.{position_type}.{position}")
+                    continue
                 position_examples = type_examples[type_examples.position == position]
                 position_examples = position_examples[['text', 'label']].sample(n=TOTAL).reset_index(drop=True)
 
@@ -111,7 +115,6 @@ def classify(model_id : str,
                     'recall' : recall
                 }
 
-                json_file = os.path.join(out_dir, f'{generator}.{position_type}.{position}.json')
                 json.dump(out, open(json_file, 'w'))
                 
 

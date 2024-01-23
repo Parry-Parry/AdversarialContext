@@ -17,6 +17,9 @@ def main(config : Union[str, dict], file : str = None, dir : str = None, out_dir
             model_name = model_config['model']
             injection_file = os.path.join(dir, file)
             out_file = os.path.join(out_dir, f'{model_name}.{file}')
+            if os.path.exists(out_file): 
+                print(f"Already done {injection_file}")
+                continue
             print(f"Running {injection_file}")
             model_score(
                 {

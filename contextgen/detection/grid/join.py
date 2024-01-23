@@ -14,6 +14,9 @@ def grid_join(score_dir : str, rel_dir : str, out_dir : str, max_alpha : float, 
             rel_file = '.'.join([*file.split('.')[1:]]) if not baseline else file
             rel_file = os.path.join(rel_dir, rel_file)
             out_file = os.path.join(out, file)
+            if os.path.exists(out_file): 
+                print(f"Already done {score_file}")
+                continue
             interpolated_scores(rel_file, score_file, out_file, alpha)
     
     return "Done!"

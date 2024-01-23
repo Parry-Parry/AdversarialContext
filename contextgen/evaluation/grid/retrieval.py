@@ -24,6 +24,9 @@ def main(config : Union[str, dict], dir : str = None, out_dir : str = None):
         files = [f for f in os.listdir(dir) if model in f]
         for injection_file in files:
             out_file = os.path.join(out_dir, injection_file)
+            if os.path.exists(out_file): 
+                print(f"Already done {injection_file}")
+                continue
             injection_file = os.path.join(dir, injection_file)
             print(f"Running {injection_file}")
             retrieval_score(original_file, injection_file, out_file, qrels)

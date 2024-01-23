@@ -27,6 +27,9 @@ def main(config : Union[str, dict], dir : str = None, out_dir : str = None):
                 original_file = config['original_file']
                 original_file = os.path.join(original_dir, _dir, original_file)
                 out_file = os.path.join(out_dir, f'{_dir}.{injection_file}')
+                if os.path.exists(out_file): 
+                    print(f"Already done {injection_file}")
+                    continue
                 injection_file = os.path.join(dir, _dir, injection_file)
                 print(f"Running {injection_file}")
                 retrieval_score(original_file, injection_file, out_file, qrels)
