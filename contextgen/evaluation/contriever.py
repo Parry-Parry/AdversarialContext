@@ -85,8 +85,8 @@ class BiEncoder(pt.Transformer):
         return query_df
     
 class ContrieverModel(BiEncoder):
-    def __init__(model_name="facebook/contriever-msmarco", **kwargs):
-        super().__init__(model_name, tokenizer=model_name, **kwargs)
+    def __init__(model_name="facebook/contriever-msmarco", batch_size : int = 32, **kwargs):
+        super().__init__(model_name, tokenizer=model_name, batch_size=batch_size)
 
     def _encode(self, texts, max_length):
         results = []
