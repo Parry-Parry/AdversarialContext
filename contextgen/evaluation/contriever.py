@@ -86,7 +86,7 @@ class BiEncoder(pt.Transformer):
     
 class ContrieverModel(BiEncoder):
     def __init__(model_name="facebook/contriever-msmarco", **kwargs):
-        from contriever.contriever import Contriever
+        from src.contriever import Contriever
         super().__init__(Contriever.from_pretrained(model_name), tokenizer=model_name, **kwargs)
 
     def _encode(self, texts, max_length):
