@@ -12,19 +12,8 @@ logger = ir_datasets.log.easy()
 class BiEncoder(pt.Transformer):
 
     def __init__(self, model, batch_size=32, text_field='text', verbose=False, tokenizer=None, cuda=None):
-        self.model_name = str(model)
-        if isinstance(model,str):
-            if tokenizer is None:
-                tokenizer = model
-            self.model = model
-        else:
-            self.model = AutoModel.from_pretrained(model).eval()
-            
-        if isinstance(tokenizer, str):
-            self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
-        else:
-            self.tokenizer = tokenizer
-        assert self.tokenizer is not None
+        self.model = model.eval()
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer) if isinstance(tokenizer, str) else tokenizer
 
         self.cuda = torch.cuda.is_available() if cuda is None else cuda
         if self.cuda:
@@ -86,7 +75,9 @@ class BiEncoder(pt.Transformer):
     
 class ContrieverModel(BiEncoder):
     def __init__(model_name="facebook/contriever-msmarco", batch_size : int = 32, **kwargs):
-        super().__init__(model_name, tokenizer=model_name, batch_size=batch_size)
+        from src.contriever import Contriever
+        super().__init__(Contriever.from_pretrained(model_name), tokenizer=model_name, batch_size=batch_size)
+
 
     def _encode(self, texts, max_length):
         results = []
